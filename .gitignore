@@ -1,0 +1,29 @@
+# External cloned repos (read-only references; not our code)
+external/
+
+# Downloaded paper PDFs (large; keep notes.md in git, not the binaries)
+references/pdfs/
+
+# Data, checkpoints, eval outputs — live on the Modal Volume in practice
+data/
+results/
+checkpoints/
+save/
+*.ckpt
+*.safetensors
+
+# Secrets — never commit tokens
+.env
+*.secret
+hf_token*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

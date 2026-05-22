@@ -1,0 +1,27 @@
+[project]
+name = "w2sr-monitorability"
+version = "0.1.0"
+description = "Does Weak-to-Strong Reasoning preserve chain-of-thought monitorability?"
+requires-python = ">=3.10"
+
+# Versions are intentionally loose here; pin exact versions once the first
+# full Modal run succeeds (spec 16: reproducibility). Modal builds its own
+# image from this list (see modal_app.py).
+dependencies = [
+    "torch",
+    "transformers",
+    "trl",
+    "peft",
+    "accelerate",
+    "vllm",            # fast trace generation + eval inference
+    "inspect-ai",      # monitorability eval harness (Meek et al.)
+    "datasets",
+    "numpy",
+    "scipy",
+    "statsmodels",     # mixed-effects model (spec 11.2)
+    "matplotlib",
+    "pandas",
+]
+
+[tool.setuptools]
+packages = ["src"]
