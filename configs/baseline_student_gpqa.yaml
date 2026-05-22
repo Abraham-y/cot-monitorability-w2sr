@@ -15,18 +15,21 @@
 #       --batch-name baseline_student_gpqa --adaptive-experiment-name 01_stanford_professor
 #   # ...repeat for the other 4 cues...
 #
-# model: serving path is the OPEN decision (OpenRouter API vs Modal vLLM).
-#   - OpenRouter (matches how Meek ran it): openrouter/qwen/qwen-2.5-7b-instruct
-#   - Modal-served vLLM (needed for our trained checkpoints): vllm/<path> or an
-#     OpenAI-compatible base_url pointing at the Modal endpoint.
-# judge: a strong model distinct from the model under test (spec 6.4). Meek used
-#   openrouter/qwen/qwq-32b; our config.py default is claude-sonnet-4-6.
+# model: the STUDENT is served via Modal vLLM (LOCKED), the SAME path as the
+#   trained W2SR/control checkpoints, so the headline baseline-vs-W2SR comparison
+#   has no serving-path confound. The model string below points at the
+#   OpenAI-compatible Modal vLLM endpoint (fill in once it's up); off-the-shelf
+#   TEACHERS are the ones that use openrouter/... (separate configs).
+# judge: a strong model distinct from the model under test (spec 6.4). Selected
+#   after validation (spec 10.3): qwq-32b favored if it validates, else sonnet.
 
 configurations:
 - config_id: '001'
   dataset: gpqa_diamond
   dataset_group: gpqa
-  model: openrouter/qwen/qwen-2.5-7b-instruct   # <-- the baseline student
+  # Baseline student via Modal vLLM (OpenAI-compatible endpoint). Set the
+  # base_url env (e.g. INSPECT_EVAL_MODEL_BASE_URL) to the Modal endpoint.
+  model: openai/Qwen/Qwen2.5-7B-Instruct        # <-- served by Modal vLLM
   model_path: null
   model_configs: null
   # scorers

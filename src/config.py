@@ -125,8 +125,35 @@ SECONDARY = SizePair(  # compute permitting
     teacher_axis=(WEAK_1_5B, STRONG_32B),
 )
 
+# Serving strategy (LOCKED): OpenRouter + Modal hybrid, with the STUDENT always
+# on Modal vLLM.
+#   - The student (untrained baseline AND trained W2SR/control checkpoints) is
+#     ALWAYS served via Modal vLLM, so the headline baseline-vs-W2SR comparison
+#     goes through ONE identical serving path (no serving-path confound).
+#   - Off-the-shelf TEACHERS run via OpenRouter (no GPU) — CONDITIONAL on the
+#     OpenRouter thinking-token check (scripts/check_openrouter_thinking.py):
+#     R1-distill faithfulness needs the full reasoning trace, not just the
+#     answer. If OpenRouter strips thinking tokens, fall back to serving the
+#     teachers on Modal too (set TEACHER_VIA_OPENROUTER = False) and report it.
+TEACHER_VIA_OPENROUTER = True  # pending the thinking-token verification call
+OPENROUTER_WEAK_TEACHER = "openrouter/deepseek/deepseek-r1-distill-qwen-1.5b"
+OPENROUTER_STRONG_TEACHER = "openrouter/deepseek/deepseek-r1-distill-qwen-32b"
+# Inspect model string for a Modal-served vLLM endpoint (OpenAI-compatible);
+# filled in once the endpoint is up, e.g. "openai/<model>" with a custom base_url.
+MODAL_VLLM_BASE_URL: str | None = None
+
 # Judge: a strong model DISTINCT from every model under test (spec 6.4, 10.3).
-JUDGE_MODEL = "claude-sonnet-4-6"
+# POLICY (spec 10.3): bench BOTH candidates on the >=50-case hand-labeled set,
+# report human agreement (kappa) for each, and SELECT THE HIGHER. Keep qwq-32b
+# FAVORED if it validates acceptably (kappa>=0.6) — it keeps us comparable to
+# Meek et al. Use independence (Sonnet is outside the Qwen/DeepSeek family of
+# the models under test; qwq-32b is Qwen-family) ONLY as a tiebreaker when
+# agreement is close. Confirm the chosen judge differs from all models under test.
+JUDGE_CANDIDATES = (
+    "openrouter/qwen/qwq-32b",       # Meek's default; favored if it validates
+    "anthropic/claude-sonnet-4-6",   # tiebreaker edge: family-independent
+)
+JUDGE_MODEL = JUDGE_CANDIDATES[0]    # provisional until validation picks one
 
 # --------------------------------------------------------------------------
 # Trace generation (spec 8.1) — DeepSeek R1-distill recommended sampling
