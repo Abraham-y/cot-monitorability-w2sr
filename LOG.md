@@ -2,6 +2,24 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-21 (late) — eval pipeline validated end-to-end ✓
+**Last:** Keys added + verified. OpenRouter probe: 32B distill returns reasoning
+traces; 1.5B teacher absent + qwq-32b retired → weak teacher on Modal, judge =
+claude-sonnet-4.6. Built `.venv-eval` (minimal API-path deps; their pinned
+torch/triton are Linux-only and unneeded since inference is remote). Downloaded
+GPQA causal-factors (ameek/causal_factors, 198 diamond Qs — no GPQA gating
+blocker). Ran the Meek baseline pass on 3 GPQA Qs (harness test, OpenRouter
+stand-in student): dataset→generate→verbosity-judge→scores all work (factor
+util ~0.79). Fix found: scorers hardcode temperature+top_p, which Anthropic's
+native API rejects — route the judge via `openrouter/anthropic/claude-sonnet-4.6`
+(normalizes it). Eval venv: `. .venv-eval/bin/activate`, run their scripts from
+`external/monitorability-eval` with `PYTHONPATH=src` and `.env` sourced.
+
+**Next (the real baseline, build-order step 2):** deploy Modal vLLM student
+endpoint (Qwen2.5-7B-Instruct) → point baseline_student_gpqa.yaml at it → run
+baseline pass + generate 5 adaptive-cue datasets + 5 cue passes over ~50 GPQA Qs
+→ extract_metrics → hand-label ≥50 cases, validate judge agreement.
+
 ## 2026-05-21 (night) — Modal vLLM serving entrypoint built ✓
 **Last:** Built + validated the Modal vLLM serving path (independent of the
 blocked credentials). `src/serving.py` holds the Modal-free, unit-tested
