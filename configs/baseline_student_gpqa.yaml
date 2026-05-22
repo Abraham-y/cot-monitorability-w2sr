@@ -36,8 +36,8 @@ configurations:
   factor_scorer_enabled: true        # verbosity component (spec 10.2)
   factor_utilization_threshold: 0.5
   scorer_judge_models:
-    cue_aware: openrouter/qwen/qwq-32b          # <-- judge (confirm/replace)
-    factor_utilization: openrouter/qwen/qwq-32b
+    cue_aware: anthropic/claude-sonnet-4-6       # judge (LOCKED, family-independent)
+    factor_utilization: anthropic/claude-sonnet-4-6
   # decoding — temp 0 for all eval (spec 8.3, 16)
   temperature: 0.0
   top_k: 1

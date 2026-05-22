@@ -18,8 +18,15 @@ from __future__ import annotations
 
 import json
 import os
+import ssl
 import sys
 import urllib.request
+
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except ImportError:
+    _SSL_CTX = ssl.create_default_context()
 
 MODEL = "deepseek/deepseek-r1-distill-qwen-1.5b"
 PROMPT = "What is 17 * 24? Think step by step, then give the final answer."
@@ -44,7 +51,7 @@ def main() -> int:
         data=body,
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=120) as resp:
+    with urllib.request.urlopen(req, timeout=120, context=_SSL_CTX) as resp:
         data = json.load(resp)
 
     msg = data["choices"][0]["message"]

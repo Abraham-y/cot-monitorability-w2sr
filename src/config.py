@@ -135,25 +135,25 @@ SECONDARY = SizePair(  # compute permitting
 #     R1-distill faithfulness needs the full reasoning trace, not just the
 #     answer. If OpenRouter strips thinking tokens, fall back to serving the
 #     teachers on Modal too (set TEACHER_VIA_OPENROUTER = False) and report it.
-TEACHER_VIA_OPENROUTER = True  # pending the thinking-token verification call
-OPENROUTER_WEAK_TEACHER = "openrouter/deepseek/deepseek-r1-distill-qwen-1.5b"
+# OpenRouter catalog reality (checked 2026-05-21): the weak 1.5B teacher is NOT
+# on OpenRouter, and qwq-32b (Meek's judge) has been retired there. So:
+#   - WEAK teacher (1.5B): served on Modal vLLM (small/cheap), NOT OpenRouter.
+#   - STRONG teacher (32B): on OpenRouter, and it DOES return reasoning traces
+#     (the `reasoning` field) — verified — so OpenRouter is fine for it.
+WEAK_TEACHER_VIA_OPENROUTER = False  # 1.5B unavailable on OpenRouter -> Modal
 OPENROUTER_STRONG_TEACHER = "openrouter/deepseek/deepseek-r1-distill-qwen-32b"
 # Inspect model string for a Modal-served vLLM endpoint (OpenAI-compatible);
-# filled in once the endpoint is up, e.g. "openai/<model>" with a custom base_url.
+# filled in once `modal deploy` gives the stable URL (see src/serving.inspect_env).
 MODAL_VLLM_BASE_URL: str | None = None
 
-# Judge: a strong model DISTINCT from every model under test (spec 6.4, 10.3).
-# POLICY (spec 10.3): bench BOTH candidates on the >=50-case hand-labeled set,
-# report human agreement (kappa) for each, and SELECT THE HIGHER. Keep qwq-32b
-# FAVORED if it validates acceptably (kappa>=0.6) — it keeps us comparable to
-# Meek et al. Use independence (Sonnet is outside the Qwen/DeepSeek family of
-# the models under test; qwq-32b is Qwen-family) ONLY as a tiebreaker when
-# agreement is close. Confirm the chosen judge differs from all models under test.
-JUDGE_CANDIDATES = (
-    "openrouter/qwen/qwq-32b",       # Meek's default; favored if it validates
-    "anthropic/claude-sonnet-4-6",   # tiebreaker edge: family-independent
-)
-JUDGE_MODEL = JUDGE_CANDIDATES[0]    # provisional until validation picks one
+# Judge (LOCKED): claude-sonnet-4.6 — strong and family-INDEPENDENT from the
+# Qwen/DeepSeek models under test (spec 6.4 independence). qwq-32b (Meek's
+# default) was the favored option but is no longer available, so exact Meek
+# comparability is moot. Still validate on the >=50-case hand-labeled set
+# (spec 10.3) and report agreement before trusting labels. Inspect uses the
+# Anthropic API id (ANTHROPIC_API_KEY); on OpenRouter the slug is
+# anthropic/claude-sonnet-4.6.
+JUDGE_MODEL = "anthropic/claude-sonnet-4-6"
 
 # --------------------------------------------------------------------------
 # Trace generation (spec 8.1) — DeepSeek R1-distill recommended sampling
