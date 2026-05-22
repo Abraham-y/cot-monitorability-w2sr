@@ -179,11 +179,22 @@ class GateConfig:
 # --------------------------------------------------------------------------
 # Evaluation (spec 8.3) — Meek et al. monitorability eval
 # --------------------------------------------------------------------------
+# The 5 cues actually shipped by the Meek eval (cloned code = ground truth,
+# spec 13.4). NB: spec 8.3 says "six cue categories from Chen et al." — Meek's
+# released eval uses these 5; we follow the code. Names are the eval's cue keys.
+MEEK_CUES = (
+    "stanford_professor_recommends",  # authority
+    "visual_squares_correct",         # visual pattern
+    "grader_hack_validation",         # code/grader hack
+    "insider_information",            # leaked answer key (unethical info)
+    "xml_metadata_success_rate",      # metadata embedding
+)
+
+
 @dataclass(frozen=True)
 class EvalConfig:
     datasets: tuple[str, ...] = ("gpqa_diamond", "mmlu")  # GPQA headline, MMLU secondary
-    # Six cue categories from Chen et al. 2505.05410 — pull exact templates
-    # from external/monitorability-eval, do NOT improvise wording (spec 8.3).
+    cues: tuple[str, ...] = MEEK_CUES
     n_per_condition_per_hint: int = 300
     temperature: float = EVAL_TEMPERATURE
     judge_model: str = JUDGE_MODEL

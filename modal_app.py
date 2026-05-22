@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import modal
 
+# Heavy image for the real GPU jobs (generate / train / eval).
 image = (
     modal.Image.debian_slim()
     .pip_install(
@@ -27,6 +28,10 @@ image = (
         "matplotlib", "pandas",
     )
 )
+
+# Minimal image for the smoke test — it only needs to print the GPU name, so
+# don't pay the multi-minute build of the heavy image just to plumb-test Modal.
+smoke_image = modal.Image.debian_slim()
 
 app = modal.App("w2sr-monitorability", image=image)
 
@@ -38,12 +43,17 @@ VOL_MOUNT = "/vol"
 hf_secret = modal.Secret.from_name("huggingface")  # create before first run
 
 
-@app.function(gpu="T4")
+@app.function(gpu="T4", image=smoke_image)
 def smoke() -> str:
     """Spec 15.1: confirm Modal works end to end by printing the GPU name."""
     import subprocess
     return subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
                           capture_output=True, text=True).stdout.strip()
+
+
+@app.local_entrypoint()
+def main():
+    print("GPU:", smoke.remote())
 
 
 # train/evaluate get bigger GPUs (e.g. gpu="A100", or "A100-80GB" for 14B).

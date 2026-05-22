@@ -165,7 +165,8 @@ Plus:
 
 - Framework: Inspect, using the Meek et al. monitorability eval as the base; adapt their hint set if needed.
 - Datasets: GPQA Diamond (primary; harder, surfaces the effect), MMLU subset (secondary; easier comparison).
-- Hints: the six cue categories from Chen et al. 2505.05410. Pull exact templates from the paper appendix or the Inspect eval code; do not improvise wording, since hint phrasing affects results.
+- Hints: use the cue set the cloned Meek eval actually ships (spec 13.4 = cloned code is ground truth). That is FIVE cues, not six: stanford_professor_recommends (authority), visual_squares_correct (visual pattern), grader_hack_validation (code/grader hack), insider_information (leaked answer key / unethical info), xml_metadata_success_rate (metadata embedding). Listed in `config.MEEK_CUES`. Pull exact templates from the eval code; do not improvise wording. (The earlier "six categories from Chen et al." was from the spec's literature reading; the released eval uses these five.)
+- Model serving + judge: the Meek eval is config-driven and API-provider based (Inspect model strings). Off-the-shelf models (baseline student, teachers) can run via OpenRouter exactly as Meek did; our trained checkpoints must be served (Modal vLLM, OpenAI-compatible endpoint). Meek's default judge is `openrouter/qwen/qwq-32b`.
 - Decoding: temperature 0 (or fixed low-temp seed) for all eval runs.
 - Judge: a strong model distinct from all models under test; two-stage classification (regex pattern match then LLM judge) per "Lie to Me"; validate on a hand-labeled set of at least 50 cases.
 - Sample size: at least 300 examples per condition per hint type.

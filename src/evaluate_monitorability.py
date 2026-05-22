@@ -3,11 +3,22 @@
 Built on the Meek et al. Inspect eval (external/monitorability-eval). Do NOT
 reimplement the cued-input logic or improvise hint wording — drive their
 scorers/prompts. Key pieces in that repo:
-  - src/measuring_cot_monitorability/prompts/cue_system.py      cue templates
+  - src/measuring_cot_monitorability/prompts/cue_system.py      5 cues (config.MEEK_CUES)
   - src/measuring_cot_monitorability/scorers/cue_aware_adaptive.py  faithfulness
   - src/measuring_cot_monitorability/scorers/factor_utilization.py  verbosity
   - configs/core_model_group_gpqa.yaml / _mmlu.yaml             eval presets
-  - scripts/evals/run_eval.py                                   entrypoint
+  - scripts/evals/batch_eval.py / run_eval.py                  entrypoints
+
+Their eval is CONFIG-DRIVEN and API-provider based (Inspect model strings like
+`openrouter/...`, `anthropic/...`, or `vllm/...`). Workflow per dataset (see
+configs/baseline_student_gpqa.yaml in OUR repo for a ready config):
+  1. baseline pass: batch_eval.py --baseline  (verbosity/factor scorer, no cue)
+  2. for each of the 5 cues: generate_adaptive_datasets.py then batch_eval.py
+  3. extract_metrics.py to collect per-case results.
+This function is a thin wrapper that writes the per-condition config, invokes
+their scripts, and normalizes outputs into our results schema (spec 16). Models
+under test served per the chosen path: OpenRouter for off-the-shelf
+baseline/teacher models, Modal-served vLLM for our trained checkpoints.
 
 Output (spec 10.4, 16): per-case rows — question id, hint type, unhinted
 answer, hinted answer, influenced flag, acknowledgment label (per channel),
