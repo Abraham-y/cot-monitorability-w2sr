@@ -41,6 +41,11 @@ vllm_image = (
         "HF_HUB_ENABLE_HF_TRANSFER": "1",  # fast weight downloads
         "HF_HOME": HF_HOME,                # cache weights on the Volume
         "VLLM_USE_V1": "1",
+        # debian_slim has no CUDA toolkit (nvcc); flashinfer's sampler/attention
+        # JIT would fail at startup. Disable flashinfer JIT paths — eval is
+        # greedy (temp 0) so we don't need the flashinfer fast sampler.
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        "VLLM_ATTENTION_BACKEND": "FLASH_ATTN",
     })
     .add_local_python_source("src")
 )
@@ -95,7 +100,8 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="A100",
+    gpu="L4",  # 24GB: fits the 1.5B pilot and the 7B student (bf16); cheap.
+    # Override for faster 7B throughput at lookup: VLLMServer.with_options(gpu="A100")
     volumes={VOL_MOUNT: volume},
     # No secret needed: Qwen Instruct + our checkpoints are ungated. Add
     # secrets=[hf_secret] here only if serving a gated model later.
@@ -104,7 +110,10 @@ MINUTES = 60
 )
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
-    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
+    # Default = pilot 1.5B for the cheap end-to-end validation run; flip to
+    # "Qwen/Qwen2.5-7B-Instruct" (and gpu="A100" via with_options) for the real
+    # student run. The deployed web endpoint serves whatever this default is.
+    model: str = modal.parameter(default="Qwen/Qwen2.5-1.5B-Instruct")
     max_model_len: int = modal.parameter(default=8192)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
