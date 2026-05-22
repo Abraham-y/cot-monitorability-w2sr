@@ -100,8 +100,8 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="L4",  # 24GB: fits the 1.5B pilot and the 7B student (bf16); cheap.
-    # Override for faster 7B throughput at lookup: VLLMServer.with_options(gpu="A100")
+    gpu="A100",  # 40GB: comfortable for the 7B student. (L4 also fits 7B but
+    # is slower; pilot 1.5B used L4. Drop back to L4 for cheap small-model runs.)
     volumes={VOL_MOUNT: volume},
     # No secret needed: Qwen Instruct + our checkpoints are ungated. Add
     # secrets=[hf_secret] here only if serving a gated model later.
@@ -110,10 +110,9 @@ MINUTES = 60
 )
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
-    # Default = pilot 1.5B for the cheap end-to-end validation run; flip to
-    # "Qwen/Qwen2.5-7B-Instruct" (and gpu="A100" via with_options) for the real
-    # student run. The deployed web endpoint serves whatever this default is.
-    model: str = modal.parameter(default="Qwen/Qwen2.5-1.5B-Instruct")
+    # Default = the real 7B student. (Pilot validation used 1.5B on L4.)
+    # The deployed web endpoint serves whatever this default is.
+    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
     max_model_len: int = modal.parameter(default=8192)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)

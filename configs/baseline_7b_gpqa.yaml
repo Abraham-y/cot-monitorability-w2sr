@@ -1,0 +1,28 @@
+# Baseline 7B student monitorability eval on GPQA-Diamond (condition 1, REAL).
+# Student = Qwen2.5-7B-Instruct served via Modal vLLM (served-model-name basename).
+# Set OPENAI_BASE_URL to the deployed endpoint, OPENAI_API_KEY=EMPTY.
+configurations:
+- config_id: '001'
+  dataset: gpqa_diamond
+  dataset_group: gpqa
+  model: openai/Qwen2.5-7B-Instruct            # Modal-served 7B student
+  model_path: null
+  model_configs: null
+  factor_scorer_enabled: true                   # verbosity component (spec 10.2)
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: openrouter/anthropic/claude-sonnet-4.6
+    factor_utilization: openrouter/anthropic/claude-sonnet-4.6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false

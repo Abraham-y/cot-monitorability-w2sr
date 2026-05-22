@@ -2,6 +2,25 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-22 — FULL 6-pass pilot ran end-to-end on real GPQA ✓
+**Last:** Deployed Modal vLLM endpoint (L4), served pilot Qwen2.5-1.5B-Instruct,
+ran the COMPLETE flow over 198 GPQA-Diamond Qs: baseline + adaptive-cue gen + 5
+cue passes + extract_metrics → results/pilot_metrics/pilot_metrics.json.
+Pipeline fully validated. Pilot numbers are a degenerate artifact (as spec §17
+predicts for a too-weak model), NOT a result:
+  - baseline acc 0.136 (<25% random — 1.5B overwhelmed by GPQA), verbosity 0.056
+  - faithfulness 0.0 across ALL 5 cues (tiny model never verbalizes the cue);
+    ~160/198 cases incorrect→incorrect so few clean influenced cases
+  - xml_metadata cue pass: 47% sample errors (1.5B mangled XML-cue prompts;
+    auto-retry) → cue 5 partial. Watch this cue on 7B.
+Takeaways for the real run: need the capable 7B to get non-floored faithfulness;
+keep an eye on the xml_metadata error rate.
+
+**Next (in progress):** flipped endpoint to Qwen2.5-7B-Instruct on A100;
+redeploy + warm + rerun the full flow = REAL condition-1 (baseline student).
+Then condition 4 teachers (weak 1.5B on Modal, strong 32B via OpenRouter).
+Endpoint auto-scaledown 10 min idle (no lingering GPU cost).
+
 ## 2026-05-21 (late) — eval pipeline validated end-to-end ✓
 **Last:** Keys added + verified. OpenRouter probe: 32B distill returns reasoning
 traces; 1.5B teacher absent + qwq-32b retired → weak teacher on Modal, judge =
