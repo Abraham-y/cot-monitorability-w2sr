@@ -2,6 +2,23 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-21 (night) — Modal vLLM serving entrypoint built ✓
+**Last:** Built + validated the Modal vLLM serving path (independent of the
+blocked credentials). `src/serving.py` holds the Modal-free, unit-tested
+command/URL helpers; `modal_app.py::VLLMServer` is a parametrized `@app.cls`
+(model, max_model_len) exposing an OpenAI-compatible `@modal.web_server`.
+`modal run modal_app.py::serve_url --model Qwen/Qwen2.5-1.5B-Instruct` returns
+the endpoint URL + Inspect model string/env with NO GPU spin-up and NO secret
+needed (Qwen/our checkpoints are ungated). Gotchas resolved: dropped
+`from __future__ import annotations` in modal_app (broke `modal.parameter`
+typing); `Secret.from_name(required=)` doesn't exist in Modal 1.4.3 so the
+serving class just omits the unused HF secret. Deployed URL pattern (after
+`modal deploy`): https://ayeung16--w2sr-monitorability-vllmserver-serve.modal.run
+
+**Next:** unchanged — still blocked on OPENROUTER/ANTHROPIC/HF keys to run the
+thinking-token check, deploy the student endpoint, download GPQA, and run the
+baseline + 5-cue eval. The serving harness is ready the moment keys land.
+
 ## 2026-05-21 (eve) — Modal smoke ✓, eval mapped, serving locked
 **Last:** Build-order step 1 DONE — `modal run modal_app.py` prints `GPU: Tesla
 T4`. Mapped the Meek eval (config-driven, Inspect API-provider model strings;
