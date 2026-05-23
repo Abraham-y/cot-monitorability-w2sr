@@ -110,10 +110,12 @@ MINUTES = 60
 )
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
-    # Default = the real 7B student. (Pilot validation used 1.5B on L4.)
-    # The deployed web endpoint serves whatever this default is.
-    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
-    max_model_len: int = modal.parameter(default=8192)
+    # Deployed web endpoint serves whatever this default is (flip + redeploy per
+    # model). Currently: weak teacher (R1-distill reasoning model) for condition
+    # 4 — needs a big context for long <think> CoT (32k). Flip back to
+    # "Qwen/Qwen2.5-7B-Instruct"/8192 for the student, or a checkpoint path.
+    model: str = modal.parameter(default="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
+    max_model_len: int = modal.parameter(default=32768)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
     def serve(self):

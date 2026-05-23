@@ -1,0 +1,34 @@
+# Condition 4 (weak teacher reference) on GPQA-Diamond.
+# DeepSeek-R1-Distill-Qwen-1.5B is a REASONING model: long <think> CoT, so the
+# generator gets a 16k token budget (endpoint served with 32k context) to avoid
+# truncating the reasoning that faithfulness is measured on.
+# Served via Modal vLLM; set OPENAI_BASE_URL to the endpoint, OPENAI_API_KEY=EMPTY.
+configurations:
+- config_id: '001'
+  dataset: gpqa_diamond
+  dataset_group: gpqa
+  model: openai/DeepSeek-R1-Distill-Qwen-1.5B   # Modal-served weak teacher
+  model_path: null
+  model_configs:
+    "openai/DeepSeek-R1-Distill-Qwen-1.5B":      # generator: allow long CoT
+      max_tokens: 16384
+    "judge:anthropic/claude-sonnet-4-6":          # judge: cap output, bill Anthropic
+      max_tokens: 4096
+  factor_scorer_enabled: true
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false
