@@ -207,6 +207,51 @@ def train(base_student: str, train_json: str, out_dir: str) -> str:
     return ckpt
 
 
+@app.function(
+    image=image, gpu="A100", volumes={VOL_MOUNT: volume},
+    secrets=[hf_secret], timeout=6 * 60 * 60,
+)
+def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bool = False) -> dict:
+    """Run the spec 9 gate = the W2SR reproduction check. One vLLM load serves
+    BOTH the untrained baseline (no adapter) and the trained student (LoRA
+    adapter) on the SAME held-out MATH, so we get the capability GAIN directly.
+    Greedy decoding (temp 0). Writes gate_report.json next to the adapter."""
+    import json as _json
+    from pathlib import Path
+    from vllm import LLM, SamplingParams
+    from vllm.lora.request import LoRARequest
+    from transformers import AutoTokenizer
+    from src import generate_traces as gt, validate_training as vt, config
+
+    held = _json.loads(Path(held_out_json).read_text())
+    gts = [str(p["gt_answer"]) for p in held]
+    tok = AutoTokenizer.from_pretrained(base_student)
+    prompts = [tok.apply_chat_template(gt.build_prompt_messages(p["problem"]),
+                                       tokenize=False, add_generation_prompt=True) for p in held]
+    sp = SamplingParams(temperature=0.0, max_tokens=4096)
+
+    cfg = config.SFTConfig()
+    llm = LLM(model=base_student, enable_lora=True, max_lora_rank=cfg.lora_rank,
+              max_model_len=8192, gpu_memory_utilization=0.9)
+    base_out = llm.generate(prompts, sp)                                   # untrained baseline
+    lora = LoRARequest("w2sr", 1, adapter_dir)
+    trained_out = llm.generate(prompts, sp, lora_request=lora)             # trained student
+
+    grade = gt.default_grader()
+    base_resp = [o.outputs[0].text for o in base_out]
+    trained_resp = [o.outputs[0].text for o in trained_out]
+    baseline_pass1 = vt.pass1(base_resp, gts, grade)
+
+    prov = Path(adapter_dir) / "train_provenance.json"
+    loss_log = _json.loads(prov.read_text()).get("loss_log", []) if prov.exists() else []
+    report = vt.validate(loss_log, trained_resp, gts, baseline_pass1, grade,
+                         is_control=is_control)
+    out = {**report.__dict__, "pass1_gain": report.pass1_gain}
+    (Path(adapter_dir) / "gate_report.json").write_text(_json.dumps(out, indent=2, default=str))
+    volume.commit()
+    return out
+
+
 @app.local_entrypoint()
 def serve_url(model: str = "Qwen/Qwen2.5-7B-Instruct"):
     """Print the OpenAI-compatible endpoint URL + the Inspect env/model string
