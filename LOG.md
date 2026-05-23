@@ -2,6 +2,24 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-22 (pm) — 7B run BLOCKED on OpenRouter credits
+**Last:** Switched endpoint to 7B/A100, launched real baseline flow. Student
+generation worked (193/198 answers) but EVERY judge call failed: HTTP 402
+"requires more credits" — OpenRouter balance exhausted. Checked: $10 total,
+$9.69 used → ~$0.31 left. The pilot's ~1300 claude-sonnet-4.6 judge calls
+(~$0.007 each) burned it. Killed the 7B run to stop A100 waste (auto-scaledown).
+Fix applied: judge `max_tokens` was defaulting to 65536 (triggered the 402
+pre-auth + wasteful) → capped to 4096 via `model_configs["judge:openrouter/
+anthropic/claude-sonnet-4.6"]` in all configs; verified it resolves. Cap fixes
+the 402 trigger but the real cost driver is sonnet token usage at volume.
+
+**BLOCKER (need from human):** top up OpenRouter credits. Rough estimate:
+~$15 to finish the 7B baseline + teacher conditions; ~$50-75 for the full
+4-condition GPQA study. Alternative: switch to a cheaper judge (justify via the
+spec 10.3 judge-validation set). Once topped up: rerun baseline_7b_gpqa.yaml
+flow (or use batch_eval --retry-failed-samples to re-judge stored 7B outputs
+without re-generating on A100).
+
 ## 2026-05-22 — FULL 6-pass pilot ran end-to-end on real GPQA ✓
 **Last:** Deployed Modal vLLM endpoint (L4), served pilot Qwen2.5-1.5B-Instruct,
 ran the COMPLETE flow over 198 GPQA-Diamond Qs: baseline + adaptive-cue gen + 5

@@ -10,7 +10,9 @@ configurations:
   dataset_group: gpqa
   model: openai/Qwen2.5-1.5B-Instruct          # Modal-served pilot student
   model_path: null
-  model_configs: null
+  model_configs:                       # cap judge output tokens (default 65536 ->
+    "judge:openrouter/anthropic/claude-sonnet-4.6":   # 402 credit error + huge cost
+      max_tokens: 4096
   factor_scorer_enabled: true                   # verbosity component (spec 10.2)
   factor_utilization_threshold: 0.5
   scorer_judge_models:

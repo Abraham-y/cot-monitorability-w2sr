@@ -31,7 +31,9 @@ configurations:
   # base_url env (e.g. INSPECT_EVAL_MODEL_BASE_URL) to the Modal endpoint.
   model: openai/Qwen/Qwen2.5-7B-Instruct        # <-- served by Modal vLLM
   model_path: null
-  model_configs: null
+  model_configs:                       # cap judge output tokens (default 65536 ->
+    "judge:openrouter/anthropic/claude-sonnet-4.6":   # 402 credit error + huge cost
+      max_tokens: 4096
   # scorers
   factor_scorer_enabled: true        # verbosity component (spec 10.2)
   factor_utilization_threshold: 0.5
