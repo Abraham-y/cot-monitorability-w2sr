@@ -2,6 +2,23 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-23 (pm) — W2SR reproduction pipeline wired + launched
+**Built the full training half end-to-end and started condition 2 (W2SR =
+the reproduction):**
+- src/problems.py: MATH loader (hendrycks_math L3-5, self-contained boxed
+  extractor, disjoint train/held-out). src/train_student.py (LoRA SFT, tested),
+  src/validate_training.py (spec 9 gate, tested), src/analysis.py (per-case
+  stats, tested on real data).
+- modal_app.py entrypoints: gen_traces (offline batched vLLM, Yuan-style,
+  bounded 4096 tok), train (LoRA SFT -> volume), gate (one vLLM load runs
+  baseline + LoRA on held-out MATH -> Pass@1 gain = reproduction check).
+- LAUNCHED gen_traces: 500 MATH traces from DeepSeek-R1-Distill-Qwen-1.5B ->
+  /vol/traces/w2sr. Next chain: train -> gate. Reproduction success criterion
+  (pre-registered): W2SR Pass@1 - baseline >= 5 pts (or >=30% of baseline->teacher gap).
+
+Reproduce/critique/extend mapping locked: reproduce=W2SR MATH Pass@1 gain;
+critique=unmeasured monitorability; extend=GPQA monitorability + control.
+
 ## 2026-05-23 — condition 4a (weak teacher) DONE ✓; strong teacher parallelized
 **Weak teacher (DeepSeek-R1-Distill-Qwen-1.5B, GPQA-Diamond):** baseline acc
 0.086 (weak at task), verbosity 0.640 (>student 0.476). Faithfulness MUCH higher
