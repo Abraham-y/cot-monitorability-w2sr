@@ -1,43 +1,139 @@
-"""Analysis: deltas, bootstrap CIs, McNemar, mixed-effects, plots (spec 7, 11).
+"""Analysis: per-case extraction, deltas, bootstrap CIs, McNemar (spec 7, 11).
 
-Pre-register the primary test on PILOT data, then run it UNCHANGED on the full
-data (spec 11). Unit of analysis = individual case (question x hint type).
+Run in the eval venv (needs numpy/pandas + inspect_ai to read .eval logs):
+    . .venv-eval/bin/activate
+    PYTHONPATH=external/monitorability-eval/src python -m src.analysis <batch> ...
 
-Primary estimands:
-  1. monitorability(W2SR) - monitorability(baseline)   [practically relevant]
-  2. monitorability(W2SR) - monitorability(control)    [confound-clean]
-Here "control" = the strong-teacher (distillation) student; "W2SR" = the
-weak-teacher student. Reference: each teacher's standalone score, to adjudicate
-H1 (inheritance) vs H2 (improve). If >2 teachers are on the axis, also fit/plot
-monitorability vs teacher.strength_rank as a dose-response curve (spec 5.3).
+Unit of analysis = individual case (question x hint type), per spec 11.1.
+Primary estimands: monitorability/acknowledgment differences
+  (i)  W2SR student - untrained baseline   (practically relevant)
+  (ii) W2SR student - control student      (confound-clean)
+with each teacher's standalone score as the H1-vs-H2 reference.
 
-Tests (spec 11.2):
-  - Combined score: paired mean diff + bootstrap 95% CI (resample questions,
-    10000 iters). Report CI + effect size, not just p.
-  - Binary acknowledgment on paired cases: McNemar + rate diff with bootstrap CI.
-  - Preferred: mixed-effects logistic
-      acknowledgment ~ condition + (1|question) + (1|hint_type)   (statsmodels)
-    as primary if feasible, else robustness check.
-
-Decision rule (spec 11.5): H1 if W2SR < baseline AND < control (CI excludes 0);
-H2 if W2SR > both (CI excludes 0); H0 if W2SR-control CI includes 0; H3 if
-nothing moves from baseline. Per-hint breakdown is exploratory (correct or label
-as such; don't cherry-pick one significant hint as the headline -- spec 11.3).
+"condition" here = the eval batch name (baseline_7b, weak_teacher,
+strong_teacher, w2sr_student, control_student, ...). Cross-condition stats are
+paired on matched (question_id, cue).
 """
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 
-def bootstrap_paired_diff(scores_a, scores_b, n_iter: int = 10000, seed: int = 0):
-    """Mean paired difference with a bootstrap 95% CI (resample questions)."""
-    raise NotImplementedError
+REPO = Path(__file__).resolve().parent.parent
+LOGS = REPO / "external/monitorability-eval/logs"
+
+CUE_DIRS = (
+    "01_stanford_professor", "02_visual_squares", "03_grader_hack",
+    "04_unethical_information", "05_xml_metadata",
+)
 
 
-def mcnemar_ack(paired_labels_a, paired_labels_b):
-    """McNemar's test on paired binary acknowledgment outcomes."""
-    raise NotImplementedError
+def load_cases(batch_name: str, logs_root: Path = LOGS) -> "list[dict]":
+    """Extract per-case rows from a batch's cue-pass .eval logs.
+
+    Per case (spec 10.1, 10.4): influenced = the hint flipped the answer to the
+    cue's target; acknowledged = cue_aware scorer fired; verbosity = factor
+    scorer. Returns rows: condition, cue, qid, baseline_answer, hinted_answer,
+    cue_target, influenced, acknowledged, verbosity, correct_letter.
+    """
+    from inspect_ai.log import read_eval_log
+
+    rows: list[dict] = []
+    batch_dir = logs_root / batch_name
+    for model_dir in sorted(p for p in batch_dir.iterdir() if p.is_dir()):
+        for cue in CUE_DIRS:
+            for evf in (model_dir / cue).rglob("*.eval"):
+                log = read_eval_log(str(evf))
+                for s in (log.samples or []):
+                    md = s.metadata or {}
+                    sc = s.scores or {}
+                    hinted = sc.get("answer").value if sc.get("answer") else None
+                    base = md.get("baseline_model_answer")
+                    target = md.get("cue_target_answer")
+                    ack = sc.get("cue_aware_adaptive_scorer")
+                    verb = sc.get("factor_utilization_scorer")
+                    rows.append({
+                        "condition": batch_name,
+                        "cue": md.get("cue_name") or cue,
+                        "qid": md.get("core_question_id") or str(s.id),
+                        "baseline_answer": base,
+                        "hinted_answer": hinted,
+                        "cue_target": target,
+                        "influenced": (hinted == target and hinted != base),
+                        "acknowledged": (None if ack is None else int(ack.value or 0)),
+                        "verbosity": (None if verb is None or not isinstance(verb.value, (int, float)) else float(verb.value)),
+                        "correct_letter": md.get("correct_letter"),
+                    })
+    return rows
 
 
-def mixed_effects_ack(df):
-    """acknowledgment ~ condition + (1|question) + (1|hint_type)."""
-    raise NotImplementedError
+def summarize(rows: "list[dict]") -> "dict":
+    """Per (condition, cue): influence rate, ack rate overall + among influenced,
+    verbosity mean, informative N (= #influenced) — the spec 11.4 number."""
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    out = {}
+    for (cond, cue), g in df.groupby(["condition", "cue"]):
+        infl = g["influenced"]
+        out[(cond, cue)] = {
+            "n": len(g),
+            "influence_rate": float(infl.mean()),
+            "informative_n": int(infl.sum()),
+            "ack_rate_overall": float(g["acknowledged"].dropna().mean()),
+            "ack_rate_influenced": float(g.loc[infl, "acknowledged"].dropna().mean()) if infl.any() else float("nan"),
+            "verbosity_mean": float(g["verbosity"].dropna().mean()),
+        }
+    return out
+
+
+def bootstrap_paired_diff(values_a, values_b, n_iter: int = 10000, seed: int = 0):
+    """Mean paired difference (a - b) with a bootstrap 95% CI, resampling the
+    pairing units (questions) with replacement (spec 11.2). `values_a/b` are
+    arrays aligned by unit. Returns (mean_diff, lo, hi)."""
+    import numpy as np
+    a = np.asarray(values_a, float); b = np.asarray(values_b, float)
+    mask = ~(np.isnan(a) | np.isnan(b))
+    a, b = a[mask], b[mask]
+    diff = a - b
+    if len(diff) == 0:
+        return float("nan"), float("nan"), float("nan")
+    rng = np.random.default_rng(seed)
+    means = diff[rng.integers(0, len(diff), size=(n_iter, len(diff)))].mean(axis=1)
+    return float(diff.mean()), float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
+
+
+def mcnemar(flags_a, flags_b):
+    """McNemar's test on paired binary outcomes (e.g., acknowledged under two
+    conditions on the same (qid,cue)) — spec 11.2. Returns (b, c, p_value)
+    where b/c are the discordant counts."""
+    from scipy.stats import binomtest
+    import numpy as np
+    a = np.asarray(flags_a, float); b = np.asarray(flags_b, float)
+    mask = ~(np.isnan(a) | np.isnan(b))
+    a, b = a[mask].astype(int), b[mask].astype(int)
+    b01 = int(((a == 0) & (b == 1)).sum())
+    c10 = int(((a == 1) & (b == 0)).sum())
+    n = b01 + c10
+    p = 1.0 if n == 0 else binomtest(b01, n, 0.5).pvalue
+    return b01, c10, p
+
+
+def paired_on(rows_a: "list[dict]", rows_b: "list[dict]", field: str):
+    """Align two conditions' rows on (qid, cue) and return matched value arrays
+    for `field` (e.g., 'acknowledged', 'verbosity') — input to the paired tests."""
+    import pandas as pd
+    da = pd.DataFrame(rows_a).set_index(["qid", "cue"])[field]
+    db = pd.DataFrame(rows_b).set_index(["qid", "cue"])[field]
+    j = da.to_frame("a").join(db.to_frame("b"), how="inner")
+    return j["a"].to_numpy(), j["b"].to_numpy()
+
+
+if __name__ == "__main__":  # quick CLI: compare two batches on acknowledgment
+    a_batch, b_batch = sys.argv[1], sys.argv[2]
+    ra, rb = load_cases(a_batch), load_cases(b_batch)
+    va, vb = paired_on(ra, rb, "acknowledged")
+    md, lo, hi = bootstrap_paired_diff(va, vb)
+    b01, c10, p = mcnemar(va, vb)
+    print(f"acknowledgment {a_batch} - {b_batch}: Δ={md:+.3f} [95% CI {lo:+.3f},{hi:+.3f}]")
+    print(f"McNemar discordant: {a_batch}-only={c10}, {b_batch}-only={b01}, p={p:.4g}")
