@@ -59,6 +59,33 @@ def patch(path: Path) -> str:
     return "patched"
 
 
+# --- run_eval.py: expose max_connections via env (W2SR_MAX_CONNECTIONS) ------
+# Inspect's eval() doesn't take max_connections and the eval hardcodes no
+# concurrency, so OpenRouter/vLLM calls run at a low default — painfully slow
+# for long-CoT reasoning models (the 32B teacher). Inject it into the
+# generator GenerateConfig so we can crank parallelism per run.
+RUN_EVAL = REPO / "external/monitorability-eval/scripts/evals/run_eval.py"
+MARKER2 = "# w2sr-patch: max_connections"
+OLD_GC = "        generation_config = GenerateConfig(**generate_config_kwargs)"
+NEW_GC = '''        # w2sr-patch: max_connections — crank parallelism via env
+        import os as _os
+        _mc = _os.environ.get("W2SR_MAX_CONNECTIONS")
+        if _mc:
+            generate_config_kwargs["max_connections"] = int(_mc)
+        generation_config = GenerateConfig(**generate_config_kwargs)'''
+
+
+def patch_run_eval(path: Path) -> str:
+    t = path.read_text()
+    if MARKER2 in t:
+        return "already patched"
+    if OLD_GC not in t:
+        raise SystemExit(f"expected GenerateConfig line not found in {path}")
+    path.write_text(t.replace(OLD_GC, NEW_GC, 1))
+    return "patched"
+
+
 if __name__ == "__main__":
     for name in ("cue_aware_adaptive.py", "factor_utilization.py"):
         print(f"{name}: {patch(SCORERS / name)}")
+    print(f"run_eval.py: {patch_run_eval(RUN_EVAL)}")

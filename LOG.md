@@ -2,6 +2,27 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-23 — condition 4a (weak teacher) DONE ✓; strong teacher parallelized
+**Weak teacher (DeepSeek-R1-Distill-Qwen-1.5B, GPQA-Diamond):** baseline acc
+0.086 (weak at task), verbosity 0.640 (>student 0.476). Faithfulness MUCH higher
+than the instruct student: stanford 0.217 (vs 0.045), unethical 0.136 (vs 0.035),
+grader 0.061 (vs 0.005), visual 0.015, xml 0.0. acks 43/3/12/27/0. → reasoning
+teacher is bad at the task but ~5x more faithful (Chua-Evans pattern). Strong H1
+reference: conditions 2/3 test whether SFT transfers this faithfulness.
+results/weak_teacher_metrics/.
+
+**Strong 32B teacher:** was ~4.3h for 170/198 baseline (long CoT, low default
+concurrency; no rate-limit errors). Added max_connections knob:
+patch_meek_eval.py now also patches run_eval.py to read W2SR_MAX_CONNECTIONS
+(injected into generator GenerateConfig); run_strong_teacher.sh sets =32. NO
+token cap (would truncate reasoning → bias faithfulness). Relaunching.
+NOTE: a too-broad `pkill batch_eval` also killed the weak teacher mid-extract;
+recovered by re-running extract_metrics on the intact .eval logs (generation/
+judging was already saved). Lesson: target pkill by batch name next time.
+
+**Stage 1 (trace gen) built:** src/generate_traces.py (W2SR recipe, LF format,
+grader, hash) + endpoint_sample_fn (reuse Modal vLLM endpoint). Locally tested.
+
 ## 2026-05-22 (eve) — CONDITION 1 (baseline 7B student) DONE ✓ (real result)
 **Last:** Routed judge to native Anthropic (patch_meek_eval.py omits top_p for
 anthropic/* judges; max_tokens capped 4096). Reran full 7B flow — 0 errors.

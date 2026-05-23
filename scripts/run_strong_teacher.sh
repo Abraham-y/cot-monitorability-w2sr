@@ -1,6 +1,7 @@
 set -e
 cd "/Users/abrahamyeung/CS 338 Project"
 set -a && . ./.env && set +a
+export W2SR_MAX_CONNECTIONS=32   # parallelize OpenRouter calls (full reasoning, no token cap)
 # strong teacher is openrouter/... — no Modal endpoint / OPENAI_BASE_URL needed
 cd external/monitorability-eval
 source ../../.venv-eval/bin/activate
