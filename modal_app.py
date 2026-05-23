@@ -40,6 +40,9 @@ image = (
         "VLLM_ATTENTION_BACKEND": "FLASH_ATTN",
     })
     .add_local_python_source("src")
+    # ship the W2SR rule-based grader (external/, gitignored) into the image so
+    # gen_traces + gate can grade MATH (default_grader looks in /root/w2sr_infer)
+    .add_local_dir("external/w2sr/infer", remote_path="/root/w2sr_infer")
 )
 
 # Dedicated image for vLLM serving (lighter than the full training image).

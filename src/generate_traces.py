@@ -48,12 +48,21 @@ class TraceRecord:
 
 def default_grader() -> Callable[[str, str], bool]:
     """Lazily build the W2SR rule-based grader (extract boxed answer +
-    math_equal). Imported from external/w2sr so we don't reimplement math
-    equivalence. Needs sympy etc., so it's loaded on demand (Modal/GPU image),
-    not at module import (keeps local formatting tests dependency-free)."""
+    math_equal). Imported from the w2sr `infer` dir so we don't reimplement math
+    equivalence. Loaded on demand (Modal/GPU image), not at module import.
+    Looks in the local repo path (dev) and /root/w2sr_infer (the dir shipped
+    into the Modal image via add_local_dir)."""
     import sys
-    infer = Path(__file__).resolve().parent.parent / "external/w2sr/infer"
-    sys.path.insert(0, str(infer))
+    candidates = [
+        Path(__file__).resolve().parent.parent / "external/w2sr/infer",
+        Path("/root/w2sr_infer"),
+    ]
+    for c in candidates:
+        if (c / "utils" / "parser.py").exists():
+            sys.path.insert(0, str(c))
+            break
+    else:
+        raise FileNotFoundError(f"w2sr infer/utils not found in {candidates}")
     from utils.parser import extract_answer  # type: ignore
     from utils.grader import math_equal       # type: ignore
 
