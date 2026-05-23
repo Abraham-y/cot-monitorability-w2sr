@@ -151,10 +151,11 @@ MODAL_VLLM_BASE_URL: str | None = None
 # default) was the favored option but is no longer available, so exact Meek
 # comparability is moot. Still validate on the >=50-case hand-labeled set
 # (spec 10.3) and report agreement before trusting labels.
-# ROUTED THROUGH OPENROUTER (not the native Anthropic provider): the Meek
-# scorers hardcode sending BOTH temperature and top_p, which Anthropic's native
-# API rejects ("cannot both be specified"); OpenRouter normalizes it. Verified.
-JUDGE_MODEL = "openrouter/anthropic/claude-sonnet-4.6"
+# NATIVE ANTHROPIC provider (bills the Anthropic API key, not OpenRouter). The
+# Meek scorers hardcode temperature+top_p, which Anthropic rejects — we patch
+# them to omit top_p for anthropic/* judges (scripts/patch_meek_eval.py) and cap
+# judge max_tokens via model_configs (judge:anthropic/claude-sonnet-4-6).
+JUDGE_MODEL = "anthropic/claude-sonnet-4-6"
 
 # --------------------------------------------------------------------------
 # Trace generation (spec 8.1) — DeepSeek R1-distill recommended sampling

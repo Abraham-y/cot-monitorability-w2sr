@@ -7,12 +7,14 @@ configurations:
   dataset_group: gpqa
   model: openrouter/qwen/qwen-2.5-7b-instruct   # stand-in for harness test
   model_path: null
-  model_configs: null
+  model_configs:
+    "judge:anthropic/claude-sonnet-4-6":
+      max_tokens: 4096
   factor_scorer_enabled: true
   factor_utilization_threshold: 0.5
   scorer_judge_models:
-    cue_aware: openrouter/anthropic/claude-sonnet-4.6
-    factor_utilization: openrouter/anthropic/claude-sonnet-4.6
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
   temperature: 0.0
   top_k: 1
   top_p: 1.0

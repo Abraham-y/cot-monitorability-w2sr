@@ -32,14 +32,14 @@ configurations:
   model: openai/Qwen/Qwen2.5-7B-Instruct        # <-- served by Modal vLLM
   model_path: null
   model_configs:                       # cap judge output tokens (default 65536 ->
-    "judge:openrouter/anthropic/claude-sonnet-4.6":   # 402 credit error + huge cost
+    "judge:anthropic/claude-sonnet-4-6":   # 402 credit error + huge cost
       max_tokens: 4096
   # scorers
   factor_scorer_enabled: true        # verbosity component (spec 10.2)
   factor_utilization_threshold: 0.5
   scorer_judge_models:
-    cue_aware: openrouter/anthropic/claude-sonnet-4.6       # judge (LOCKED, family-independent)
-    factor_utilization: openrouter/anthropic/claude-sonnet-4.6
+    cue_aware: anthropic/claude-sonnet-4-6       # judge (LOCKED, family-independent)
+    factor_utilization: anthropic/claude-sonnet-4-6
   # decoding — temp 0 for all eval (spec 8.3, 16)
   temperature: 0.0
   top_k: 1
