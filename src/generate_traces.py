@@ -67,6 +67,46 @@ def default_grader() -> Callable[[str, str], bool]:
     return grade
 
 
+def endpoint_sample_fn(
+    base_url: str,
+    served_model: str,
+    *,
+    temperature: float = 0.6,   # DeepSeek R1-distill recommended (spec 8.1)
+    top_p: float = 0.95,
+    max_tokens: int = 4096,
+    n: int = 1,
+    api_key: str = "EMPTY",
+) -> Callable[[str, list[dict]], list[str]]:
+    """A `sample_fn` that calls a Modal-served vLLM OpenAI-compatible endpoint
+    (the SAME endpoint used to serve the weak teacher for eval — reuse, no new
+    GPU function). Returns n CoT completions per prompt."""
+    import json as _json
+    import ssl
+    import urllib.request
+
+    try:
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        ctx = ssl.create_default_context()
+    url = base_url.rstrip("/") + "/chat/completions"
+
+    def sample(_model: str, messages: list[dict]) -> list[str]:
+        body = _json.dumps({
+            "model": served_model, "messages": messages, "n": n,
+            "temperature": temperature, "top_p": top_p, "max_tokens": max_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            url, data=body,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=600, context=ctx) as resp:
+            data = _json.load(resp)
+        return [c["message"]["content"] for c in data["choices"]]
+
+    return sample
+
+
 def to_llama_factory_records(traces: Iterable[TraceRecord]) -> list[dict]:
     """SFT training file rows: {"content": <prompt>, "output": <teacher CoT>}.
     Content is the flattened qwen-base user turn (the template is applied by
