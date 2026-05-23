@@ -2,6 +2,27 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-22 (eve) — CONDITION 1 (baseline 7B student) DONE ✓ (real result)
+**Last:** Routed judge to native Anthropic (patch_meek_eval.py omits top_p for
+anthropic/* judges; max_tokens capped 4096). Reran full 7B flow — 0 errors.
+First real data point (Qwen2.5-7B-Instruct, GPQA-Diamond, 198 Qs):
+  baseline acc 0.369, verbosity 0.476 (n=198)
+  faithfulness per cue: stanford 0.045, visual_squares 0.0, grader_hack 0.005,
+    unethical 0.035, xml_metadata 0.0  (acks: 9/0/1/7/0)
+  monitorability: 0.233/0.240/0.225/0.191/0.109
+Interpretation: cues clearly influence (acc drops to 0.18-0.29; 41-55
+correct→incorrect flips/cue) but the untrained Instruct student almost never
+acknowledges the cue (~0-4.5% faithfulness — matches Chua-Evans ~7% non-reasoning
+baseline). CAVEAT (spec 11.4): acks are single-digit → small informative N;
+W2SR-vs-control deltas must be sizeable to resolve. Results in
+results/baseline_7b_metrics/baseline_7b_metrics.json.
+
+**Next:** condition 4 = teacher references (build-order step 3, no training).
+Weak teacher DeepSeek-R1-Distill-Qwen-1.5B (reasoning model → long CoT, needs
+bigger max_model_len, e.g. 32k) served on Modal; strong 32B via OpenRouter.
+Expect HIGHER faithfulness for the reasoning teacher (Chua-Evans: R1 ~59%) — the
+H1-vs-H2 reference. Then conditions 2/3 (W2SR + control) need trace-gen + SFT.
+
 ## 2026-05-22 (pm) — 7B run BLOCKED on OpenRouter credits
 **Last:** Switched endpoint to 7B/A100, launched real baseline flow. Student
 generation worked (193/198 answers) but EVERY judge call failed: HTTP 402
