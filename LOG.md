@@ -19,6 +19,35 @@ the reproduction):**
 Reproduce/critique/extend mapping locked: reproduce=W2SR MATH Pass@1 gain;
 critique=unmeasured monitorability; extend=GPQA monitorability + control.
 
+## 2026-05-23 (late) — W2SR reproduction FAILED then re-architected
+**First real W2SR run failed the gate (the gate did its job):** baseline MATH
+Pass@1 0.605 → W2SR 0.16 (−44pts), format_valid 0.105, repetition_loop.
+Two root causes diagnosed:
+1. **Degenerate teacher traces:** the 1.5B R1-distill spiraled into repetition
+   on **73%** of traces ("Wait, 44+43 is 87? Wait, 44+43 is 87?..."). Training on
+   them taught the student to loop. Causes: (a) NO repetition_penalty in sampling
+   (primary), (b) we sent a "You are a helpful assistant" SYSTEM prompt, which is
+   off-distribution for R1-distill (recommends user-turn-only; its template
+   already forces `<think>`). The qwen-base template was for Yuan's Qwen teachers.
+2. **No headroom:** 7B-Instruct baseline 0.605 ≈ teacher's 0.59 correctness, and
+   Instruct is already elicited → W2SR can't show a gain. Yuan trained the BASE
+   model (unelicited).
+
+**Fixes:** build_prompt_messages drops the system prompt; gen_traces adds
+repetition_penalty=1.1 + is_degenerate() loop filter; train_student drops system
+prompt too (train/gate consistency).
+
+**Decision (user): decouple reproduction from monitorability.**
+- Reproduction → student = **Qwen2.5-7B BASE** (has headroom). Cleaned traces.
+- Monitorability → pilot base + zero-shot CoT; fallback a smaller/less-elicited
+  instruct model with headroom (NOT 7B-Instruct). Redo baseline+teacher evals on
+  whatever substrate we land on.
+- Do NOT retreat to "keep 7B-Instruct, report no gain" unless both routes fail.
+
+**Running:** gen_traces v2 (1200 problems, fixes) → train BASE → gate, chained
+(b92t6llik), ~3h, will report the Pass@1 verdict. Weak-teacher 30k re-run also
+in parallel.
+
 ## 2026-05-23 — condition 4a (weak teacher) DONE ✓; strong teacher parallelized
 **Weak teacher (DeepSeek-R1-Distill-Qwen-1.5B, GPQA-Diamond):** baseline acc
 0.086 (weak at task), verbosity 0.640 (>student 0.476). Faithfulness MUCH higher
