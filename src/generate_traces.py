@@ -25,17 +25,33 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable
 
-# Matches external/w2sr/infer/generate.py::make_conversation_base (qwen-base).
-QWEN_BASE_SYSTEM = "You are a helpful assistant."
 REASON_SUFFIX = "Please reason step by step, and put your final answer within \\boxed{}."
 
 
 def build_prompt_messages(problem: str) -> list[dict]:
-    """qwen-base-template chat messages (W2SR recipe)."""
-    return [
-        {"role": "system", "content": QWEN_BASE_SYSTEM},
-        {"role": "user", "content": f"{problem}\n{REASON_SUFFIX}"},
-    ]
+    """Trace-gen prompt. NO system prompt: DeepSeek-R1-Distill is trained to take
+    all instructions in the user turn (its chat template auto-opens `<think>`);
+    a system prompt is off-distribution and worsens the 1.5B's repetition loops.
+    (Yuan's qwen-base template used a system prompt, but that was for his Qwen
+    SimpleRL teachers, not R1-distill.)"""
+    return [{"role": "user", "content": f"{problem}\n{REASON_SUFFIX}"}]
+
+
+def is_degenerate(text: str) -> bool:
+    """Detect repetition-loop / no-final-answer traces (the 1.5B teacher spirals
+    on hard MATH). Such traces teach the student to loop -> filter them out
+    (spec §3: structurally well-formed CoT matters more than correctness)."""
+    if "\\boxed" not in text:
+        return True
+    words = text.split()
+    if len(words) > 200 and len(set(words)) / len(words) < 0.30:
+        return True
+    tail = text[-800:].split()
+    for n in (6, 8, 10):
+        grams = [" ".join(tail[i:i + n]) for i in range(len(tail) - n)]
+        if grams and max((grams.count(g) for g in set(grams)), default=0) >= 4:
+            return True
+    return False
 
 
 @dataclass

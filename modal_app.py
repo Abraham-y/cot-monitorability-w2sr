@@ -168,7 +168,8 @@ def gen_traces(
     llm = LLM(model=teacher_model, max_model_len=8192, gpu_memory_utilization=0.9,
               trust_remote_code=True)
     sp = SamplingParams(temperature=temperature, top_p=top_p,
-                        max_tokens=max_tokens, n=n_per_problem)
+                        max_tokens=max_tokens, n=n_per_problem,
+                        repetition_penalty=1.1)   # suppress 1.5B repetition spirals
     outputs = llm.generate(prompts, sp)
 
     grade = gt.default_grader()
@@ -176,7 +177,10 @@ def gen_traces(
         gt.TraceRecord(p["problem"], str(p["gt_answer"]), o.text, grade(o.text, str(p["gt_answer"])))
         for p, out in zip(train, outputs) for o in out.outputs
     ]
-    kept = [t for t in raw if (t.is_correct or keep_incorrect)]
+    # keep correct+incorrect (Yuan) but DROP degenerate/looping traces — they
+    # teach the student to loop (caused the first run's format collapse).
+    n_degenerate = sum(gt.is_degenerate(t.response) for t in raw)
+    kept = [t for t in raw if (t.is_correct or keep_incorrect) and not gt.is_degenerate(t.response)]
     rows = gt.to_llama_factory_records(kept)
     out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
     (out / "train.json").write_text(_json.dumps(rows, ensure_ascii=False, indent=2))
@@ -185,6 +189,7 @@ def gen_traces(
         "teacher_model": teacher_model, "n_problems": len(train),
         "n_traces_total": len(raw), "n_correct": sum(t.is_correct for t in raw),
         "n_kept": len(kept), "keep_incorrect": keep_incorrect,
+        "n_degenerate_dropped": n_degenerate,
         "data_hash": gt.dataset_hash(rows),
         "total_output_chars": sum(len(t.response) for t in kept),
     }

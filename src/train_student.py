@@ -19,17 +19,13 @@ from pathlib import Path
 
 from src import config
 
-# qwen-base template turns (must match generate_traces: the trace `content`
-# already carries the reason suffix; we wrap it as the user turn and train on
-# the teacher CoT as the assistant turn).
-SYSTEM = "You are a helpful assistant."
-
-
 def to_chat_messages(row: dict) -> list[dict]:
-    """One SFT example -> chat messages. `row` = {"content", "output"} from
-    generate_traces.to_llama_factory_records."""
+    """One SFT example -> chat messages. `row` = {"content", "output"}.
+    NO system prompt — must match generate_traces.build_prompt_messages (used at
+    gate/eval time) so the student is trained and prompted identically. The
+    trace `content` already carries the reason suffix; train on the CoT as the
+    assistant turn."""
     return [
-        {"role": "system", "content": SYSTEM},
         {"role": "user", "content": row["content"]},
         {"role": "assistant", "content": row["output"]},
     ]
