@@ -29,8 +29,7 @@ image = (
         "torch", "transformers", "trl", "peft", "accelerate", "vllm",
         "inspect-ai", "datasets", "numpy", "scipy", "statsmodels",
         "matplotlib", "pandas",
-        # W2SR rule-based grader deps (extract_answer + math_equal)
-        "regex", "sympy", "latex2sympy2", "antlr4-python3-runtime==4.11.1",
+        "sympy",   # src/grading.py math grader (self-contained, no latex2sympy2)
     )
     .env({  # vLLM is used here too (gen_traces, gate) — same flashinfer/HF env
         "HF_HUB_ENABLE_HF_TRANSFER": "1",
@@ -40,9 +39,6 @@ image = (
         "VLLM_ATTENTION_BACKEND": "FLASH_ATTN",
     })
     .add_local_python_source("src")
-    # ship the W2SR rule-based grader (external/, gitignored) into the image so
-    # gen_traces + gate can grade MATH (default_grader looks in /root/w2sr_infer)
-    .add_local_dir("external/w2sr/infer", remote_path="/root/w2sr_infer")
 )
 
 # Dedicated image for vLLM serving (lighter than the full training image).

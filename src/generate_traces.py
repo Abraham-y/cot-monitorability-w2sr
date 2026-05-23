@@ -47,32 +47,10 @@ class TraceRecord:
 
 
 def default_grader() -> Callable[[str, str], bool]:
-    """Lazily build the W2SR rule-based grader (extract boxed answer +
-    math_equal). Imported from the w2sr `infer` dir so we don't reimplement math
-    equivalence. Loaded on demand (Modal/GPU image), not at module import.
-    Looks in the local repo path (dev) and /root/w2sr_infer (the dir shipped
-    into the Modal image via add_local_dir)."""
-    import sys
-    candidates = [
-        Path(__file__).resolve().parent.parent / "external/w2sr/infer",
-        Path("/root/w2sr_infer"),
-    ]
-    for c in candidates:
-        if (c / "utils" / "parser.py").exists():
-            sys.path.insert(0, str(c))
-            break
-    else:
-        raise FileNotFoundError(f"w2sr infer/utils not found in {candidates}")
-    from utils.parser import extract_answer  # type: ignore
-    from utils.grader import math_equal       # type: ignore
-
-    def grade(response: str, gt_answer: str) -> bool:
-        try:
-            pred = extract_answer(response)
-            return bool(math_equal(pred, gt_answer))
-        except Exception:
-            return False
-
+    """The self-contained sympy-based MATH grader (src/grading.py). Replaces the
+    W2SR grader, whose latex2sympy2 dep is broken on our stack — see grading.py
+    for the rationale (only used for the Pass@1 gate + trace is_correct)."""
+    from src.grading import grade
     return grade
 
 
