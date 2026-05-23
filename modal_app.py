@@ -32,6 +32,13 @@ image = (
         # W2SR rule-based grader deps (extract_answer + math_equal)
         "regex", "sympy", "latex2sympy2", "antlr4-python3-runtime==4.11.1",
     )
+    .env({  # vLLM is used here too (gen_traces, gate) — same flashinfer/HF env
+        "HF_HUB_ENABLE_HF_TRANSFER": "1",
+        "HF_HOME": HF_HOME,
+        "VLLM_USE_V1": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",   # debian_slim has no nvcc
+        "VLLM_ATTENTION_BACKEND": "FLASH_ATTN",
+    })
     .add_local_python_source("src")
 )
 
