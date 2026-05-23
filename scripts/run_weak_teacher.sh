@@ -6,7 +6,7 @@ export OPENAI_API_KEY="EMPTY"
 SERVED="DeepSeek-R1-Distill-Qwen-1.5B"
 
 echo "===== DEPLOY weak teacher (R1-distill 1.5B, 32k ctx) ====="
-modal deploy modal_app.py 2>&1 | tail -3
+/opt/miniconda3/bin/modal deploy modal_app.py 2>&1 | tail -3
 
 echo "===== WARM UP ====="
 python3 - <<PY
