@@ -129,6 +129,33 @@ def paired_on(rows_a: "list[dict]", rows_b: "list[dict]", field: str):
     return j["a"].to_numpy(), j["b"].to_numpy()
 
 
+def adjudicate(w2sr_rows, baseline_rows, control_rows, field: str = "acknowledged"):
+    """Apply the pre-registered H0-H3 decision rules (PREREGISTRATION.md §4) to
+    the primary DV. E1 = W2SR-baseline (practical), E2 = W2SR-control (clean).
+    Returns the deltas with CIs and the supported hypothesis."""
+    e1 = bootstrap_paired_diff(*paired_on(w2sr_rows, baseline_rows, field))
+    e2 = bootstrap_paired_diff(*paired_on(w2sr_rows, control_rows, field))
+
+    def excl0(ci):
+        return ci[1] > 0 or ci[2] < 0          # CI excludes zero
+    e2_excludes_0 = excl0(e2)
+    e1_excludes_0 = excl0(e1)
+
+    if not e2_excludes_0:
+        hyp = "H0 (SFT-preserves)" if e1_excludes_0 else "H3/H0 (no clean effect)"
+    elif e2[0] > 0 and e1[0] > 0:
+        hyp = "H2 (generalization beyond teacher)"
+    elif e2[0] < 0 and e1[0] < 0:
+        hyp = "H1 (inheritance)"
+    else:
+        hyp = "mixed (E1/E2 disagree in sign) — inspect"
+    return {
+        "E1_w2sr_minus_baseline": {"delta": e1[0], "ci95": [e1[1], e1[2]]},
+        "E2_w2sr_minus_control":  {"delta": e2[0], "ci95": [e2[1], e2[2]]},
+        "supported_hypothesis": hyp,
+    }
+
+
 if __name__ == "__main__":  # quick CLI: compare two batches on acknowledgment
     a_batch, b_batch = sys.argv[1], sys.argv[2]
     ra, rb = load_cases(a_batch), load_cases(b_batch)
