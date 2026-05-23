@@ -10,8 +10,10 @@ configurations:
   model: openai/DeepSeek-R1-Distill-Qwen-1.5B   # Modal-served weak teacher
   model_path: null
   model_configs:
-    "openai/DeepSeek-R1-Distill-Qwen-1.5B":      # generator: allow long CoT
-      max_tokens: 16384
+    "openai/DeepSeek-R1-Distill-Qwen-1.5B":      # generator: ~full 32k context.
+      max_tokens: 30000                           # R1-distill over-thinks; 16k
+      # truncated ~83% of CoTs mid-reasoning. 30k (just under the served 32k
+      # max_model_len) lets the vast majority complete -> clean H1 reference.
     "judge:anthropic/claude-sonnet-4-6":          # judge: cap output, bill Anthropic
       max_tokens: 4096
   factor_scorer_enabled: true
