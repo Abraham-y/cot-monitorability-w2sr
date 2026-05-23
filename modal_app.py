@@ -29,6 +29,8 @@ image = (
         "torch", "transformers", "trl", "peft", "accelerate", "vllm",
         "inspect-ai", "datasets", "numpy", "scipy", "statsmodels",
         "matplotlib", "pandas",
+        # W2SR rule-based grader deps (extract_answer + math_equal)
+        "regex", "sympy", "latex2sympy2", "antlr4-python3-runtime==4.11.1",
     )
     .add_local_python_source("src")
 )
@@ -124,6 +126,55 @@ class VLLMServer:
             self.model, max_model_len=self.max_model_len,
         )
         subprocess.Popen(cmd)
+
+
+@app.function(
+    image=image,            # has datasets + the W2SR grader deps
+    volumes={VOL_MOUNT: volume},
+    secrets=[hf_secret],    # gated MATH? + HF cache
+    timeout=6 * 60 * 60,
+)
+def gen_traces(
+    teacher_base_url: str, served_model: str, out_dir: str,
+    n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
+) -> dict:
+    """Stage 1 on Modal: load MATH (levels 3-5), sample CoT from the teacher
+    served at `teacher_base_url` (the deployed vLLM endpoint), grade with the
+    W2SR grader, write train.json + manifest to `out_dir` on the volume. Same
+    `problems`/seed across W2SR and control to match the sets (spec 6.1)."""
+    from pathlib import Path
+    from src import problems, generate_traces as gt
+    train, held_out = problems.load_math_problems(n_train=n_problems, n_held_out=200)
+    sample = gt.endpoint_sample_fn(teacher_base_url, served_model, n=n_per_problem)
+    manifest = gt.generate_traces(
+        served_model, train, sample, Path(out_dir),
+        keep_incorrect=keep_incorrect, n_per_problem=n_per_problem,
+    )
+    # stash the disjoint held-out set next to the traces for the Pass@1 gate
+    import json as _json
+    (Path(out_dir) / "held_out.json").write_text(_json.dumps(held_out, indent=2))
+    volume.commit()
+    return manifest
+
+
+@app.function(
+    image=image,            # heavy image (torch/trl/peft)
+    gpu="A100",
+    volumes={VOL_MOUNT: volume},
+    timeout=16 * 60 * 60,   # keep runs < 16h (spec 15)
+)
+def train(base_student: str, train_json: str, out_dir: str) -> str:
+    """Stage 2 on GPU: LoRA SFT the student on a trace dataset (W2SR or control).
+    `train_json` and `out_dir` are paths ON the volume (e.g. /vol/traces/w2sr/
+    train.json, /vol/checkpoints/w2sr). Returns the checkpoint path.
+
+    Get traces onto the volume first (run stage 1 locally against the weak-teacher
+    endpoint, then `modal volume put w2sr-vol <local> /vol/traces/<cond>`)."""
+    from pathlib import Path
+    from src.train_student import train_student_lora
+    ckpt = train_student_lora(base_student, Path(train_json), Path(out_dir))
+    volume.commit()  # persist checkpoint to the volume
+    return ckpt
 
 
 @app.local_entrypoint()

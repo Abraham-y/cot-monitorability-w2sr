@@ -21,6 +21,13 @@ dependencies = [
     "statsmodels",     # mixed-effects model (spec 11.2)
     "matplotlib",
     "pandas",
+    # W2SR rule-based grader (extract_answer + math_equal); antlr4 pinned for
+    # latex2sympy2 (newer breaks on py3.13). gt-answer loading uses a
+    # self-contained boxed extractor, so the loader needs none of these.
+    "regex",
+    "sympy",
+    "latex2sympy2",
+    "antlr4-python3-runtime==4.11.1",
 ]
 
 [tool.setuptools]
