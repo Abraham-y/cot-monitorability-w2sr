@@ -129,30 +129,60 @@ class VLLMServer:
 
 
 @app.function(
-    image=image,            # has datasets + the W2SR grader deps
+    image=image,            # vllm + datasets + W2SR grader deps in one image
+    gpu="A100",
     volumes={VOL_MOUNT: volume},
-    secrets=[hf_secret],    # gated MATH? + HF cache
+    secrets=[hf_secret],
     timeout=6 * 60 * 60,
 )
 def gen_traces(
-    teacher_base_url: str, served_model: str, out_dir: str,
+    teacher_model: str, out_dir: str,
     n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
+    temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
 ) -> dict:
-    """Stage 1 on Modal: load MATH (levels 3-5), sample CoT from the teacher
-    served at `teacher_base_url` (the deployed vLLM endpoint), grade with the
-    W2SR grader, write train.json + manifest to `out_dir` on the volume. Same
-    `problems`/seed across W2SR and control to match the sets (spec 6.1)."""
-    from pathlib import Path
-    from src import problems, generate_traces as gt
-    train, held_out = problems.load_math_problems(n_train=n_problems, n_held_out=200)
-    sample = gt.endpoint_sample_fn(teacher_base_url, served_model, n=n_per_problem)
-    manifest = gt.generate_traces(
-        served_model, train, sample, Path(out_dir),
-        keep_incorrect=keep_incorrect, n_per_problem=n_per_problem,
-    )
-    # stash the disjoint held-out set next to the traces for the Pass@1 gate
+    """Stage 1 on Modal (offline batched vLLM, like Yuan's generate.py): load
+    MATH (levels 3-5), sample CoT from `teacher_model`, grade with the W2SR
+    grader, write train.json + manifest + held_out.json to `out_dir` on the
+    volume. Same problems/seed across W2SR and control to match sets (spec 6.1).
+    Trace generation is bounded at max_tokens=4096 (Yuan recipe), unlike the
+    monitorability eval which keeps full reasoning."""
     import json as _json
-    (Path(out_dir) / "held_out.json").write_text(_json.dumps(held_out, indent=2))
+    from pathlib import Path
+    from vllm import LLM, SamplingParams
+    from transformers import AutoTokenizer
+    from src import problems, generate_traces as gt
+
+    train, held_out = problems.load_math_problems(n_train=n_problems, n_held_out=200)
+    tok = AutoTokenizer.from_pretrained(teacher_model)
+    prompts = [
+        tok.apply_chat_template(gt.build_prompt_messages(p["problem"]),
+                                tokenize=False, add_generation_prompt=True)
+        for p in train
+    ]
+    llm = LLM(model=teacher_model, max_model_len=8192, gpu_memory_utilization=0.9,
+              trust_remote_code=True)
+    sp = SamplingParams(temperature=temperature, top_p=top_p,
+                        max_tokens=max_tokens, n=n_per_problem)
+    outputs = llm.generate(prompts, sp)
+
+    grade = gt.default_grader()
+    raw = [
+        gt.TraceRecord(p["problem"], str(p["gt_answer"]), o.text, grade(o.text, str(p["gt_answer"])))
+        for p, out in zip(train, outputs) for o in out.outputs
+    ]
+    kept = [t for t in raw if (t.is_correct or keep_incorrect)]
+    rows = gt.to_llama_factory_records(kept)
+    out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
+    (out / "train.json").write_text(_json.dumps(rows, ensure_ascii=False, indent=2))
+    (out / "held_out.json").write_text(_json.dumps(held_out, indent=2))
+    manifest = {
+        "teacher_model": teacher_model, "n_problems": len(train),
+        "n_traces_total": len(raw), "n_correct": sum(t.is_correct for t in raw),
+        "n_kept": len(kept), "keep_incorrect": keep_incorrect,
+        "data_hash": gt.dataset_hash(rows),
+        "total_output_chars": sum(len(t.response) for t in kept),
+    }
+    (out / "manifest.json").write_text(_json.dumps(manifest, indent=2))
     volume.commit()
     return manifest
 
