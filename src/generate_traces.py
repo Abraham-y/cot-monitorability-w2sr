@@ -29,12 +29,21 @@ REASON_SUFFIX = "Please reason step by step, and put your final answer within \\
 
 
 def build_prompt_messages(problem: str) -> list[dict]:
-    """Trace-gen prompt. NO system prompt: DeepSeek-R1-Distill is trained to take
-    all instructions in the user turn (its chat template auto-opens `<think>`);
-    a system prompt is off-distribution and worsens the 1.5B's repetition loops.
-    (Yuan's qwen-base template used a system prompt, but that was for his Qwen
-    SimpleRL teachers, not R1-distill.)"""
+    """CoT-eliciting prompt (trace-gen + the W2SR student's train/eval format).
+    NO system prompt: DeepSeek-R1-Distill takes instructions in the user turn
+    (its chat template auto-opens `<think>`); a system prompt is off-distribution
+    and worsens the 1.5B's repetition loops."""
     return [{"role": "user", "content": f"{problem}\n{REASON_SUFFIX}"}]
+
+
+def build_direct_prompt(problem: str) -> list[dict]:
+    """UNELICITED (no-CoT) prompt for the REPRODUCTION baseline. Yuan's W2SR
+    gain is from eliciting reasoning, so the untrained-base baseline must NOT be
+    CoT-prompted (else it elicits the very reasoning W2SR provides, cancelling
+    the gain). Asks for the answer directly. (Distinct from the MONITORABILITY
+    baseline, which DOES use zero-shot CoT since monitorability needs a CoT.)"""
+    return [{"role": "user", "content":
+             f"{problem}\nGive only the final answer within \\boxed{{}}, with no explanation."}]
 
 
 def is_degenerate(text: str) -> bool:

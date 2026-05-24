@@ -237,16 +237,21 @@ def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bo
     held = _json.loads(Path(held_out_json).read_text())
     gts = [str(p["gt_answer"]) for p in held]
     tok = AutoTokenizer.from_pretrained(base_student)
-    prompts = [tok.apply_chat_template(gt.build_prompt_messages(p["problem"]),
-                                       tokenize=False, add_generation_prompt=True) for p in held]
+    # REPRODUCTION baseline = UNELICITED (no-CoT) prompt on the untrained base,
+    # so W2SR's reasoning-elicitation gain isn't cancelled (Yuan's mechanism).
+    # The trained W2SR student is prompted in its CoT training format.
+    base_prompts = [tok.apply_chat_template(gt.build_direct_prompt(p["problem"]),
+                                            tokenize=False, add_generation_prompt=True) for p in held]
+    trained_prompts = [tok.apply_chat_template(gt.build_prompt_messages(p["problem"]),
+                                               tokenize=False, add_generation_prompt=True) for p in held]
     sp = SamplingParams(temperature=0.0, max_tokens=4096)
 
     cfg = config.SFTConfig()
     llm = LLM(model=base_student, enable_lora=True, max_lora_rank=cfg.lora_rank,
               max_model_len=8192, gpu_memory_utilization=0.9)
-    base_out = llm.generate(prompts, sp)                                   # untrained baseline
+    base_out = llm.generate(base_prompts, sp)                              # untrained, unelicited
     lora = LoRARequest("w2sr", 1, adapter_dir)
-    trained_out = llm.generate(prompts, sp, lora_request=lora)             # trained student
+    trained_out = llm.generate(trained_prompts, sp, lora_request=lora)     # trained student (CoT)
 
     grade = gt.default_grader()
     base_resp = [o.outputs[0].text for o in base_out]

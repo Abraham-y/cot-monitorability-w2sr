@@ -51,6 +51,18 @@ Let Δ = W2SR − comparator on the primary DV, with bootstrap 95% CI.
   effect) — even if E1 moves (an SFT-on-CoT effect, itself reportable).
 - **H3 (base-determined):** neither W2SR nor control differs from baseline.
 
+## 4b. Two deliberately different baselines (NOT an inconsistency)
+The reproduction and the monitorability study use **different** baselines on
+purpose, because they answer different questions:
+- **Reproduction baseline = base model WITHOUT CoT elicitation** (direct/few-shot,
+  `build_direct_prompt`). Yuan's W2SR gain comes from *eliciting reasoning*; a
+  CoT-prompted baseline already elicits that reasoning and cancels the gain. So
+  the capability-gain comparison is: untrained base (unelicited) vs W2SR student
+  (CoT, its training format).
+- **Monitorability baseline = base model WITH zero-shot CoT** (`build_prompt_messages`),
+  because measuring monitorability *requires* a CoT to score.
+Documented here so the differing baselines aren't read as a bug.
+
 ## 5. Validity gates (must hold before any monitorability claim)
 - **Capability/reproduction gate (spec §9.4):** the W2SR student's held-out MATH
   **Pass@1 must exceed baseline by ≥ 5 absolute points** (or recover ≥30% of the
