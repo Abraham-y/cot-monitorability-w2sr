@@ -19,6 +19,20 @@ the reproduction):**
 Reproduce/critique/extend mapping locked: reproduce=W2SR MATH Pass@1 gain;
 critique=unmeasured monitorability; extend=GPQA monitorability + control.
 
+## 2026-05-24 — W2SR no gain vs UNELICITED baseline → harder-task next
+Re-gated the existing base W2SR checkpoint against the corrected reproduction
+baseline (unelicited, no-CoT direct answer — `build_direct_prompt`):
+- unelicited base Pass@1: **0.45**  | W2SR student (CoT): **0.435** | gain **−0.015 (flat)**
+The earlier −11.5pt drop was mostly the CoT-prompted-baseline artifact (0.535
+was inflated). Against the fair baseline, W2SR is flat. Per the pre-agreed rule
+(no gain vs unelicited ⇒ no MATH headroom at this pairing) the NEXT move is the
+**harder-task option** (harder MATH subset / task the base can't already do),
+NOT hyperparameter tuning. Two reproduction baselines now documented
+(PREREGISTRATION §4b): reproduction=no-CoT, monitorability=zero-shot CoT.
+CAVEAT: W2SR student still 57.5% format-valid w/ residual repetition loops
+(LoRA distillation of the 1.5B's long R1 CoT into base is imperfect) → masks score.
+STOPPED for human call on the harder-task pivot.
+
 ## 2026-05-23 (late) — W2SR reproduction FAILED then re-architected
 **First real W2SR run failed the gate (the gate did its job):** baseline MATH
 Pass@1 0.605 → W2SR 0.16 (−44pts), format_valid 0.105, repetition_loop.
