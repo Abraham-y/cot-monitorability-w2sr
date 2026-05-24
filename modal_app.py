@@ -222,7 +222,8 @@ def train(base_student: str, train_json: str, out_dir: str) -> str:
     image=image, gpu="A100", volumes={VOL_MOUNT: volume},
     secrets=[hf_secret], timeout=6 * 60 * 60,
 )
-def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bool = False) -> dict:
+def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bool = False,
+         rep_penalty: float = 1.0, max_tokens: int = 4096) -> dict:
     """Run the spec 9 gate = the W2SR reproduction check. One vLLM load serves
     BOTH the untrained baseline (no adapter) and the trained student (LoRA
     adapter) on the SAME held-out MATH, so we get the capability GAIN directly.
@@ -244,7 +245,9 @@ def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bo
                                             tokenize=False, add_generation_prompt=True) for p in held]
     trained_prompts = [tok.apply_chat_template(gt.build_prompt_messages(p["problem"]),
                                                tokenize=False, add_generation_prompt=True) for p in held]
-    sp = SamplingParams(temperature=0.0, max_tokens=4096)
+    # greedy + no penalty is the worst case for loops; rep_penalty curbs the
+    # trained model's eval-time repetition/runaway (same decoding for both arms).
+    sp = SamplingParams(temperature=0.0, max_tokens=max_tokens, repetition_penalty=rep_penalty)
 
     cfg = config.SFTConfig()
     llm = LLM(model=base_student, enable_lora=True, max_lora_rank=cfg.lora_rank,
