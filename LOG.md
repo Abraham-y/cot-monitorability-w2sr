@@ -19,6 +19,31 @@ the reproduction):**
 Reproduce/critique/extend mapping locked: reproduce=W2SR MATH Pass@1 gain;
 critique=unmeasured monitorability; extend=GPQA monitorability + control.
 
+## 2026-05-24 (paused) — RESUME HERE: fix residual degeneration
+**Decision:** dig into the W2SR student's residual degeneration (57.5% format-valid,
+loops) BEFORE trusting the flat MATH result or pivoting task — format failure
+depresses the score independently of capability. (Legit measurement repair, not
+gain-manufacturing.) Timebox to format-valid >~80%, then re-read the gate:
+still flat ⇒ trustworthy no-headroom ⇒ harder-task pivot; gain appears ⇒ repro works.
+
+**Planned steps, cost order (NOT yet run):**
+1. eval-time `gate --rep-penalty 1.15` (greedy+no-penalty was worst case for loops) — CHEAPEST, no retrain. `gate` already has the rep_penalty/max_tokens params (committed).
+2. strengthen trace filter to drop teacher traces that don't conclude cleanly; regen + retrain.
+3. raise student eval-time rep penalty further if needed.
+4. raise LoRA rank (capacity for the 1.5B's long R1 CoT) — the one justified training-knob change.
+If bounded effort doesn't lift conclusion rate ⇒ stop+flag: LoRA-distilling this teacher
+into this base is the binding constraint (a finding); reconsider distillation/teacher.
+
+**⚠️ MODAL PROFILE GOTCHA:** active profile switched to `cs336-2026` (other class).
+ALL our resources (w2sr-vol, `huggingface` secret, endpoint, /vol/checkpoints/w2sr_base)
+live in the **`ayeung16`** workspace. Resume every modal command with
+`MODAL_PROFILE=ayeung16` (do NOT rely on the default; do not change the user's
+active profile). Next action on resume: relaunch step 1 re-gate with that prefix.
+
+**Background:** weak-teacher 30k monitorability re-run — no local proc alive now
+(check on resume whether it completed: results/weak_teacher_metrics + 6 .eval logs
+at 198 each; if not, restart it — H1 reference, valid regardless of the repro).
+
 ## 2026-05-24 — W2SR no gain vs UNELICITED baseline → harder-task next
 Re-gated the existing base W2SR checkpoint against the corrected reproduction
 baseline (unelicited, no-CoT direct answer — `build_direct_prompt`):
