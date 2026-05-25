@@ -134,26 +134,19 @@ class VLLMServer:
         subprocess.Popen(cmd)
 
 
-@app.function(
-    image=image,            # vllm + datasets + W2SR grader deps in one image
-    gpu="A100",
-    volumes={VOL_MOUNT: volume},
-    secrets=[hf_secret],
-    timeout=6 * 60 * 60,
-)
-def gen_traces(
+def _gen_traces_impl(
     teacher_model: str, out_dir: str,
-    n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
-    temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
-    teacher_system: str = "", levels: str = "3,4,5",
-    teacher_max_model_len: int = 8192,
+    n_problems: int, n_per_problem: int, keep_incorrect: bool,
+    temperature: float, top_p: float, max_tokens: int,
+    teacher_system: str, levels: str,
+    teacher_max_model_len: int, tensor_parallel: int,
 ) -> dict:
-    """Stage 1 on Modal (offline batched vLLM, like Yuan's generate.py): load
+    """Shared Stage-1 body (offline batched vLLM, like Yuan's generate.py): load
     MATH (levels 3-5), sample CoT from `teacher_model`, grade with the W2SR
     grader, write train.json + manifest + held_out.json to `out_dir` on the
     volume. Same problems/seed across W2SR and control to match sets (spec 6.1).
-    Trace generation is bounded at max_tokens=4096 (Yuan recipe), unlike the
-    monitorability eval which keeps full reasoning."""
+    `tensor_parallel`>1 shards a big teacher (e.g. 72B) across multiple GPUs.
+    Called by gen_traces (1×A100) and gen_traces_big (2×A100-80GB)."""
     import json as _json
     from pathlib import Path
     from vllm import LLM, SamplingParams
@@ -176,7 +169,8 @@ def gen_traces(
     # teacher_max_model_len: lower to 4096 for 4k-context teachers
     # (e.g. Qwen2.5-Math-* series; 8192 exceeds their max_position_embeddings).
     llm = LLM(model=teacher_model, max_model_len=teacher_max_model_len,
-              gpu_memory_utilization=0.9, trust_remote_code=True)
+              gpu_memory_utilization=0.9, trust_remote_code=True,
+              tensor_parallel_size=tensor_parallel)
     sp = SamplingParams(temperature=temperature, top_p=top_p,
                         max_tokens=max_tokens, n=n_per_problem,
                         repetition_penalty=1.1)   # suppress 1.5B repetition spirals
@@ -206,6 +200,43 @@ def gen_traces(
     (out / "manifest.json").write_text(_json.dumps(manifest, indent=2))
     volume.commit()
     return manifest
+
+
+@app.function(
+    image=image, gpu="A100", volumes={VOL_MOUNT: volume},
+    secrets=[hf_secret], timeout=6 * 60 * 60,
+)
+def gen_traces(
+    teacher_model: str, out_dir: str,
+    n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
+    temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
+    teacher_system: str = "", levels: str = "3,4,5",
+    teacher_max_model_len: int = 8192,
+) -> dict:
+    """Stage 1 on a single A100 (teachers up to ~14B). See _gen_traces_impl."""
+    return _gen_traces_impl(
+        teacher_model, out_dir, n_problems, n_per_problem, keep_incorrect,
+        temperature, top_p, max_tokens, teacher_system, levels,
+        teacher_max_model_len, tensor_parallel=1)
+
+
+@app.function(
+    image=image, gpu="A100-80GB:2", volumes={VOL_MOUNT: volume},
+    secrets=[hf_secret], timeout=6 * 60 * 60,
+)
+def gen_traces_big(
+    teacher_model: str, out_dir: str,
+    n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
+    temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
+    teacher_system: str = "", levels: str = "3,4,5",
+    teacher_max_model_len: int = 8192,
+) -> dict:
+    """Stage 1 for a big teacher (e.g. Qwen2.5-Math-72B-Instruct) sharded across
+    2×A100-80GB (tensor_parallel=2). Used for the strong end of the teacher axis."""
+    return _gen_traces_impl(
+        teacher_model, out_dir, n_problems, n_per_problem, keep_incorrect,
+        temperature, top_p, max_tokens, teacher_system, levels,
+        teacher_max_model_len, tensor_parallel=2)
 
 
 @app.function(
