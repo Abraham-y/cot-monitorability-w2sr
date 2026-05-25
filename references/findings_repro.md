@@ -57,3 +57,21 @@ Reproduction switched to Yuan's actual teacher, `hkust-nlp/Qwen-2.5-1.5B-SimpleR
 retained as the **monitorability** teacher reference (published faithfulness
 baseline + the H1 weak-teacher run). The two halves deliberately use different
 teachers for different reasons; documented so it isn't read as inconsistency.
+
+## Finding 3 — SimpleRL-Zoo-1.5B (Yuan's teacher) is too NOISY/weak to distill
+Switched the reproduction teacher to hkust-nlp/Qwen-2.5-1.5B-SimpleRL-Zoo
+(Yuan's actual teacher). Traces are concise (median 1510 chars, conclude with
+\boxed) BUT the model is noisy: ~24% of kept traces contain stray CJK, plus
+Chinese preambles, scraped URLs (e.g. "/problem/code/...html"), HTML-entity
+garbage, and mangled mid-word starts. It's also very weak on MATH (212/1200 =
+18% correct; 58% dropped as no-boxed). Training the 7B base (LoRA r32) on these:
+Pass@1 0.445 (unelicited base) -> 0.12 (W2SR), format-valid 0.26 — a COLLAPSE,
+worse than R1-distill. The garbage corrupts the student.
+
+## Net reproduction result (robust across the matrix)
+W2SR with a weak 1.5B teacher does NOT reproduce a capability gain on MATH for a
+7B student, across: students {7B-instruct, 7B-base}, teachers {R1-distill-1.5B,
+SimpleRL-Zoo-1.5B}, LoRA rank {16,32}, trace filters, eval decodings. R1-distill
+gives flat+degenerate; SimpleRL-Zoo gives collapse-from-noise. The gain Yuan
+reports does not appear in this (smaller, LoRA, public-1.5B-teacher) setup.
+The MONITORABILITY study (the novel contribution) is unaffected and further along.
