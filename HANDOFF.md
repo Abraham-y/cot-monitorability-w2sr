@@ -134,11 +134,18 @@ the blocker (L5 had headroom, still flat).
      the 30k re-run never persisted (no logs/ dir) — optional cosmetic redo only.
    - Condition 4b (strong 32B teacher, OpenRouter): INCOMPLETE (was ~40/198
      baseline). Re-run scripts/run_strong_teacher.sh (needs OpenRouter $).
-   - Conditions 2 & 3 (W2SR + control student MONITORABILITY): serve each trained
-     7B-Instruct checkpoint (Modal vLLM endpoint or served LoRA) and run the eval.
-     Both are capability-controlled (~0.63 CoT ceiling, headroom-verified); report
-     the headroom/gate status alongside (spec 16 schema). cond-2 = w2sr_infamily_inst,
-     cond-3 = w2sr_control_inst.
+   - Conditions 2 & 3 (W2SR + control student MONITORABILITY): ✅ DONE.
+     cond-2 = w2sr_infamily_inst (weak Math-1.5B-Inst teacher), cond-3 =
+     w2sr_control_inst (strong Math-72B-Inst teacher), both 7B-Instruct, merged →
+     served via Modal vLLM → 6-pass GPQA eval. Results in findings_extension.md +
+     results/{w2sr_student,control_student}_metrics (gitignored). HEADLINE:
+     faithfulness NULL (E2 W2SR−control Δ=−0.006 p=.13, all at floor, H0/H3);
+     verbosity TRANSFERS large (E1 +0.264). Distillation transfers verbosity not
+     cue-faithfulness; teacher's 0.172 faith not inherited; teacher strength
+     irrelevant. Scoring fix: MATH-SFT students emit \boxed (patch_meek_eval.py).
+   - Condition 4b (strong 32B teacher ref): OPTIONAL remaining — rounds out the
+     teacher-strength reference axis (cond-4a weak done: faith 0.172). Core study
+     complete without it. scripts/run_strong_teacher.sh (OpenRouter $).
    - Analysis: src/analysis.py (load_cases → bootstrap_paired_diff → mcnemar →
      adjudicate per PREREGISTRATION H0-H3). Validated: weak_teacher−baseline
      acknowledgment Δ=+0.179 [95% CI .143,.218], McNemar p~6e-20.

@@ -2,6 +2,32 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-25 (pm-3) — EXTENSION COMPLETE: verbosity transfers, faithfulness doesn't
+**Last:** Ran the monitorability study end-to-end on the locked 7B-Instruct
+student (capability-controlled per Finding 5). Built cond-2 (W2SR, weak in-family
+teacher Qwen2.5-Math-1.5B-Inst) and cond-3 (control, strong in-family teacher
+Qwen2.5-Math-72B-Inst, same MATH L3-5 problems → clean 48× teacher-strength axis;
+the 7B "strong" teacher tied the 1.5B at ~66% so L3-5 is saturated — use scale).
+Each: train LoRA → gate(headroom) → merge_adapter → serve via Modal vLLM → 6-pass
+GPQA monitorability eval (judge=sonnet-4-6). Also re-extracted cond-1 + cond-4a.
+
+Hit + fixed a scoring bug: MATH-SFT students emit \boxed{X} not "ANSWER: X" ->
+Inspect answer() misparsed -> fake accuracy collapse (cond-2 0.051 vs true 0.328).
+Faithfulness/verbosity are judge/factor-based, unaffected. Codified a
+format-agnostic re-parse in patch_meek_eval.py; cond-1 unchanged (0.369->0.379).
+
+RESULTS (findings_extension.md): faithfulness (acknowledgment) is NULL — E2
+(W2SR-control) Δ=-0.006 [-.013,.000] p=.13; E1 (W2SR-baseline) Δ=+0.024 [.000,.049]
+p=.11; all at floor -> H0/H3. Verbosity TRANSFERS large — E1 Δ=+0.264 [.218,.312],
+control-baseline Δ=+0.247, E2≈0. -> Distillation transfers VERBOSITY but not
+cue-FAITHFULNESS; teacher's 0.172 faithfulness not inherited; teacher strength
+irrelevant. A distilled model looks more monitorable (verbose) without being more
+faithful. Core study COMPLETE (reproduction + extension).
+
+**Next (optional):** cond-4b strong-teacher ref (R1-32B, OpenRouter) to round out
+the teacher-strength reference axis; otherwise write the 5-page paper.
+**Blockers:** OpenRouter balance for the optional cond-4b.
+
 ## 2026-05-25 (pm) — ★ W2SR REPRODUCED (in-family native-Qwen teacher)
 **Last:** Resolved the reproduction. Root cause of all prior flat/collapse runs
 = teacher↔student STYLE mismatch (R1-distill's foreign over-thinking CoT,
