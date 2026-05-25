@@ -221,7 +221,7 @@ def gen_traces(
 
 
 @app.function(
-    image=image, gpu="A100-80GB:2", volumes={VOL_MOUNT: volume},
+    image=image, gpu="A100-80GB:4", volumes={VOL_MOUNT: volume},
     secrets=[hf_secret], timeout=6 * 60 * 60,
 )
 def gen_traces_big(
@@ -232,11 +232,13 @@ def gen_traces_big(
     teacher_max_model_len: int = 8192,
 ) -> dict:
     """Stage 1 for a big teacher (e.g. Qwen2.5-Math-72B-Instruct) sharded across
-    2×A100-80GB (tensor_parallel=2). Used for the strong end of the teacher axis."""
+    4×A100-80GB (tensor_parallel=4). 72B bf16 (~144GB) nearly fills 2×80GB,
+    leaving no KV-cache headroom (engine init failed); 4×80GB gives ~150GB free
+    for KV. Used for the strong end of the teacher axis."""
     return _gen_traces_impl(
         teacher_model, out_dir, n_problems, n_per_problem, keep_incorrect,
         temperature, top_p, max_tokens, teacher_system, levels,
-        teacher_max_model_len, tensor_parallel=2)
+        teacher_max_model_len, tensor_parallel=4)
 
 
 @app.function(
