@@ -211,16 +211,21 @@ def gen_traces(
     volumes={VOL_MOUNT: volume},
     timeout=16 * 60 * 60,   # keep runs < 16h (spec 15)
 )
-def train(base_student: str, train_json: str, out_dir: str) -> str:
+def train(base_student: str, train_json: str, out_dir: str, max_seq_len: int = 0) -> str:
     """Stage 2 on GPU: LoRA SFT the student on a trace dataset (W2SR or control).
     `train_json` and `out_dir` are paths ON the volume (e.g. /vol/traces/w2sr/
     train.json, /vol/checkpoints/w2sr). Returns the checkpoint path.
 
     Get traces onto the volume first (run stage 1 locally against the weak-teacher
     endpoint, then `modal volume put w2sr-vol <local> /vol/traces/<cond>`)."""
+    import dataclasses
     from pathlib import Path
+    from src import config
     from src.train_student import train_student_lora
-    ckpt = train_student_lora(base_student, Path(train_json), Path(out_dir))
+    cfg = config.SFTConfig()
+    if max_seq_len:  # e.g. 4096 for Qwen2.5-Math-7B (4k context)
+        cfg = dataclasses.replace(cfg, max_seq_len=max_seq_len)
+    ckpt = train_student_lora(base_student, Path(train_json), Path(out_dir), cfg)
     volume.commit()  # persist checkpoint to the volume
     return ckpt
 
@@ -230,7 +235,7 @@ def train(base_student: str, train_json: str, out_dir: str) -> str:
     secrets=[hf_secret], timeout=6 * 60 * 60,
 )
 def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bool = False,
-         rep_penalty: float = 1.0, max_tokens: int = 4096) -> dict:
+         rep_penalty: float = 1.0, max_tokens: int = 4096, max_model_len: int = 8192) -> dict:
     """Run the spec 9 gate = the W2SR reproduction check. One vLLM load serves
     BOTH the untrained baseline (no adapter) and the trained student (LoRA
     adapter) on the SAME held-out MATH, so we get the capability GAIN directly.
@@ -258,7 +263,7 @@ def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bo
 
     cfg = config.SFTConfig()
     llm = LLM(model=base_student, enable_lora=True, max_lora_rank=cfg.lora_rank,
-              max_model_len=8192, gpu_memory_utilization=0.9)
+              max_model_len=max_model_len, gpu_memory_utilization=0.9)
     base_out = llm.generate(base_prompts, sp)                              # untrained, unelicited
     lora = LoRARequest("w2sr", 1, adapter_dir)
     trained_out = llm.generate(trained_prompts, sp, lora_request=lora)     # trained student (CoT)
