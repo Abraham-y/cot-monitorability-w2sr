@@ -10,6 +10,9 @@ configurations:
   model: openrouter/deepseek/deepseek-r1-distill-qwen-32b   # strong teacher
   model_path: null
   model_configs:
+    "openrouter/deepseek/deepseek-r1-distill-qwen-32b":  # generator: full CoT
+      max_tokens: 30000          # R1-32B over-thinks; match cond-4a's clean 30k
+      # (a low cap truncates the reasoning that faithfulness is measured on).
     "judge:anthropic/claude-sonnet-4-6":
       max_tokens: 4096
   factor_scorer_enabled: true
