@@ -140,6 +140,7 @@ def _gen_traces_impl(
     temperature: float, top_p: float, max_tokens: int,
     teacher_system: str, levels: str,
     teacher_max_model_len: int, tensor_parallel: int,
+    enforce_eager: bool = False,
 ) -> dict:
     """Shared Stage-1 body (offline batched vLLM, like Yuan's generate.py): load
     MATH (levels 3-5), sample CoT from `teacher_model`, grade with the W2SR
@@ -168,9 +169,11 @@ def _gen_traces_impl(
     ]
     # teacher_max_model_len: lower to 4096 for 4k-context teachers
     # (e.g. Qwen2.5-Math-* series; 8192 exceeds their max_position_embeddings).
+    # enforce_eager: skip cudagraph capture — slower but robust on multi-GPU TP
+    # (the 72B 4-GPU run died mid-generation in the cudagraph shm broadcast).
     llm = LLM(model=teacher_model, max_model_len=teacher_max_model_len,
               gpu_memory_utilization=0.9, trust_remote_code=True,
-              tensor_parallel_size=tensor_parallel)
+              tensor_parallel_size=tensor_parallel, enforce_eager=enforce_eager)
     sp = SamplingParams(temperature=temperature, top_p=top_p,
                         max_tokens=max_tokens, n=n_per_problem,
                         repetition_penalty=1.1)   # suppress 1.5B repetition spirals
@@ -238,7 +241,7 @@ def gen_traces_big(
     return _gen_traces_impl(
         teacher_model, out_dir, n_problems, n_per_problem, keep_incorrect,
         temperature, top_p, max_tokens, teacher_system, levels,
-        teacher_max_model_len, tensor_parallel=4)
+        teacher_max_model_len, tensor_parallel=4, enforce_eager=True)
 
 
 @app.function(
