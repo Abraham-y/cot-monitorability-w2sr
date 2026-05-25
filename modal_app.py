@@ -146,6 +146,7 @@ def gen_traces(
     n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
     temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
     teacher_system: str = "", levels: str = "3,4,5",
+    teacher_max_model_len: int = 8192,
 ) -> dict:
     """Stage 1 on Modal (offline batched vLLM, like Yuan's generate.py): load
     MATH (levels 3-5), sample CoT from `teacher_model`, grade with the W2SR
@@ -172,8 +173,10 @@ def gen_traces(
         tok.apply_chat_template(_msgs(p["problem"]), tokenize=False, add_generation_prompt=True)
         for p in train
     ]
-    llm = LLM(model=teacher_model, max_model_len=8192, gpu_memory_utilization=0.9,
-              trust_remote_code=True)
+    # teacher_max_model_len: lower to 4096 for 4k-context teachers
+    # (e.g. Qwen2.5-Math-* series; 8192 exceeds their max_position_embeddings).
+    llm = LLM(model=teacher_model, max_model_len=teacher_max_model_len,
+              gpu_memory_utilization=0.9, trust_remote_code=True)
     sp = SamplingParams(temperature=temperature, top_p=top_p,
                         max_tokens=max_tokens, n=n_per_problem,
                         repetition_penalty=1.1)   # suppress 1.5B repetition spirals

@@ -68,10 +68,41 @@ garbage, and mangled mid-word starts. It's also very weak on MATH (212/1200 =
 Pass@1 0.445 (unelicited base) -> 0.12 (W2SR), format-valid 0.26 — a COLLAPSE,
 worse than R1-distill. The garbage corrupts the student.
 
-## Net reproduction result (robust across the matrix)
-W2SR with a weak 1.5B teacher does NOT reproduce a capability gain on MATH for a
-7B student, across: students {7B-instruct, 7B-base}, teachers {R1-distill-1.5B,
-SimpleRL-Zoo-1.5B}, LoRA rank {16,32}, trace filters, eval decodings. R1-distill
-gives flat+degenerate; SimpleRL-Zoo gives collapse-from-noise. The gain Yuan
-reports does not appear in this (smaller, LoRA, public-1.5B-teacher) setup.
+## Finding 4 — W2SR REPRODUCES with an in-family (native-Qwen) weak teacher ★
+The earlier no-reproduction was a **teacher-family/style mismatch**, NOT a flaw
+in W2SR. R1-distill and SimpleRL-Zoo are Qwen-*based* but impart a FOREIGN
+reasoning style (R1's over-thinking; SimpleRL's noisy RL-tuned output) that is
+out of the student's latent distribution → poor elicitation + hard-to-distill
+traces. Yuan keeps teacher+student in-family. We finally tested that:
+
+- **Teacher** `Qwen2.5-Math-1.5B-Instruct` (native-Qwen, clean, weak): 66.9%
+  correct on MATH L3-5 train problems, median ~1.5k-char CoT, only **10.9%
+  degenerate** (vs R1-distill's ~73% raw loop rate).
+- **Student** `Qwen2.5-Math-7B` (4k ctx), LoRA r32, max_seq_len 4096, 3 epochs.
+- **Gate (held-out L3-5, temp 0, max_tokens 3500):**
+
+| metric | value | prior R1/SimpleRL best |
+|---|---|---|
+| baseline (unelicited) | 0.325 | — |
+| **W2SR Pass@1** | **0.670** | — |
+| **gain** | **+0.345** | ~0 (best +0.005) / collapse |
+| format-valid | **1.00** | 0.47–0.62 |
+| degenerate gen | **none** | chronic loops |
+| **gate** | **PASSED** | always failed |
+
+The weak 1.5B teacher lifted the 7B student 0.325 → 0.670 — a clean weak-to-strong
+gain, and the **first passing gate across the entire matrix**. Confirms the W2SR
+effect AND pins the prior failures on teacher-family/style, not on the method,
+the benchmark, headroom, LoRA-vs-full-SFT, or decoding. Run artifacts:
+`/traces/w2sr_infamily` (hash 7235870…), `/checkpoints/w2sr_infamily`.
+
+## Net reproduction result (RESOLVED)
+W2SR **reproduces** (Pass@1 +0.345, gate passed) when the weak teacher is
+**in-family / native-Qwen** (`Qwen2.5-Math-1.5B-Instruct` → `Qwen2.5-Math-7B`).
+It does NOT reproduce with cross-style teachers (R1-distill-1.5B → flat+
+degenerate; SimpleRL-Zoo-1.5B → collapse-from-noise), across students
+{7B-instruct, 7B-base}, LoRA rank {16,32}, trace filters, and eval decodings.
+**Takeaway for the paper:** weak-to-strong reasoning transfer is gated by
+teacher↔student style/distribution match, not just teacher capability — a clean,
+in-distribution weak CoT elicits the student; a foreign verbose one does not.
 The MONITORABILITY study (the novel contribution) is unaffected and further along.

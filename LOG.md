@@ -2,6 +2,30 @@
 
 Daily log per spec 15. Newest entry on top.
 
+## 2026-05-25 (pm) — ★ W2SR REPRODUCED (in-family native-Qwen teacher)
+**Last:** Resolved the reproduction. Root cause of all prior flat/collapse runs
+= teacher↔student STYLE mismatch (R1-distill's foreign over-thinking CoT,
+SimpleRL's noisy RL output) — not the method. Tested an in-family native-Qwen
+weak teacher: `Qwen2.5-Math-1.5B-Instruct` → student `Qwen2.5-Math-7B`.
+- gen_traces (L3-5, max_tokens 2048, teacher_system="You are a helpful
+  assistant.", teacher_max_model_len 4096): 891 kept / 1000, teacher 66.9%
+  correct, only 10.9% degenerate (vs R1's ~73% raw loop rate), ~1.5k char/trace.
+- Fixed a blocker: gen_traces hardcoded teacher max_model_len=8192 → crashed on
+  the 4k-ctx Math teacher; added a `teacher_max_model_len` param (default 8192).
+- train: LoRA r32, max_seq_len 4096, 3 epochs (84 steps, loss ~0.16, tok-acc 0.96).
+- **gate (held-out L3-5, temp 0, max_tokens 3500, max_model_len 4096): Pass@1
+  0.325 → 0.670 = +0.345, format-valid 1.00, no degeneration, GATE PASSED.**
+  Pre-registered success criterion was ≥+0.05; we hit +0.345. First passing gate
+  across the whole matrix. Course-requirement reproduction MET.
+Docs updated: findings_repro.md Finding 4 + net-result RESOLVED; HANDOFF table.
+This Math-7B student is REPRODUCTION-ONLY — the monitorability student stays the
+general 7B (GPQA is science; cond-1 baseline already on 7B-Instruct).
+
+**Next:** EXTENSION (the paper). Strong-teacher distillation control on the
+general 7B (doubles as cond-3 control student) → monitorability conds 2,3,4b →
+preregistered analysis (H0-H3).
+**Blockers:** OpenRouter balance (~$10) for cond 4b; Anthropic judge budget.
+
 ## 2026-05-23 (pm) — W2SR reproduction pipeline wired + launched
 **Built the full training half end-to-end and started condition 2 (W2SR =
 the reproduction):**

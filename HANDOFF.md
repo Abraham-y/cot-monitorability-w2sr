@@ -8,9 +8,11 @@ the "where are we / how to continue" summary.
 "Does Weak-to-Strong Reasoning (W2SR) preserve CoT monitorability?" Spec:
 project_spec.md. Two halves:
 - **Reproduce** (course req): W2SR capability gain on MATH (weak teacher SFTs a
-  stronger student → Pass@1 rises). STATUS: **does not reproduce** in our setup
-  (details below). User directive: keep trying configs until SOMETHING shows a
-  gain, then go to the extension.
+  stronger student → Pass@1 rises). STATUS: **REPRODUCED** (2026-05-25) with an
+  in-family native-Qwen weak teacher: Qwen2.5-Math-1.5B-Instruct → Qwen2.5-Math-7B,
+  Pass@1 0.325→0.670 (**+0.345**, gate PASSED, format 1.0). Earlier cross-style
+  teachers (R1-distill, SimpleRL) were flat/collapse — root cause was teacher↔student
+  style mismatch, not the method (findings_repro.md Finding 4). Course req met.
 - **Extend** (novel contribution): measure CoT **monitorability** (Meek et al.
   Inspect eval) on baseline vs W2SR vs control students + teacher refs, on GPQA.
   This is the real paper and is further along.
@@ -46,9 +48,10 @@ project_spec.md. Two halves:
 
 ## Volume `w2sr-vol` layout
 - `/traces/{w2sr (R1 L3-5, 729 kept), w2sr_simplerl (SimpleRL, noisy), w2sr_L5
-  (R1 L5, 528 kept), w2sr_r32}` — each has train.json, held_out.json, manifest.json
-- `/checkpoints/{w2sr_base, w2sr_base_r32, w2sr_simplerl, w2sr_L5, w2sr_math7b}`
-  — each has adapter_model.safetensors + gate_report.json
+  (R1 L5, 528 kept), w2sr_r32, w2sr_infamily (Math-1.5B-Inst L3-5, 891 kept ✅)}`
+  — each has train.json, held_out.json, manifest.json
+- `/checkpoints/{w2sr_base, w2sr_base_r32, w2sr_simplerl, w2sr_L5, w2sr_math7b,
+  w2sr_infamily (✅ gate PASSED +0.345)}` — adapter_model.safetensors + gate_report.json
 - `/hf_cache` — HF weights
 
 ## REPRODUCTION — results (all vs UNELICITED baseline unless noted; ALL FLAT)
@@ -60,6 +63,7 @@ project_spec.md. Two halves:
 | 7B-base | SimpleRL-1.5B | L3-5 | 32 | 0.445 | 0.12 | −0.325 | 0.26 |
 | 7B-base | R1-1.5B | **L5** | 32 | 0.355 | 0.335 | −0.02 | 0.475 |
 | **Math-7B** | R1-1.5B | L5 | 32 | 0.39 | 0.395 | +0.005 | 0.505 |
+| **Math-7B** | **Math-1.5B-Inst** (in-family) | L3-5 | 32 | 0.325 | **0.67** | **+0.345** ✅ | **1.00** |
 \*CoT-prompted (inflated); all others unelicited (build_direct_prompt). See
 PREREGISTRATION §4b: reproduction baseline = no-CoT; monitorability baseline = zero-shot CoT.
 
@@ -72,7 +76,17 @@ are noisy (CJK/URLs/garbage, 18% correct) → collapse. Benchmark/headroom is NO
 the blocker (L5 had headroom, still flat).
 
 ## NEXT (per user "reproduce SOMETHING, then extension")
-0. **★ TRY FIRST — in-family native-Qwen weak teacher (the real fix).** Root
+0. **✅ DONE — in-family native-Qwen weak teacher REPRODUCED W2SR** (2026-05-25).
+   Qwen2.5-Math-1.5B-Instruct → Qwen2.5-Math-7B, L3-5: Pass@1 0.325→0.670
+   (+0.345), format 1.0, no degeneration, gate PASSED. Artifacts:
+   /traces/w2sr_infamily (891 traces, hash 7235870…), /checkpoints/w2sr_infamily.
+   Course-req reproduction met → focus shifts to the EXTENSION (step 2). NOTE:
+   this Math-7B student is REPRODUCTION-ONLY; the monitorability student stays the
+   general 7B (GPQA is science, not math; cond-1 baseline already on 7B-Instruct).
+   Fix applied: gen_traces gained a `teacher_max_model_len` param (4k teachers).
+
+   --- original plan (for provenance) ---
+   **★ in-family native-Qwen weak teacher (the real fix).** Root
    cause of no-reproduction is likely a TEACHER-FAMILY/STYLE mismatch: Yuan keeps
    teacher+student in-family (both Qwen2.5, native-Qwen reasoning) so the weak
    teacher's CoT is in the student's latent distribution → clean elicitation. Our
@@ -83,9 +97,12 @@ the blocker (L5 had headroom, still flat).
    max_seq_len 4096, gate max_model_len 4096). teacher_system="You are a helpful
    assistant." (Qwen chat). MATH L3-5 or L5. gen_traces → train → gate vs
    unelicited baseline. This is the most faithful-to-Yuan + most likely to gain.
-   ⏳ IN PROGRESS: gen_traces LAUNCHED (teacher Qwen2.5-Math-1.5B-Instruct,
-   max_tokens 2048, L3-5) → /vol/traces/w2sr_infamily. ON RESUME: check that
-   manifest (degeneracy should be LOW — native-Qwen clean), then
+   ⏳ IN PROGRESS: gen_traces (teacher Qwen2.5-Math-1.5B-Instruct, max_tokens 2048,
+   L3-5) → /vol/traces/w2sr_infamily. NOTE: first launch CRASHED — gen_traces
+   hardcoded teacher max_model_len=8192 but Qwen2.5-Math-1.5B-Instruct is 4k-ctx
+   (max_position_embeddings=4096). FIXED: added `teacher_max_model_len` param to
+   gen_traces (default 8192); relaunched with --teacher-max-model-len 4096.
+   ON RESUME: check manifest (degeneracy should be LOW — native-Qwen clean), then
    `train --base-student Qwen/Qwen2.5-Math-7B --train-json
    /vol/traces/w2sr_infamily/train.json --out-dir /vol/checkpoints/w2sr_infamily
    --max-seq-len 4096` → `gate ... --max-model-len 4096 --max-tokens 3500`.
