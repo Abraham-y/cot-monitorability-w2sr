@@ -72,6 +72,17 @@ are noisy (CJK/URLs/garbage, 18% correct) → collapse. Benchmark/headroom is NO
 the blocker (L5 had headroom, still flat).
 
 ## NEXT (per user "reproduce SOMETHING, then extension")
+0. **★ TRY FIRST — in-family native-Qwen weak teacher (the real fix).** Root
+   cause of no-reproduction is likely a TEACHER-FAMILY/STYLE mismatch: Yuan keeps
+   teacher+student in-family (both Qwen2.5, native-Qwen reasoning) so the weak
+   teacher's CoT is in the student's latent distribution → clean elicitation. Our
+   R1-Distill teacher is Qwen-based but imparts a FOREIGN DeepSeek-R1 over-thinking
+   style → poor elicitation + hard-to-distill long traces. We never tested a clean
+   in-family teacher. DO: teacher `Qwen2.5-Math-1.5B-Instruct` (native-Qwen, clean,
+   weak) → student `Qwen2.5-Math-7B` (4k ctx → gen max_tokens≈2048, train
+   max_seq_len 4096, gate max_model_len 4096). teacher_system="You are a helpful
+   assistant." (Qwen chat). MATH L3-5 or L5. gen_traces → train → gate vs
+   unelicited baseline. This is the most faithful-to-Yuan + most likely to gain.
 1. **Strong-teacher distillation control** (HIGH-confidence gain + needed by the
    extension). Source `open-r1/OpenR1-Math-220k` (fields: problem, generations
    [R1 traces], correctness_math_verify, answer). Build train.json from CORRECT,
