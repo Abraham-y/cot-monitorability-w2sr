@@ -96,6 +96,39 @@ effect AND pins the prior failures on teacher-family/style, not on the method,
 the benchmark, headroom, LoRA-vs-full-SFT, or decoding. Run artifacts:
 `/traces/w2sr_infamily` (hash 7235870…), `/checkpoints/w2sr_infamily`.
 
+## Finding 5 — The gain is GENUINE on the BASE model, an ARTIFACT on Instruct ★★
+A reviewer flag: a +5pt gate-pass on an *already-CoT-capable* student can be
+"marginal rearrangement" (the model already had the ability; suppressing CoT just
+made the baseline look low) rather than genuine weak-supervision elicitation. We
+added a **headroom probe** to the gate: score the UNTRAINED base with a zero-shot
+CoT prompt (no LoRA) = the prompting-only ceiling. Then `w2sr_beyond_cot_prompt`
+= W2SR − that ceiling isolates what TRAINING added beyond merely prompting.
+
+| student | unelicited | untrained+0-shot-CoT | W2SR | **W2SR beyond CoT-prompt** |
+|---|---|---|---|---|
+| Qwen2.5-**Math-7B (base)** | 0.325 | **0.24** | 0.645 | **+0.405 — GENUINE** |
+| Qwen2.5-**7B-Instruct** | 0.23 | **0.63** | 0.63 | **0.00 — prompt-induced** |
+
+- **Base model:** zero-shot CoT prompting does nothing (0.325→0.24, slightly
+  *hurts* — the base can't use CoT unprompted). W2SR training adds **+0.405** that
+  prompting cannot extract → real elicitation of latent capability. The
+  reproduction (Finding 4) is confound-free.
+- **Instruct model:** already reaches 0.63 by prompting alone; W2SR adds **0.0**
+  beyond that. Its apparent +0.40 "gain" vs the unelicited baseline is purely the
+  CoT-elicitation confound (PREREG §4b), NOT weak supervision.
+
+**Methodological takeaway (paper):** W2SR capability reproduction requires a base
+(non-CoT-eliciting) student; on an instruct student the gain is an artifact of
+the unelicited baseline. This sharpens *when* W2SR reproduces and is itself a
+contribution. **Consequence for the extension:** the monitorability student is the
+locked 7B-Instruct (GPQA-capable, matches cond-1), where W2SR/control SFT shifts
+CoT *style* at ~constant capability (the 0.63 CoT ceiling). So the faithfulness
+comparison is **capability-controlled** — differences can't be a capability
+confound. We adopt the reviewer's pre-authorized framing: "monitorability changes
+*without* capability gain." (Both gates also showed a borderline single-response
+`degenerate` flag at temp 0; format-valid 0.995 — vLLM greedy run-to-run noise,
+not a regression; the first Math-7B gate was 1.00/clean.)
+
 ## Net reproduction result (RESOLVED)
 W2SR **reproduces** (Pass@1 +0.345, gate passed) when the weak teacher is
 **in-family / native-Qwen** (`Qwen2.5-Math-1.5B-Instruct` → `Qwen2.5-Math-7B`).

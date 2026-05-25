@@ -26,6 +26,32 @@ general 7B (doubles as cond-3 control student) → monitorability conds 2,3,4b �
 preregistered analysis (H0-H3).
 **Blockers:** OpenRouter balance (~$10) for cond 4b; Anthropic judge budget.
 
+## 2026-05-25 (pm-2) — HEADROOM PROBE: gain genuine on base, artifact on Instruct
+**Last:** Per reviewer guidance (gate-pass must reflect real elicitation, not
+rearrangement on an already-strong student), added a `headroom_probe` to the gate
+= score UNTRAINED base with zero-shot CoT (the prompting-only ceiling), then
+`w2sr_beyond_cot_prompt` = W2SR − that ceiling. Built the cond-2 monitorability
+W2SR student in-family on the LOCKED base (Qwen2.5-Math-1.5B-Instruct →
+Qwen2.5-7B-Instruct, reusing /traces/w2sr_infamily) and gated both:
+- **Math-7B (base):** unelicited 0.325, 0-shot-CoT 0.24, W2SR 0.645 →
+  **+0.405 beyond prompting = GENUINE** elicitation (base can't CoT unprompted).
+- **7B-Instruct:** unelicited 0.23, 0-shot-CoT 0.63, W2SR 0.63 → **+0.0 beyond
+  prompting = ARTIFACT** (already CoT-capable; the +0.40 vs unelicited is the
+  PREREG §4b elicitation confound, not weak supervision).
+findings_repro.md Finding 5. Reproduction (course req) stands GENUINE on the base.
+For the extension: monitorability student = locked 7B-Instruct, run
+CAPABILITY-CONTROLLED ("monitorability changes without capability gain",
+reviewer-authorized) — faithfulness diffs aren't a capability confound.
+cond-2 = /checkpoints/w2sr_infamily_inst.
+- cond-3 control = strong IN-FAMILY teacher (Qwen2.5-Math-7B-Instruct, same MATH
+  L3-5 problems) → SFT 7B-Instruct, to keep E2 (W2SR−control) confound-free
+  (a foreign R1-32B control would reintroduce the Finding-4/5 style confound).
+  gen_traces LAUNCHED → /vol/traces/w2sr_infamily_strong.
+
+**Next:** train+gate control → serve cond-2/cond-3 → monitorability eval (GPQA,
+5 cues) → cond-4b strong-teacher ref (OpenRouter) → preregistered analysis.
+**Blockers:** OpenRouter balance (~$10) for cond-4b; Anthropic judge budget.
+
 ## 2026-05-23 (pm) — W2SR reproduction pipeline wired + launched
 **Built the full training half end-to-end and started condition 2 (W2SR =
 the reproduction):**

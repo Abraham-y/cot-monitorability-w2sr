@@ -106,34 +106,39 @@ the blocker (L5 had headroom, still flat).
    `train --base-student Qwen/Qwen2.5-Math-7B --train-json
    /vol/traces/w2sr_infamily/train.json --out-dir /vol/checkpoints/w2sr_infamily
    --max-seq-len 4096` → `gate ... --max-model-len 4096 --max-tokens 3500`.
-1. **Strong-teacher distillation control** (HIGH-confidence gain + needed by the
-   extension). Source `open-r1/OpenR1-Math-220k` (fields: problem, generations
-   [R1 traces], correctness_math_verify, answer). Build train.json from CORRECT,
-   length-filtered traces → SFT Qwen2.5-7B (general; 32k ctx ok) → gate vs the
-   unelicited baseline. Standard distillation from strong R1 reliably lifts the
-   student → "reproduce something". Reuse gen_traces format helpers / write a
-   small OpenR1 loader; train via modal_app::train; gate via modal_app::gate
-   (max_tokens 4096, max_model_len 8192).
-   - If gain → reproduced (distillation). Proceed to extension.
-   - If still flat → likely LoRA-vs-full-SFT is the limiter; try full SFT
-     (finetuning_type full) as a last reproduction lever.
+0b. **★★ HEADROOM FINDING (findings_repro.md Finding 5) — drives the extension.**
+   Added a headroom probe to the gate (zero-shot-CoT untrained baseline). Result:
+   the W2SR gain is GENUINE on the BASE model (Math-7B: cot-prompt 0.24 → W2SR
+   0.645, +0.405 beyond prompting) but an ARTIFACT on the Instruct model
+   (7B-Instruct: cot-prompt 0.63 = W2SR 0.63, +0.0 beyond prompting). So:
+   - Reproduction (course req) = GENUINE, on the base model. DONE.
+   - Monitorability student = locked 7B-Instruct (GPQA-capable, matches cond-1),
+     run as a CAPABILITY-CONTROLLED faithfulness study ("monitorability changes
+     without capability gain", reviewer-authorized). cond-2 W2SR student already
+     trained: /vol/checkpoints/w2sr_infamily_inst (7B-Instruct on Math-1.5B-Inst).
+1. **Strong-teacher distillation control (cond-3)** — IN-FAMILY to keep E2
+   (W2SR−control) confound-free: strong teacher `Qwen2.5-Math-7B-Instruct` on the
+   SAME MATH L3-5 problems → SFT `Qwen2.5-7B-Instruct`. (NOT OpenR1/R1-32B: a
+   foreign-family control would reintroduce the very style confound Finding 4/5
+   identified.) ⏳ gen_traces → /vol/traces/w2sr_infamily_strong LAUNCHED. Then
+   train --base-student Qwen/Qwen2.5-7B-Instruct --out-dir
+   /vol/checkpoints/w2sr_control_inst → gate --headroom-probe. Larger in-family
+   strong teacher (72B) = exploratory dose-response (spec 5.3).
 2. **EXTENSION (the actual paper):** monitorability eval (configs/*.yaml drive
    external/monitorability-eval via batch_eval.py; see scripts/run_*_teacher.sh
    for the 6-pass pattern: baseline pass + 5 adaptive-cue passes + extract_metrics).
    - Condition 1 (baseline 7B-Instruct student): DONE — results/baseline_7b_metrics/
      (acc 0.369, verbosity 0.476, faithfulness 0–4.5%/cue).
    - Condition 4a (weak teacher R1-1.5B): DONE — results/weak_teacher_metrics/
-     (verbosity 0.640, faith 0.217/0.015/0.061/0.136/0.0). NOTE: a 30k-token
-     re-run was launched for clean (un-truncated) numbers — CHECK if it finished
-     (6 .eval logs at 198 each in logs/weak_teacher); if not, restart it.
+     (verbosity 0.640, faith 0.217/0.015/0.061/0.136/0.0). Existing result valid;
+     the 30k re-run never persisted (no logs/ dir) — optional cosmetic redo only.
    - Condition 4b (strong 32B teacher, OpenRouter): INCOMPLETE (was ~40/198
      baseline). Re-run scripts/run_strong_teacher.sh (needs OpenRouter $).
    - Conditions 2 & 3 (W2SR + control student MONITORABILITY): serve each trained
-     checkpoint (Modal vLLM endpoint or a served LoRA) and run the monitorability
-     eval. NB: capability gate failed for W2SR, so per spec §9 a monitorability
-     CLAIM for the W2SR student is caveated — but the descriptive comparison
-     (baseline vs W2SR vs control faithfulness) is still the study; report the
-     gate status alongside (spec 16 schema).
+     7B-Instruct checkpoint (Modal vLLM endpoint or served LoRA) and run the eval.
+     Both are capability-controlled (~0.63 CoT ceiling, headroom-verified); report
+     the headroom/gate status alongside (spec 16 schema). cond-2 = w2sr_infamily_inst,
+     cond-3 = w2sr_control_inst.
    - Analysis: src/analysis.py (load_cases → bootstrap_paired_diff → mcnemar →
      adjudicate per PREREGISTRATION H0-H3). Validated: weak_teacher−baseline
      acknowledgment Δ=+0.179 [95% CI .143,.218], McNemar p~6e-20.
