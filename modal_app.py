@@ -108,28 +108,32 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="A100",  # 40GB: comfortable for the 7B student. (L4 also fits 7B but
-    # is slower; pilot 1.5B used L4. Drop back to L4 for cheap small-model runs.)
+    gpu="A100-80GB:2",  # 2×80GB for the strong 32B teacher (cond-4b, TP=2; 32B
+    # bf16 ~64GB + 32k-ctx KV). 7B students/1.5B fit on 1×A100 — drop gpu back
+    # to "A100" + tensor_parallel=1 for those (cheaper).
     volumes={VOL_MOUNT: volume},
-    # No secret needed: Qwen Instruct + our checkpoints are ungated. Add
-    # secrets=[hf_secret] here only if serving a gated model later.
+    secrets=[hf_secret],  # R1-distill is ungated, but keeps HF happy on download
     timeout=60 * MINUTES,
     scaledown_window=10 * MINUTES,  # spin down after 10 min idle (cost control)
 )
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
     # Deployed web endpoint serves whatever this default is (flip + redeploy per
-    # model). Currently: weak teacher (R1-distill reasoning model) for condition
-    # 4 — needs a big context for long <think> CoT (32k). Flip back to
-    # "Qwen/Qwen2.5-7B-Instruct"/8192 for the student, or a checkpoint path.
-    model: str = modal.parameter(default="/vol/merged/w2sr_control_inst")
-    max_model_len: int = modal.parameter(default=8192)
+    # model). Currently: strong 32B teacher (R1-distill reasoning model) for
+    # condition 4b — long <think> CoT (32k ctx), sharded across 2 GPUs (TP=2).
+    # Flip to a merged student path + max_model_len 8192 + tensor_parallel 1
+    # (and gpu="A100") for the student conditions.
+    model: str = modal.parameter(default="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B")
+    max_model_len: int = modal.parameter(default=32768)
+    tensor_parallel: int = modal.parameter(default=2)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
     def serve(self):
         import subprocess
+        extra = (["--tensor-parallel-size", str(self.tensor_parallel)]
+                 if self.tensor_parallel > 1 else None)
         cmd = serving.vllm_serve_command(
-            self.model, max_model_len=self.max_model_len,
+            self.model, max_model_len=self.max_model_len, extra=extra,
         )
         subprocess.Popen(cmd)
 
