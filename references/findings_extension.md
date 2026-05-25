@@ -14,6 +14,13 @@ gitignored (large .eval logs); regenerate with extract_metrics + src/analysis.py
   (Qwen2.5-Math-72B-Instruct), SAME MATH L3-5 problems → clean teacher-strength
   axis (weak 1.5B vs strong 72B, 48× scale; both native-Qwen, same recipe).
 - **cond-4a weak teacher ref:** DeepSeek-R1-Distill-Qwen-1.5B (its own GPQA CoT).
+- **cond-4b strong teacher ref (R1-32B):** NOT RUN. Attempted via OpenRouter
+  (impractically slow ~10 samples/20min, truncated non-reasoning output) and via
+  Modal-served (2×A100, enforce-eager + 32-way concurrency) — but the full
+  R1-32B reasoning eval (6 passes × 198 Qs × up to 30k-token CoT) is ~20 GPU-hr,
+  beyond the <16h budget for an OPTIONAL reference arm. cond-4a anchors the
+  teacher-faithfulness scale; the core E1/E2 student comparison does not need 4b.
+  Future work: a subset (≤50 Q) or a smaller/length-capped strong teacher.
 
 NB capability is CONTROLLED, not gained: per the headroom probe (findings_repro
 Finding 5) the in-family SFT lands the Instruct student at ~its zero-shot-CoT
