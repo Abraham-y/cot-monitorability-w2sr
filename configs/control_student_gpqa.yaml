@@ -1,0 +1,33 @@
+# Condition 3 (CONTROL / strong-teacher STUDENT) monitorability eval on GPQA.
+# Student = Qwen2.5-7B-Instruct + strong IN-FAMILY teacher LoRA (Qwen2.5-Math-7B-
+# Instruct distillation on the SAME MATH L3-5 problems as cond-2), merged and
+# served via Modal vLLM. In-family strong teacher keeps E2 (W2SR-control)
+# confound-free (same family/problems/recipe; only teacher strength differs).
+# Set OPENAI_BASE_URL to the deployed endpoint, OPENAI_API_KEY=EMPTY.
+configurations:
+- config_id: '001'
+  dataset: gpqa_diamond
+  dataset_group: gpqa
+  model: openai/w2sr_control_inst              # Modal-served merged control student
+  model_path: null
+  model_configs:
+    "judge:anthropic/claude-sonnet-4-6":
+      max_tokens: 4096
+  factor_scorer_enabled: true
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false

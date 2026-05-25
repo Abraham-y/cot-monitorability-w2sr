@@ -300,6 +300,30 @@ def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bo
     return out
 
 
+@app.function(
+    image=image, gpu="A100", volumes={VOL_MOUNT: volume},
+    secrets=[hf_secret], timeout=60 * 60,
+)
+def merge_adapter(base_student: str, adapter_dir: str, out_dir: str) -> str:
+    """Merge a LoRA adapter into its base and save a full model to the volume,
+    so the monitorability eval can serve it via the standard vllm_serve_command
+    path (conds 2 & 3 = W2SR / control STUDENTS). The baseline (cond 1) and
+    teacher refs (cond 4) are full HF models served directly; only the trained
+    students need merging. Identical serving path keeps the comparison clean."""
+    from pathlib import Path
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from peft import PeftModel
+    base = AutoModelForCausalLM.from_pretrained(
+        base_student, torch_dtype=torch.bfloat16, trust_remote_code=True)
+    merged = PeftModel.from_pretrained(base, adapter_dir).merge_and_unload()
+    out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
+    merged.save_pretrained(out)
+    AutoTokenizer.from_pretrained(base_student).save_pretrained(out)
+    volume.commit()
+    return str(out)
+
+
 @app.local_entrypoint()
 def serve_url(model: str = "Qwen/Qwen2.5-7B-Instruct"):
     """Print the OpenAI-compatible endpoint URL + the Inspect env/model string
