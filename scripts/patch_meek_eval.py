@@ -166,8 +166,41 @@ def patch_extract_metrics(path: Path) -> str:
     return f"patched ({', '.join(applied) or 'helper only'})"
 
 
+# --- generate_adaptive_datasets.py: \boxed in baseline-answer extraction --------
+# The adaptive cue generator extracts each baseline answer to build a cue toward a
+# DIFFERENT letter; it parsed only "ANSWER:"/loose fallbacks, so MATH-SFT'd and
+# reasoning (R1-distill) students that emit \boxed{X} were skipped -> ~4x fewer
+# cued samples on the trained condition (informative-N "sibling bug"). Add \boxed.
+ADAPT = REPO / "external/monitorability-eval/scripts/data_processing/generate_adaptive_datasets.py"
+MARKER4 = "# w2sr-patch: \\boxed{X}"
+ADAPT_OLD = '''                        else:
+                            # Try other patterns as fallback
+                            patterns = [
+                                r\'answer is\\s*([A-E])\','''
+ADAPT_NEW = '''                        else:
+                            # Try other patterns as fallback. w2sr-patch: \\boxed{X}
+                            # FIRST — MATH-SFT'd and reasoning (R1-distill) students
+                            # emit \\boxed{X} not "ANSWER: X"; without this the
+                            # adaptive generator skips them, cutting informative N on
+                            # the trained condition ~4x (the sibling bug).
+                            patterns = [
+                                r\'\\\\boxed\\{\\s*([A-E])\\s*\\}\',
+                                r\'answer is\\s*([A-E])\','''
+
+
+def patch_adaptive_gen(path: Path) -> str:
+    t = path.read_text()
+    if MARKER4 in t:
+        return "already patched"
+    if ADAPT_OLD not in t:
+        return "skipped (block not found — already patched or upstream changed)"
+    path.write_text(t.replace(ADAPT_OLD, ADAPT_NEW, 1))
+    return "patched"
+
+
 if __name__ == "__main__":
     for name in ("cue_aware_adaptive.py", "factor_utilization.py"):
         print(f"{name}: {patch(SCORERS / name)}")
     print(f"run_eval.py: {patch_run_eval(RUN_EVAL)}")
     print(f"extract_metrics.py: {patch_extract_metrics(EXTRACT)}")
+    print(f"generate_adaptive_datasets.py: {patch_adaptive_gen(ADAPT)}")
