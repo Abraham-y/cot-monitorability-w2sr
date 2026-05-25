@@ -83,6 +83,12 @@ the blocker (L5 had headroom, still flat).
    max_seq_len 4096, gate max_model_len 4096). teacher_system="You are a helpful
    assistant." (Qwen chat). MATH L3-5 or L5. gen_traces → train → gate vs
    unelicited baseline. This is the most faithful-to-Yuan + most likely to gain.
+   ⏳ IN PROGRESS: gen_traces LAUNCHED (teacher Qwen2.5-Math-1.5B-Instruct,
+   max_tokens 2048, L3-5) → /vol/traces/w2sr_infamily. ON RESUME: check that
+   manifest (degeneracy should be LOW — native-Qwen clean), then
+   `train --base-student Qwen/Qwen2.5-Math-7B --train-json
+   /vol/traces/w2sr_infamily/train.json --out-dir /vol/checkpoints/w2sr_infamily
+   --max-seq-len 4096` → `gate ... --max-model-len 4096 --max-tokens 3500`.
 1. **Strong-teacher distillation control** (HIGH-confidence gain + needed by the
    extension). Source `open-r1/OpenR1-Math-220k` (fields: problem, generations
    [R1 traces], correctness_math_verify, answer). Build train.json from CORRECT,
