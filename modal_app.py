@@ -145,7 +145,7 @@ def gen_traces(
     teacher_model: str, out_dir: str,
     n_problems: int = 1000, n_per_problem: int = 1, keep_incorrect: bool = True,
     temperature: float = 0.6, top_p: float = 0.95, max_tokens: int = 4096,
-    teacher_system: str = "",
+    teacher_system: str = "", levels: str = "3,4,5",
 ) -> dict:
     """Stage 1 on Modal (offline batched vLLM, like Yuan's generate.py): load
     MATH (levels 3-5), sample CoT from `teacher_model`, grade with the W2SR
@@ -159,7 +159,8 @@ def gen_traces(
     from transformers import AutoTokenizer
     from src import problems, generate_traces as gt
 
-    train, held_out = problems.load_math_problems(n_train=n_problems, n_held_out=200)
+    lv = tuple(int(x) for x in levels.split(","))
+    train, held_out = problems.load_math_problems(n_train=n_problems, n_held_out=200, levels=lv)
     tok = AutoTokenizer.from_pretrained(teacher_model)
     # teacher_system: SimpleRL-Zoo (Qwen) wants Yuan's qwen-base system prompt;
     # R1-distill wants none (its template forces <think>). The student's ChatML
