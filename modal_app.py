@@ -238,11 +238,18 @@ def train(base_student: str, train_json: str, out_dir: str, max_seq_len: int = 0
     secrets=[hf_secret], timeout=6 * 60 * 60,
 )
 def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bool = False,
-         rep_penalty: float = 1.0, max_tokens: int = 4096, max_model_len: int = 8192) -> dict:
+         rep_penalty: float = 1.0, max_tokens: int = 4096, max_model_len: int = 8192,
+         headroom_probe: bool = False) -> dict:
     """Run the spec 9 gate = the W2SR reproduction check. One vLLM load serves
     BOTH the untrained baseline (no adapter) and the trained student (LoRA
     adapter) on the SAME held-out MATH, so we get the capability GAIN directly.
-    Greedy decoding (temp 0). Writes gate_report.json next to the adapter."""
+    Greedy decoding (temp 0). Writes gate_report.json next to the adapter.
+
+    headroom_probe: also score the UNTRAINED base with the CoT prompt (zero-shot
+    CoT, no LoRA). Lets us separate genuine W2SR elicitation from "just prompting
+    it to think": if cot_prompted_baseline ~= W2SR, the gain is prompt-induced,
+    not weak-supervision-induced; if unelicited << cot_prompted < W2SR, the model
+    was genuinely under-elicited and training added real capability (PREREG §5)."""
     import json as _json
     from pathlib import Path
     from vllm import LLM, SamplingParams
@@ -281,6 +288,13 @@ def gate(base_student: str, adapter_dir: str, held_out_json: str, is_control: bo
     report = vt.validate(loss_log, trained_resp, gts, baseline_pass1, grade,
                          is_control=is_control)
     out = {**report.__dict__, "pass1_gain": report.pass1_gain}
+    if headroom_probe:
+        # untrained base, CoT prompt, no LoRA = the zero-shot-CoT ceiling.
+        cot_out = llm.generate(trained_prompts, sp)
+        cot_pass1 = vt.pass1([o.outputs[0].text for o in cot_out], gts, grade)
+        out["cot_prompted_baseline_pass1"] = cot_pass1
+        out["headroom_unelicited_to_cot"] = cot_pass1 - baseline_pass1
+        out["w2sr_beyond_cot_prompt"] = report.pass1 - cot_pass1
     (Path(adapter_dir) / "gate_report.json").write_text(_json.dumps(out, indent=2, default=str))
     volume.commit()
     return out
