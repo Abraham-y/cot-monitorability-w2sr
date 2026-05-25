@@ -130,10 +130,15 @@ class VLLMServer:
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
     def serve(self):
         import subprocess
-        extra = (["--tensor-parallel-size", str(self.tensor_parallel)]
-                 if self.tensor_parallel > 1 else None)
+        extra = []
+        if self.tensor_parallel > 1:
+            extra += ["--tensor-parallel-size", str(self.tensor_parallel)]
+            # skip cudagraph compile on multi-GPU TP — it adds ~5min to cold
+            # start and hangs the shm broadcast, so the eval warmup never latches
+            # before the 10-min idle scaledown recycles the container.
+            extra += ["--enforce-eager"]
         cmd = serving.vllm_serve_command(
-            self.model, max_model_len=self.max_model_len, extra=extra,
+            self.model, max_model_len=self.max_model_len, extra=extra or None,
         )
         subprocess.Popen(cmd)
 
