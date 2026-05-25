@@ -262,3 +262,16 @@ stage/gate/orchestrator/analysis skeletons, `modal_app.py`, README, CLAUDE.md.
   final teacher choice (Yuan checkpoints vs DeepSeek-R1-Distill).
 - Send the Yuan (W2SR first-author) email; fold in Arcuschin/Meek thread guidance.
 - Pre-register the statistical test on pilot before the full run.
+
+## 2026-05-25 — degeneration bounded effort done: STOP-AND-FLAG (binding constraint)
+Iterations: eval rep_penalty=1.15 (killed loops but tanked accuracy 0.45->0.27,
+format still 0.55 — wrong lever for math); max_tokens=7000 (no help -> non-
+conclusion is inherent, not truncation); rank16->32 + filter 729->532 (format
+0.55->0.615, still <0.8, still some degeneration). Gain ROBUSTLY FLAT across ALL
+configs (Instruct/base, rank16/32, all decoding): ~0 (+0.005 at r32). As format
+climbed 0.55->0.615 the gain stayed flat -> cleaner generation isn't hiding a gain.
+FINDINGS: (1) no W2SR capability gain at 1.5B-R1-teacher / 7B pairing on MATH;
+(2) LoRA-distilling the 1.5B's long over-thinking R1 CoT into the base is the
+binding constraint on clean generation (bounded levers only nudge it).
+Per plan: stop; reconsider distillation/teacher before harder task. Decision pending.
+No lingering Modal cost (ephemeral apps scaled to 0).
