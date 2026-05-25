@@ -122,8 +122,8 @@ class VLLMServer:
     # model). Currently: weak teacher (R1-distill reasoning model) for condition
     # 4 — needs a big context for long <think> CoT (32k). Flip back to
     # "Qwen/Qwen2.5-7B-Instruct"/8192 for the student, or a checkpoint path.
-    model: str = modal.parameter(default="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
-    max_model_len: int = modal.parameter(default=32768)
+    model: str = modal.parameter(default="/vol/merged/w2sr_infamily_inst")
+    max_model_len: int = modal.parameter(default=8192)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
     def serve(self):
