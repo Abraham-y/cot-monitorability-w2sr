@@ -181,8 +181,10 @@ class TraceGenConfig:
 @dataclass(frozen=True)
 class SFTConfig:
     method: str = "lora"             # "lora" pilot / "full" final (spec 8.2)
-    lora_rank: int = 16
-    lora_alpha: int = 32
+    # raised 16->32 to give the adapter capacity to absorb the 1.5B's long
+    # R1-style CoT cleanly (rank 16 produced rambly/looping generation).
+    lora_rank: int = 32
+    lora_alpha: int = 64
     learning_rate: float = 1e-4      # 1e-4 LoRA / 1e-5 full
     num_epochs: int = 3              # NB: repo uses 5-10
     effective_batch_size: int = 32   # NB: repo uses 128
