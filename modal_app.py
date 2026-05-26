@@ -108,11 +108,9 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="A100",  # 40GB: fits the 7B student / 1.5B teacher (tensor_parallel=1).
-    # For the strong 32B teacher (cond-4b) bump to gpu="A100-80GB:2" +
-    # tensor_parallel=2 (the serve cmd adds --enforce-eager on TP>1). NB: the full
-    # R1-32B reasoning monitorability eval is ~20 GPU-hr (6×198 long CoTs) — beyond
-    # the <16h budget; cond-4a (R1-1.5B) is the teacher reference instead.
+    gpu="A100-80GB",  # 80GB: a 7B reasoning student (R1-distill-7B) at 32k ctx with
+    # 32-way concurrency needs KV headroom. For a small instruct 7B at 8k, "A100"
+    # (40GB) suffices; for the 32B teacher use gpu="A100-80GB:2" + tensor_parallel=2.
     volumes={VOL_MOUNT: volume},
     secrets=[hf_secret],
     timeout=60 * MINUTES,
@@ -121,10 +119,10 @@ MINUTES = 60
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
     # Deployed web endpoint serves whatever this default is (flip + redeploy per
-    # model). Neutral cheap default = the baseline 7B student. For a checkpoint,
-    # use a /vol/merged/<ckpt> path; for the 32B teacher set the big-GPU config.
-    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
-    max_model_len: int = modal.parameter(default=8192)
+    # model). Currently: baseline reasoning student R1-distill-7B (cond-1', 32k ctx
+    # for long <think> CoT). For the W2SR student use /vol/merged/w2sr_r1_7b.
+    model: str = modal.parameter(default="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
+    max_model_len: int = modal.parameter(default=32768)
     tensor_parallel: int = modal.parameter(default=1)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)

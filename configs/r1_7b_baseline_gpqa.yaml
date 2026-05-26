@@ -1,0 +1,32 @@
+# cond-1' baseline reasoning student (untrained R1-distill-7B) on GPQA-Diamond. Reasoning model (long <think> CoT) served via Modal
+# vLLM at 32k ctx; generator 30k tokens to avoid truncating reasoning (match
+# cond-4a). Judge = anthropic/claude-sonnet-4-6. OPENAI_BASE_URL=endpoint, KEY=EMPTY.
+configurations:
+- config_id: '001'
+  dataset: gpqa_diamond
+  dataset_group: gpqa
+  model: openai/DeepSeek-R1-Distill-Qwen-7B
+  model_path: null
+  model_configs:
+    "openai/DeepSeek-R1-Distill-Qwen-7B":
+      max_tokens: 30000
+    "judge:anthropic/claude-sonnet-4-6":
+      max_tokens: 4096
+  factor_scorer_enabled: true
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false
