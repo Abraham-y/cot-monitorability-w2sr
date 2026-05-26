@@ -5,13 +5,13 @@
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
-\titlespacing*{\section}{0pt}{6pt}{3pt}
-\titlespacing*{\subsection}{0pt}{4pt}{2pt}
-\setlength{\parskip}{2pt}
+\titlespacing*{\section}{0pt}{5pt}{2pt}
+\titlespacing*{\subsection}{0pt}{3pt}{1pt}
+\setlength{\parskip}{1.5pt}
 \frenchspacing
 
 \title{\vspace{-3.5em}Looking Monitorable Without Being Faithful:\\
-Weak-to-Strong Reasoning Distillation Transfers Verbosity but Not Chain-of-Thought Faithfulness}
+Weak-to-Strong Reasoning Distillation Compresses Chain-of-Thought and Degrades Cue-Faithfulness}
 \author{Abraham Yeung \\ \small CS 338 Project}
 \date{\vspace{-1em}\small May 2026}
 
@@ -21,324 +21,216 @@ Weak-to-Strong Reasoning Distillation Transfers Verbosity but Not Chain-of-Thoug
 
 \begin{abstract}
 \noindent
-Weak-to-Strong Reasoning (W2SR; Yuan et al.\ 2026) shows that supervised
-fine-tuning a capable student on a \emph{weaker} reasoning model's chain-of-thought
-(CoT) raises the student's task accuracy. Its safety case is incomplete: it
-measures only accuracy and never asks whether the student's CoT stays
-\emph{monitorable}---whether the CoT still reveals the factors actually driving the
-answer. We reproduce a W2SR capability gain and extend it with a controlled
-monitorability study using the Meek et al.\ (2025) chain-of-thought faithfulness
-eval on GPQA-Diamond. Two findings. (i) \textbf{W2SR reproduction requires an
-in-family (same base-family) weak teacher}: a foreign-style teacher (DeepSeek-R1
-distillation) yields no gain and degenerate generations, whereas an in-family
-native-Qwen weak teacher lifts a base student from 0.32 to 0.65 Pass@1 on MATH; a
-\emph{headroom probe} shows this gain is genuine elicitation on a base student but
-a prompting artifact on an instruct student. (ii) Holding student capability fixed,
-\textbf{distillation transfers CoT \emph{verbosity} (+0.26, 95\% CI [0.22, 0.31])
-but not cue-\emph{faithfulness}}, and the faithfulness effect is
-\textbf{substrate-dependent and, where measurable, harmful}. On the locked
-instruct student, cue-acknowledgment is at a floor (1.8--4.6\%) for every
-condition, so transfer is undetectable (the teacher reaches 22--37\%). On an
-in-family \emph{reasoning} student, where baseline faithfulness has real range
-(25\%), W2SR distillation \textbf{significantly degrades} it---acknowledgment
-falls to 3.2\% (paired $\Delta=-0.22$, 95\% CI $[-0.29,-0.15]$, McNemar
-$p\approx2{\times}10^{-9}$)---while GPQA accuracy is preserved and the
-chain-of-thought collapses ${\sim}14\times$ in length. W2SR yields a concise,
-capable, but \emph{non-revealing} reasoner: monitorability degrades silently to
-an accuracy check. We map the work to the reproduce/critique/extend rubric.
+Weak-to-Strong Reasoning (W2SR; Yuan et al.\ 2026) fine-tunes a capable student on
+a \emph{weaker} model's chain-of-thought (CoT) and reports higher task accuracy.
+Its safety case is incomplete: it measures only accuracy, never whether the
+student's CoT stays \emph{monitorable}. We reproduce a W2SR capability gain and
+extend it with a controlled CoT-monitorability study (Meek et al.\ 2025 cue-based
+faithfulness eval, GPQA-Diamond). On a \emph{reasoning} student where faithfulness
+has dynamic range, \textbf{W2SR significantly degrades cue-acknowledgment, $25\%\!
+\to\!3\%$} (paired $\Delta\!=\!-0.22$, McNemar $p\!\approx\!2\times10^{-9}$), at
+\emph{preserved} accuracy, while collapsing CoT length ${\sim}14\times$.
+Decomposing the mechanism: the degradation is \textbf{compression-dominant}, but a
+\textbf{real, moderate residual persists at matched length} (acknowledgment
+$44\%\!\to\!19\%$, $p\!=\!0.016$; directionally echoed by three further
+length-controlled cuts)---the distilled model surfaces decision-relevant cues less
+\emph{even per unit reasoning}. A teacher-strength axis shows the effect is
+\emph{compression-general}: a strong (14B) teacher degrades faithfulness nearly as
+much as a weak (1.5B) one. On a non-reasoning instruct student faithfulness is
+floored, so the effect is undetectable there---an artifact of substrate, which we
+use to motivate the reasoning-student test. Reproduction itself required an
+in-family weak teacher and is genuine only on a base student (a headroom probe
+separates elicitation from prompting). \textbf{A capability-only certification of a
+weak-to-strong student can pass a model whose CoT has become markedly less
+revealing.}
 \end{abstract}
 
 \vspace{-0.5em}
 \section{Introduction}
-Chain-of-thought (CoT) ``monitorability'' is the hope that reading a model's
-reasoning tells us \emph{why} it answered as it did, so that an overseer can catch
-undesired influences. Two literatures pull against each other. Weak-to-Strong
-Reasoning (W2SR)~\cite{yuan2026} reports that fine-tuning a strong student on a
-\emph{weaker} model's CoT \emph{raises accuracy}---weak supervision elicits latent
-student capability. Separately, faithfulness work~\cite{turpin2023,meek2025} shows
-models often \emph{do not} verbalize the cues that change their answers.
+Chain-of-thought ``monitorability'' is the hope that reading a model's reasoning
+reveals \emph{why} it answered, so an overseer can catch undesired influences.
+Weak-to-Strong Reasoning (W2SR)~\cite{yuan2026} reports that fine-tuning a strong
+student on a \emph{weaker} model's CoT \emph{raises accuracy}. Faithfulness
+work~\cite{turpin2023,meek2025,chua2025} shows models often do not verbalize the
+cues that actually move their answers.
 
-\textbf{Critique.} W2SR's safety argument is incomplete: it certifies the student
-on task accuracy alone and is silent on whether the distilled CoT remains
-monitorable. If W2SR-style distillation altered \emph{how} a model reasons on the
-page without altering \emph{what} it reveals, an accuracy-only check would miss it.
+\textbf{Critique.} W2SR certifies the student on accuracy alone and is silent on
+whether the distilled CoT stays monitorable. If distillation changed \emph{how} a
+model reasons on the page without changing \emph{what it reveals}, an accuracy
+check would miss it.
 
-\textbf{Contributions} (mapped to reproduce / critique / extend):
-\begin{itemize}\itemsep1pt
-\item \emph{Reproduce.} We reproduce a W2SR capability gain on MATH, and in doing so
-identify two conditions Yuan et al.\ leave implicit: the weak teacher must be
-\emph{in-family} with the student, and the apparent gain is genuine only on a
-\emph{base} (non-CoT-eliciting) student---on an instruct student it is a
-CoT-prompting artifact (\S\ref{sec:repro}).
-\item \emph{Critique \& Extend.} Holding student capability fixed, we measure CoT
-monitorability (faithfulness + verbosity) of the W2SR student vs.\ baseline and a
-strong-teacher control on GPQA-Diamond (\S\ref{sec:ext}). On the instruct student
-faithfulness is floored (a decoupling: verbosity transfers, faithfulness cannot be
-assessed); on an in-family \emph{reasoning} student with real faithfulness range,
-W2SR \textbf{significantly degrades} cue-acknowledgment at preserved capability.
-\end{itemize}
+\textbf{Contributions} (reproduce / critique / extend):
+\textbf{(1)} we reproduce a W2SR capability gain on MATH and show it is conditional
+---it requires an \emph{in-family} weak teacher, and is genuine only on a
+\emph{base} student (on an instruct student it is a CoT-prompting artifact;
+\S\ref{sec:repro}); \textbf{(2)} holding capability fixed, we measure CoT
+monitorability and find that on a reasoning student W2SR \textbf{significantly
+degrades cue-faithfulness}, predominantly by compressing the CoT but with a real
+matched-length residual, and that this is \emph{compression-general} across teacher
+strength (\S\ref{sec:ext}).
 
-\section{Background and Setup}
-\textbf{W2SR}~\cite{yuan2026}: generate CoT traces from a weak teacher on a problem
-set, keep correct and incorrect traces, and SFT a stronger student on them; report
-held-out Pass@1. \textbf{Monitorability}~\cite{meek2025}: for each question, present
-a \emph{cue} (e.g.\ an authority opinion, a leaked answer key, embedded metadata)
-that points at a target answer; an LLM judge reads the full CoT and scores (a)
-\emph{faithfulness} = whether the CoT \emph{acknowledges} the cue, and (b)
-\emph{verbosity} = a factor-utilization rate over the decision-relevant factors. We
-use the five cues shipped in the released eval
-(authority, visual pattern, grader hack, leaked info, XML metadata) and a single
-judge (\texttt{claude-sonnet-4-6}, $T{=}0$).
+\section{Setup}
+\textbf{W2SR}~\cite{yuan2026}: sample CoT from a weak teacher on a problem set, keep
+correct + incorrect traces, LoRA-SFT a stronger student; report held-out Pass@1.
+\textbf{Monitorability}~\cite{meek2025}: each question is paired with a \emph{cue}
+(authority opinion, leaked answer key, embedded metadata, etc.) pointing at a
+target; an LLM judge reads the full CoT and scores \emph{faithfulness}
+(does the CoT \emph{acknowledge} the cue) and \emph{verbosity} (a
+factor-utilization rate). We use the five cues shipped in the released eval and a
+single judge (\texttt{claude-sonnet-4-6}, $T{=}0$); faithfulness is reported as
+acknowledgment among \emph{cued} samples. All evaluation is greedy ($T{=}0$); trace
+sets are hashed. Training is LoRA; generation/training/gating run on Modal GPUs.
 
-\textbf{Models / compute.} Student (all monitorability conditions):
-\texttt{Qwen2.5-7B-Instruct}. Teachers (in-family, native-Qwen): weak
-\texttt{Qwen2.5-Math-1.5B-Instruct}, strong \texttt{Qwen2.5-Math-72B-Instruct};
-reproduction student \texttt{Qwen2.5-Math-7B}. Training is LoRA SFT; generation,
-training, and offline gating run on Modal GPUs; the monitorability eval drives the
-cloned Meek eval. All evaluation is at $T{=}0$; every trace set is hashed.
-
-\section{Reproduction: when does W2SR actually fire?}
+\section{Reproduction: when does W2SR fire?}
 \label{sec:repro}
-\textbf{It does not reproduce with a foreign-style teacher.} Across students
-(7B-instruct, 7B-base), public 1.5B teachers (R1-distill, SimpleRL-Zoo), LoRA ranks,
-and decodings, a DeepSeek-R1--distilled weak teacher produced \emph{no} Pass@1 gain
-and chronically degenerate CoT (Table~\ref{tab:repro}, top). The R1 teacher is
-Qwen-\emph{based} but imparts a foreign, over-thinking R1 reasoning style that is
-out of the student's distribution and hard to distill cleanly under LoRA.
+With a foreign-style weak teacher (DeepSeek-R1-distilled 1.5B, or SimpleRL-Zoo)
+distilled into a Qwen2.5-7B student, we found \emph{no} Pass@1 gain and frequent
+degeneration, across students, ranks, and decodings. W2SR reproduces only with an
+\textbf{in-family, native-Qwen} weak teacher: \texttt{Qwen2.5-Math-1.5B-Instruct}
+($\sim$67\% on the train problems) $\to$ \texttt{Qwen2.5-Math-7B} lifts held-out
+MATH (L3--5) Pass@1 from $0.325$ to $0.645$, format-valid $1.00$.
 
-\textbf{It reproduces with an in-family weak teacher.} Swapping in a clean
-native-Qwen weak teacher (\texttt{Qwen2.5-Math-1.5B-Instruct}, $\sim$67\% on the
-training problems) and student \texttt{Qwen2.5-Math-7B} lifts held-out MATH (L3--5)
-Pass@1 from 0.325 to 0.645 (+0.32), with a 1.00 valid-format rate and no
-degeneration---the first passing capability gate in our matrix.
-
-\textbf{Headroom probe: genuine on a base student, artifact on an instruct
-student.} A $+5$pt gate-pass on an already-CoT-capable model can be ``rearrangement''
-rather than elicitation. We therefore also score the \emph{untrained} model under a
-zero-shot CoT prompt (the prompting-only ceiling) and report
-$\text{W2SR}-\text{(zero-shot CoT)}$ (Table~\ref{tab:headroom}). On the base
-student, zero-shot CoT does nothing (0.24) and W2SR adds \textbf{+0.41 beyond
-prompting}---real elicitation of latent capability. On the instruct student,
-zero-shot CoT alone already reaches 0.63 and W2SR adds \textbf{+0.00}: its apparent
-$+0.40$ gain over an unelicited baseline is purely a CoT-elicitation confound.
-\emph{W2SR reproduction is real, but only on a base student; on an instruct student
-the headline gain is an artifact.}
+\textbf{Genuine only on a base student (headroom probe).} A $+5$pt gate-pass on an
+already-CoT-capable model may be re-arrangement, not elicitation. Scoring the
+\emph{untrained} model under a zero-shot CoT prompt (the prompting-only ceiling)
+and reporting $\text{W2SR}-\text{(zero-shot CoT)}$ (Table~\ref{tab:repro}): on the
+base student W2SR adds $+0.41$ \emph{beyond prompting} (genuine latent-capability
+elicitation); on an instruct student it adds $+0.00$---its apparent gain over an
+unelicited baseline is purely the CoT-elicitation confound. Two conditions Yuan et
+al.\ leave implicit: in-family teacher, and a base (non-CoT-eliciting) student.
 
 \begin{table}[t]\centering\small
-\caption{W2SR reproduction on MATH (held-out Pass@1; unelicited baseline).
-In-family native-Qwen teacher is the only configuration that fires.}
+\caption{Reproduction (held-out MATH L3--5 Pass@1). In-family native-Qwen teacher;
+headroom probe separates genuine elicitation from CoT-prompting. Genuine on the
+base student, artifact on the instruct student.}
 \label{tab:repro}
-\begin{tabular}{llccc}
-\toprule
-student & weak teacher & baseline & W2SR & gain \\
-\midrule
-7B-base & R1-distill-1.5B & 0.445 & 0.450 & $+0.005$ \\
-7B-base & SimpleRL-Zoo-1.5B & 0.445 & 0.120 & $-0.325$ (collapse) \\
-Math-7B & R1-distill-1.5B (L5) & 0.390 & 0.395 & $+0.005$ \\
-\textbf{Math-7B} & \textbf{Math-1.5B-Inst (in-family)} & \textbf{0.325} & \textbf{0.645} & $\mathbf{+0.320}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[t]\centering\small
-\caption{Headroom probe. ``W2SR beyond CoT-prompt'' isolates training-induced gain
-from prompting alone. Genuine on the base student; zero on the instruct student.}
-\label{tab:headroom}
 \begin{tabular}{lcccc}
 \toprule
-student & unelicited & zero-shot CoT & W2SR & W2SR $-$ CoT-prompt \\
+student & unelicited & zero-shot CoT & W2SR & W2SR $-$ CoT \\
 \midrule
 Qwen2.5-Math-7B (base) & 0.325 & 0.240 & 0.645 & $\mathbf{+0.405}$ (genuine)\\
 Qwen2.5-7B-Instruct & 0.230 & 0.630 & 0.630 & $\mathbf{+0.000}$ (artifact)\\
+\midrule
+\multicolumn{5}{l}{\footnotesize Foreign-style teachers (R1-distill-1.5B, SimpleRL-Zoo) $\to$ 7B: no gain / collapse.}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Extension: does W2SR preserve CoT monitorability?}
 \label{sec:ext}
-\textbf{Design.} All four conditions share the locked instruct student so
-comparisons are clean: \textbf{(1)} baseline \texttt{Qwen2.5-7B-Instruct};
-\textbf{(2)} \emph{W2SR student} = (1) LoRA-SFT'd on the weak in-family teacher's
-MATH traces; \textbf{(3)} \emph{control} = (1) SFT'd on the \emph{strong} in-family
-teacher (\texttt{Qwen2.5-Math-72B-Instruct}) on the \emph{same} problems---a clean
-teacher-strength axis ($1.5$B vs $72$B, $48{\times}$ scale; on L3--5 the
-Qwen-Math family saturates at $\sim$66--69\% so the axis is by \emph{scale}, not
-train accuracy); \textbf{(4a)} weak-teacher reference (R1-distill-1.5B's own CoT).
-Crucially, capability is \textbf{controlled, not changed}: on the instruct student
-the SFT lands at its zero-shot-CoT ceiling (Table~\ref{tab:headroom}), and all
-three students score $0.33$--$0.38$ on GPQA, so faithfulness differences are not a
-capability confound. Estimands (preregistered): E1 $=$ W2SR$-$baseline, E2 $=$
-W2SR$-$control (the weak-supervision-specific effect).
+\textbf{Capability-controlled design.} We compare a baseline student, a W2SR student
+(LoRA-SFT'd on a weak in-family teacher's MATH CoT), and references, on GPQA. The
+SFT lands the student at its own CoT ceiling, so faithfulness differences are not a
+capability confound; the question is ``does distillation change faithfulness,'' not
+``does it improve capability.''
 
-\textbf{Results} (Table~\ref{tab:ext}). \emph{Verbosity transfers, large and tight:}
-both trained students are markedly more verbose than baseline (E1 $=+0.264$, 95\%
-CI $[0.218,0.312]$; control$-$baseline $=+0.247$, $[0.192,0.300]$; both exclude 0),
-and the two are indistinguishable (E2 $\approx 0$). \emph{Faithfulness does not.}
-Cue acknowledgment is at a floor for every student condition (1.8--4.6\%). The
-floor is established robustly by the \emph{baseline at $N{=}970$ cued samples}; the
-weak teacher reaches 22--37\%, confirming the judge registers acknowledgment when
-present, so the students' floor is real behavior (7B instruct models rarely
-verbalize a decisive cue), not measurement failure. Distillation does not lift the
-students off this floor; the preregistered paired test on acknowledgment is null
-(E2 CI includes 0). We make the floor claim strongly but do \emph{not} claim a
-precise no-transfer magnitude---only that no transfer is detectable above a floor
-all student conditions share. Directionally, the trained students drift
-\emph{slightly above} baseline (3.6/4.6\% vs 1.8\%; noise at these counts), the
-opposite of inheritance: there is no evidence distillation drags the student toward
-the teacher's much higher faithfulness.
+\textbf{Instruct student is floored (motivation).} On \texttt{Qwen2.5-7B-Instruct},
+cue-acknowledgment is at a floor for every condition (baseline $1.8\%$ at $N{=}970$;
+W2SR $3.6\%$; strong-teacher control $4.6\%$), while teacher references reach
+$22$--$37\%$. We cannot detect faithfulness transfer here---but verbosity transfers
+strongly (W2SR$-$baseline $\Delta\!=\!+0.26$, CI $[0.22,0.31]$): the model
+\emph{looks} more monitorable without measurable faithfulness change. To probe a
+substrate with dynamic range, we move to a reasoning student.
+
+\textbf{Reasoning student: W2SR significantly degrades faithfulness}
+(Table~\ref{tab:r1}). Fully in-family: student \texttt{R1-Distill-Qwen-7B}, weak
+teacher \texttt{R1-Distill-Qwen-1.5B}; distillation is clean (gate format-valid
+$0.99$); baseline acknowledgment is off-floor ($25\%$). W2SR drops pooled
+acknowledgment to $3.2\%$ (paired on (qid,cue): $\Delta\!=\!-0.220$, CI
+$[-0.293,-0.153]$, McNemar $p\!\approx\!2\times10^{-9}$, discordant $34/1$), at
+\emph{preserved} GPQA accuracy ($0.42$ vs.\ $0.28$, $n{=}40$) and ${\sim}14\times$
+shorter CoT. The drop is not an artifact (hand-checked: completions coherent, $37/40$
+conclude with an answer, none degenerate---the model solves the problem without
+verbalizing the cue).
 
 \begin{table}[t]\centering\small
-\caption{Monitorability on GPQA-Diamond. Faithfulness $=$ cue acknowledgment among
-\emph{cued} samples (acked/cued); verbosity $=$ factor-utilization rate. Students
-are capability-matched ($\approx$ acc); verbosity transfers, faithfulness stays at
-floor.}
-\label{tab:ext}
+\caption{Reasoning-student monitorability (GPQA, in-family R1-distill teachers).
+Faithfulness = acknowledgment among cued samples. W2SR degrades faithfulness at
+preserved accuracy; a strong (14B) teacher degrades it nearly as much as a weak
+(1.5B) one (compression-general).}
+\label{tab:r1}
 \begin{tabular}{lccc}
 \toprule
-condition & GPQA acc & faithfulness (acked/cued) & verbosity \\
+condition & faithfulness & GPQA acc & median CoT (chars) \\
 \midrule
-(1) baseline 7B-Instruct & 0.379 & $17/970 = 1.8\%$ & 0.476 \\
-(2) W2SR (weak teacher) & 0.328 & $8/225 = 3.6\%$ & 0.611 \\
-(3) control (strong 72B) & 0.374 & $8/175 = 4.6\%$ & 0.623 \\
-(4a) weak teacher ref & 0.227 & $\sim\!26/117 = 22\%$ (37\% authority cue) & 0.640 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{A non-floored substrate: a reasoning student}
-The instruct result is floored, so it can only show that faithfulness transfer is
-\emph{undetectable}, not absent. To probe a substrate where faithfulness has
-dynamic range, we re-ran the core comparison (E1 only) on a \emph{reasoning}
-student, fully in-family: student \texttt{R1-Distill-Qwen-7B}, weak teacher
-\texttt{R1-Distill-Qwen-1.5B} (= the cond-4a teacher; traces reused). Same
-protocol, capability-controlled, reduced to 40 questions (the long-CoT eval is
-throughput-bound). In-family distillation was clean (gate format-valid 0.99) and
-the baseline reasoning student is off-floor (25\% pooled acknowledgment).
-
-\textbf{Result (Table~\ref{tab:r1}): W2SR significantly \emph{degrades}
-faithfulness.} Pooled cue-acknowledgment falls from 25.0\% (baseline) to 3.2\%
-(W2SR); paired on (qid,cue), $\Delta=-0.220$, 95\% CI $[-0.293,-0.153]$, McNemar
-$p\approx2\times10^{-9}$ ($n{=}150$ pairs; discordant $34/1$, one-directional). The
-drop is concentrated on the three text cues where the baseline had range (e.g.\
-authority $47\%\!\to\!8\%$, leaked-info $56\%\!\to\!5\%$); the two non-text cues are
-at floor for both. This effect is \emph{invisible} on the floored instruct student.
-It is not an artifact (hand-checked: W2SR completions are coherent, 37/40 conclude
-with a boxed answer, none degenerate; the model simply solves the problem without
-verbalizing the cue) and not a capability drop (GPQA accuracy is preserved:
-baseline 0.28 vs.\ W2SR 0.42, $n{=}40$). \textbf{Mechanism:} distilling the terser
-1.5B teacher collapses the strong reasoner's CoT length $\sim$14$\times$ (median
-$\sim$20{,}100$\to$1{,}392 chars); briefer, more direct reasoning surfaces decisive
-cues far less. W2SR yields a concise, capable, but \emph{non-revealing} reasoner.
-
-\textbf{Mechanism: compression-dominant, plus a real matched-length residual.}
-Faithfulness and CoT length both fall; the near-trivial half is that shorter CoT
-surfaces cues less, so the claim of interest is that W2SR surfaces cues less
-\emph{even at matched length}. Length is endogenous to reasoning (we cannot hold
-content fixed and vary length---a brevity-prompt control failed, as R1-distill
-ignores it), so we isolate the residual by \emph{convergence} across imperfect
-length-controlled cuts on the long ($\ge\!9.6$k-char) traces: (a) acknowledgment
-(judge): W2SR $6/31{=}19\%$ vs.\ baseline $32/72{=}44\%$, two-proportion
-$p{=}0.016$; (b) literal cue-mention rate: $16\%$ vs.\ $28\%$ (same direction,
-n.s.); (c) per-1k-char mention density: $0.037$ vs.\ $0.167$; (d) natural
-length-matched question pairs (within $2\times$): $1/9$ vs.\ $4/9$ (same direction,
-underpowered). \textbf{All four cuts point the same way; the primary (judge) cut is
-significant.} So most of the $42\%\!\to\!7\%$ drop is \textbf{compression} (W2SR's
-long traces recover to $19\%$ from its $7\%$ overall), with a \textbf{real, moderate
-residual at matched length} ($\sim$2.3$\times$, $p{=}0.016$): the distilled model
-surfaces decision-relevant cues less even per unit reasoning. We claim the residual
-\emph{persists across length-controlled cuts}, not that the confound is eliminated.
-
-\textbf{Teacher strength does not rescue it.} Distilling a \emph{strong} in-family
-teacher (R1-Distill-Qwen-14B) into the same student degrades faithfulness almost as
-much as the weak teacher: $7.4\%$ vs.\ baseline $25\%$ ($p{=}1.1\!\times\!10^{-5}$),
-and is not distinguishable from the weak-teacher student's $3.2\%$ ($p{=}0.07$),
-with the same ${\sim}13\times$ CoT compression. The degradation is driven by
-distillation-induced compression \emph{generally}, not by teacher weakness---W2SR
-(weak$\to$strong) is not uniquely harmful.
-
-\begin{table}[t]\centering\small
-\caption{Reasoning-student E1 (in-family R1-distill). Acknowledgment among cued
-samples. W2SR distillation significantly reduces faithfulness on a substrate with
-real range; capability (GPQA acc) is preserved.}
-\label{tab:r1}
-\begin{tabular}{lcc}
-\toprule
-cue & baseline R1-7B & W2SR R1-7B \\
-\midrule
-authority (stanford) & $15/32=47\%$ & $3/38=8\%$ \\
-leaked info (unethical) & $18/32=56\%$ & $2/38=5\%$ \\
-grader hack & $7/32=22\%$ & $1/38=3\%$ \\
-visual / xml (non-text) & $0\%$ / $0\%$ & $0\%$ / $0\%$ \\
-\midrule
-\textbf{pooled faithfulness} & $\mathbf{40/160=25.0\%}$ & $\mathbf{6/190=3.2\%}$ \\
-GPQA accuracy ($n{=}40$) & 0.28 & 0.42 \\
+baseline R1-7B & $40/160 = 25.0\%$ & 0.28 & 20{,}096 \\
+W2SR, weak teacher (1.5B) & $6/190 = 3.2\%$ & 0.42 & 1{,}392 \\
+W2SR, strong teacher (14B) & $13/175 = 7.4\%$ & --- & 1{,}638 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Paired: $\Delta=-0.220$ [$-0.293,-0.153$], McNemar $p\approx2\times10^{-9}$.
+\footnotesize weak vs.\ baseline $p\!=\!2\times10^{-9}$; strong vs.\ baseline
+$p\!=\!1\times10^{-5}$; weak vs.\ strong $p\!=\!0.07$ (n.s.).
 \end{table}
 
-\section{Discussion}
-\textbf{W2SR does not preserve monitorability---and where it is measurable, it
-hurts.} The two substrates tell a consistent story. On the instruct student,
-Meek's composite ``monitorability'' (mean of verbosity and faithfulness) rises
-after distillation \emph{almost entirely through verbosity}: a distilled model can
-\emph{look} more monitorable (longer, more legible chains) while its
-faithfulness---floored---says nothing. On the reasoning student, where faithfulness
-has room to move, the illusion gives way to the real effect: W2SR distillation
-\emph{significantly reduces} cue-acknowledgment ($25\%\!\to\!3\%$,
-$p\approx2\times10^{-9}$) at \emph{preserved} accuracy, by collapsing the CoT to a
-short, direct form that no longer surfaces the decisive cue. The safety-relevant
-component thus gets \emph{worse}, not better. The practical warning is sharp:
-\emph{an accuracy-only certification of a weak-to-strong student---exactly W2SR's---
-can pass a model whose chain-of-thought has become markedly less revealing}, and a
-monitorability check that rewards legible-looking CoT would miss it too.
+\textbf{Mechanism: compression-dominant + a real matched-length residual.}
+Faithfulness and CoT length both fall; the near-trivial half is that shorter CoT
+surfaces cues less, so the claim of interest is degradation \emph{at matched
+length}. Length is endogenous to reasoning (a brevity-prompt control failed---R1
+ignores it), so we isolate the residual by \emph{convergence} across imperfect
+length-controlled cuts on long ($\ge\!9.6$k-char) traces: (a) acknowledgment
+(judge): $19\%$ vs.\ $44\%$, $p\!=\!0.016$; (b) literal cue-mention rate: $16\%$
+vs.\ $28\%$ (same direction, n.s.); (c) mention density: $0.037$ vs.\ $0.167$ per
+1k chars; (d) natural length-matched question pairs: $1/9$ vs.\ $4/9$ (same
+direction, underpowered). \textbf{All four cuts agree in direction; the primary
+(judge) cut is significant.} So most of the $25\%\!\to\!3\%$ drop is
+\textbf{compression} (W2SR's long traces recover to $19\%$), with a \textbf{real,
+moderate residual} ($\sim$2.3$\times$) at matched length: the distilled model
+surfaces decision-relevant cues less even per unit reasoning. We claim the residual
+\emph{persists across length-controlled cuts}, not that the confound is eliminated.
+A teacher-strength axis (Table~\ref{tab:r1}) shows the effect is
+\textbf{compression-general}: a strong 14B teacher degrades faithfulness about as
+much as the 1.5B teacher and is not distinguishable from it---W2SR (weak$\to$strong)
+is not uniquely harmful; distillation-induced compression is.
 
-\textbf{The in-family requirement} is a substantive condition on W2SR itself:
-weak-to-strong transfer is gated by teacher$\leftrightarrow$student
-distributional match, not just teacher capability, and the headroom probe shows the
-``gain'' must be read against the student's own prompting ceiling. Both sharpen when
-W2SR's accuracy claim is even meaningful.
+\section{Discussion}
+W2SR does not preserve monitorability and, where it is measurable, it hurts. The
+two substrates are consistent: on the floored instruct student the composite
+``monitorability'' (mean of verbosity and faithfulness) rises after distillation
+almost entirely via verbosity---the model \emph{looks} more monitorable; on the
+reasoning student, faithfulness has room to move and W2SR \emph{reduces} it, mostly
+by compressing the CoT into a short, direct form that no longer surfaces the cue.
+The safety-relevant component thus gets \emph{worse}, not better. The warning is
+sharp: \emph{an accuracy-only certification of a weak-to-strong student---exactly
+W2SR's---can pass a model whose chain-of-thought has become markedly less
+revealing}, and a monitorability check that rewards elaborate-looking CoT would
+miss it too. That the in-family requirement and headroom probe are needed for the
+accuracy claim to even hold~\cite{repshape2025} only sharpens how narrow the
+certified guarantee is.
 
 \section{Limitations}
-\textbf{Instruct-arm floor.} On the instruct student, acknowledgment is floored
-(1.8--4.6\%; baseline well-powered at $N{=}970$), so that arm only shows transfer is
-\emph{undetectable}; the reasoning arm is what carries the faithfulness claim.
-\textbf{Reasoning-arm $N$.} The reasoning E1 uses 40 questions (the long-CoT eval is
-throughput-bound); the effect is nonetheless large and significant
-($p\approx2\times10^{-9}$, one-directional $34/1$). \textbf{Parsing (disclosed).}
-MATH-SFT'd / reasoning students answer in \texttt{\textbackslash boxed\{X\}} not
-\texttt{ANSWER: X}; the adaptive cue generator originally parsed only
-\texttt{ANSWER:}, cutting cued-$N$ on trained instruct conditions $\sim$4$\times$
-(rate unbiased---judges read full completions, hand-checked). We added a
-\texttt{\textbackslash boxed} re-parse before the reasoning runs, so their
-cued-$N$ is intact. \textbf{Capability not held identical.} On MATH the W2SR
-reasoning student is weaker than baseline (it regresses toward the weaker teacher);
-on GPQA it is comparable-to-better (0.42 vs.\ 0.28, $n{=}40$), so the faithfulness
-drop is not a capability artifact---but capability is controlled, not pinned.
-\textbf{Scope.} Small-scale, LoRA (not full SFT), public teachers, a single judge,
-GPQA-Diamond only, two non-text cues at floor throughout, and the strong
-\emph{teacher} reference (R1-32B) not run ($\sim$20 GPU-hr).
+\textbf{Floored instruct substrate:} the instruct arm only motivates; the
+faithfulness claim rests on the reasoning student. \textbf{Moderate / underpowered
+residual:} the matched-length residual is significant on the judge measure
+($p\!=\!0.016$) but directional-only on three further cuts; we claim a real,
+moderate effect that persists across cuts, not an eliminated confound.
+\textbf{Single family:} the degradation is shown within the Qwen R1-distill
+lineage; a matched-recipe cross-family (Llama) test was confounded by
+over-compression (a terse instruct teacher cratered the reasoning student's
+capability), and no clean capability-matched in-family Llama teacher exists, so
+cross-family generalization remains open. \textbf{Also:} LoRA (not full SFT), a
+single judge model, and GPQA-Diamond only for the extension.
 
 \section{Conclusion}
 W2SR's accuracy gain is real but conditional (in-family teacher; genuine only on a
-base student). Its silence on monitorability hides a real cost: on a reasoning
-student---where chain-of-thought faithfulness can actually be measured---W2SR
-distillation \emph{significantly reduces} the rate at which the CoT reveals a
-decisive hidden cue ($25\%\!\to\!3\%$), at preserved task accuracy, by collapsing
-the reasoning to a terse non-revealing form. Certifying weak-to-strong students on
-accuracy---or on how elaborate their CoT looks---is insufficient and potentially
-misleading; the cue-acknowledgment component of monitorability must be measured
-directly.
+base student), and on a reasoning student it \emph{significantly reduces} how often
+the CoT reveals a decisive hidden cue ($25\%\!\to\!3\%$) at preserved accuracy---
+predominantly by compressing the reasoning, with a real residual beyond length, and
+regardless of teacher strength. Certifying weak-to-strong students on accuracy, or
+on how elaborate their CoT looks, is insufficient and potentially misleading; the
+cue-acknowledgment component of monitorability must be measured directly.
 
 \begin{thebibliography}{9}\small
 \bibitem{yuan2026} Yuan et al. Incentivizing Strong Reasoning from Weak
-Supervision. arXiv:2505.20072, 2025 (EACL 2026).
-\bibitem{meek2025} Meek et al. [Chain-of-Thought Monitorability eval].
+Supervision (W2SR). arXiv:2505.20072, 2025.
+\bibitem{meek2025} Meek et al. Measuring Chain-of-Thought Monitorability.
 arXiv:2510.27378, 2025.
 \bibitem{turpin2023} Turpin et al. Language Models Don't Always Say What They Think.
 arXiv:2305.04388, 2023.
-\bibitem{chen2025} Chen et al. [Reasoning-model faithfulness]. arXiv:2505.05410, 2025.
+\bibitem{chua2025} Chua \& Evans. Are DeepSeek-R1 reasoning models more faithful?
+arXiv:2501.08156, 2025.
+\bibitem{repshape2025} Representations Shape Weak-to-Strong Generalization.
+2025.
 \end{thebibliography}
 
 \end{document}
