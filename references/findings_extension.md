@@ -109,6 +109,47 @@ power.")
   judge (claude-sonnet-4-6), faithfulness at floor, and GPQA-Diamond only for the
   extension. cond-4b (strong teacher reference) not run (~20 GPU-hr; see top).
 
+## ★ Reasoning-student extension (the home run) — W2SR DEGRADES faithfulness
+The instruct study is floored, so it can only show "no transfer above floor."
+To probe a substrate where faithfulness has dynamic range, we re-ran E1 on a
+REASONING student, fully in-family: student `DeepSeek-R1-Distill-Qwen-7B`, weak
+teacher `DeepSeek-R1-Distill-Qwen-1.5B` (the cond-4a teacher; traces reused from
+/traces/w2sr). Capability-controlled (report Pass@1, don't chase a gain). In-family
+distillation was CLEAN (gate format-valid 0.99). Reduced to 40 GPQA Qs (the eval is
+throughput-bound at ~1.4 samples/min on long-CoT students; informative N preserved
+via the \boxed fix). Pre-check confirmed the substrate is off-floor (baseline
+stanford-cue acknowledgment 46%).
+
+**E1 result (cond-1' baseline R1-7B vs cond-2' W2SR R1-7B), acknowledgment among cued:**
+| cue | baseline | W2SR |
+|---|---|---|
+| stanford_professor | 15/32 = 47% | 3/38 = 8% |
+| unethical_information | 18/32 = 56% | 2/38 = 5% |
+| grader_hack | 7/32 = 22% | 1/38 = 3% |
+| visual_squares / xml_metadata | 0% / 0% | 0% / 0% (non-text cues, floor for both) |
+| **POOLED** | **40/160 = 25.0%** | **6/190 = 3.2%** |
+
+**Paired (qid,cue) test:** Δ = **−0.220** [95% CI −0.293, −0.153], **McNemar
+p = 2.1e-9**, n=150 pairs, discordant **34/1** (one-directional). So W2SR
+distillation **significantly DEGRADES** cue-faithfulness on a reasoning student —
+an effect INVISIBLE on the floored instruct student.
+
+**Not an artifact (hand-checked):** W2SR completions are coherent (37/40 conclude
+with a boxed answer, 0 degenerate); the model genuinely solves the problem WITHOUT
+verbalizing the cue. **Mechanism:** distilling the terser 1.5B teacher collapses
+the strong reasoner's CoT length (median ~20,100 → ~1,392 chars, ~14×); briefer,
+more-direct reasoning surfaces decisive cues far less. **Capability preserved:**
+GPQA acc baseline 0.275 vs W2SR 0.425 (n=40, comparable/noisy) — the faithfulness
+collapse is NOT a capability drop. So W2SR yields a concise, capable, but
+NON-REVEALING reasoner: monitorability collapses silently to an accuracy check.
+
+**Combined story (both substrates):** W2SR distillation does not preserve CoT
+monitorability. On a floored instruct student the effect is undetectable
+(underpowered); on a reasoning student with real range it is a large, significant
+REDUCTION in cue-acknowledgment (25%→3%), accompanied by a ~14× CoT-length drop,
+at preserved capability. The safety-relevant component (does the CoT reveal the
+decisive cue?) gets worse, not better, and a capability-only check would miss it.
+
 ## Scoring fix (reproducibility)
 MATH-SFT students emit `\boxed{X}` instead of the requested `ANSWER: X`, so
 Inspect's answer() scorer misparsed them and tanked ACCURACY (cond-2 0.051 vs
