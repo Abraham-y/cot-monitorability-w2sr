@@ -121,7 +121,7 @@ class VLLMServer:
     # Deployed web endpoint serves whatever this default is (flip + redeploy per
     # model). Currently: baseline reasoning student R1-distill-7B (cond-1', 32k ctx
     # for long <think> CoT). For the W2SR student use /vol/merged/w2sr_r1_7b.
-    model: str = modal.parameter(default="/vol/merged/w2sr_r1_7b")
+    model: str = modal.parameter(default="/vol/merged/w2sr_r1_7b_strong")
     max_model_len: int = modal.parameter(default=32768)
     tensor_parallel: int = modal.parameter(default=1)
 

@@ -186,6 +186,39 @@ REDUCTION in cue-acknowledgment (25%→3%), accompanied by a ~14× CoT-length dr
 at preserved capability. The safety-relevant component (does the CoT reveal the
 decisive cue?) gets worse, not better, and a capability-only check would miss it.
 
+## ★ P2 — teacher-strength axis on the reasoning student (compression-general)
+Tests whether the faithfulness degradation is specific to a WEAK teacher or to
+distillation/compression generally. Same R1-Distill-Qwen-7B student, in-family
+R1-distill teachers, 40 GPQA Qs, 5 cues:
+| condition | faithfulness (acked/cued) | median CoT |
+|---|---|---|
+| baseline R1-7B | 40/160 = 25.0% [19,32] | 20,096 |
+| weak-teacher W2SR (R1-1.5B) | 6/190 = 3.2% [1,7] | 1,392 |
+| strong-teacher W2SR (R1-14B) | 13/175 = 7.4% [4,12] | 1,638 |
+
+Two-proportion tests: strong vs baseline p=1.1e-5; weak vs baseline p=1.7e-9;
+**weak vs strong p=0.067 (n.s.)**. So BOTH weak and strong distillation degrade
+faithfulness significantly and by statistically indistinguishable amounts, with
+the same ~13× CoT compression. **Teacher strength does NOT rescue monitorability**
+— a 14B strong teacher degrades it nearly as much as a 1.5B weak teacher.
+**Precommitted call: the driver is distillation-induced CoT COMPRESSION generally,
+not weak supervision specifically.** (Corroborates the instruct-arm E2≈0: teacher
+strength was irrelevant there too, but floored; here, on a substrate with range,
+both teachers degrade significantly.)
+
+## P1 — cross-family (Llama): DEGENERATION CONSTRAINT (no faithfulness conclusion)
+Student DeepSeek-R1-Distill-Llama-8B, weak teacher Llama-3.2-3B-Instruct (official,
+the only reliable in-family option — no sub-8B Llama R1-distill exists). Gate:
+format-valid 0.805, capability cratered 0.64 (zero-shot CoT) → 0.175 (W2SR), i.e.
+w2sr_beyond_cot = −0.465 — far beyond the controlled level (Qwen R1-7B was only
+−0.175). The terse, non-reasoning, 44%-correct/20%-degenerate Llama-3B teacher
+OVER-COMPRESSED/degraded the reasoning student. Per the precommitted rule we did
+NOT run the monitorability eval (reading faithfulness off a collapsed student =
+the SimpleRL error). **Cross-family generalization is INCONCLUSIVE with this
+teacher**; the matched recipe over-compresses instruct→reasoning. (Optional retry
+with a gentler recipe would deviate from the matched protocol — flagged for a human
+decision.)
+
 ## Scoring fix (reproducibility)
 MATH-SFT students emit `\boxed{X}` instead of the requested `ANSWER: X`, so
 Inspect's answer() scorer misparsed them and tanked ACCURACY (cond-2 0.051 vs
