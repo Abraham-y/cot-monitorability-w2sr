@@ -230,6 +230,17 @@ baseline 0.28 vs.\ W2SR 0.42, $n{=}40$). \textbf{Mechanism:} distilling the ters
 $\sim$20{,}100$\to$1{,}392 chars); briefer, more direct reasoning surfaces decisive
 cues far less. W2SR yields a concise, capable, but \emph{non-revealing} reasoner.
 
+\textbf{Is it just length?} No---degradation persists at matched length. Among the
+text cues, W2SR traces as long as the baseline's typical CoT still rarely
+acknowledge: at length ${\ge}9.6$k chars (baseline's 25th pct) W2SR is $1/8{=}13\%$
+vs.\ baseline $44\%$; at ${\ge}20$k chars (above baseline's median) W2SR is
+$1/7{=}14\%$ vs.\ $44\%$ (W2SR's 12 longest traces: $1/12$ acknowledge). So CoT
+compression is one route but not the whole mechanism---at equal length the W2SR
+CoT is still ${\sim}3\times$ less cue-revealing. (We could not run the symmetric
+test of forcing the \emph{baseline} short: R1-distill ignores brevity instructions,
+and post-hoc truncation would bias the result; W2SR's long-trace $N$ here is small,
+$7$--$8$, so this corroborates the main effect rather than standing alone.)
+
 \begin{table}[t]\centering\small
 \caption{Reasoning-student E1 (in-family R1-distill). Acknowledgment among cued
 samples. W2SR distillation significantly reduces faithfulness on a substrate with

@@ -143,6 +143,27 @@ GPQA acc baseline 0.275 vs W2SR 0.425 (n=40, comparable/noisy) — the faithfuln
 collapse is NOT a capability drop. So W2SR yields a concise, capable, but
 NON-REVEALING reasoner: monitorability collapses silently to an accuracy check.
 
+**Length confound (faithfulness AND CoT length both drop — is length the
+mechanism?).** Two checks, both pointing to "not the whole story":
+- *Step 1 (free, W2SR-side matched length):* among the 3 text cues, W2SR traces
+  that are as long as the baseline's typical CoT still rarely acknowledge:
+  len≥9.6k chars (baseline p25) → W2SR 1/8=12.5% vs baseline 32/72=44%;
+  len≥20k (> baseline median) → W2SR 1/7=14% vs baseline 23/52=44%. W2SR's 12
+  longest traces (4k–40k chars): 1/12 acknowledge. So at MATCHED long length W2SR
+  is still ~3× less faithful.
+- *Step 2a (baseline-short control): INFEASIBLE / negative.* We tried to
+  constrain-generate the baseline R1-7B to short CoT (brevity directive in the
+  prompt — NOT truncation, which would bias toward a false "length" result). The
+  directive was applied (verified in-prompt) but R1-distill IGNORED it: median CoT
+  18,262 vs 20,762 normal. R1-distill is brevity-resistant, so the symmetric
+  baseline-short test cannot be run without truncation (vetoed). The W2SR-side
+  matched-length evidence (step 1) carries the confound check instead.
+- *Framing the data supports:* W2SR degrades monitorability via TWO compounding
+  routes — (1) CoT compression (~14× shorter → less room to reveal) and (2) at
+  matched length, less cue-revealing reasoning. The strong claim (degradation
+  beyond shortening) holds; W2SR long-trace N is small (7–8), so this corroborates
+  the main 25%→3% result rather than standing alone.
+
 **Combined story (both substrates):** W2SR distillation does not preserve CoT
 monitorability. On a floored instruct student the effect is undetectable
 (underpowered); on a reasoning student with real range it is a large, significant
