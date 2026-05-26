@@ -9,7 +9,7 @@ configurations:
   model_path: null
   model_configs:
     "openai/DeepSeek-R1-Distill-Qwen-7B":
-      max_tokens: 30000
+      max_tokens: 8000
     "judge:anthropic/claude-sonnet-4-6":
       max_tokens: 4096
   factor_scorer_enabled: true
