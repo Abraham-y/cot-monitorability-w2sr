@@ -108,7 +108,7 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="A100-80GB",  # 80GB: a 7B reasoning student (R1-distill-7B) at 32k ctx with
+    gpu="A100",  # 40GB default (cheap). Bump to "A100-80GB" for a 7B reasoning student (R1-distill-7B) at 32k ctx with
     # 32-way concurrency needs KV headroom. For a small instruct 7B at 8k, "A100"
     # (40GB) suffices; for the 32B teacher use gpu="A100-80GB:2" + tensor_parallel=2.
     volumes={VOL_MOUNT: volume},
@@ -121,8 +121,8 @@ class VLLMServer:
     # Deployed web endpoint serves whatever this default is (flip + redeploy per
     # model). Currently: baseline reasoning student R1-distill-7B (cond-1', 32k ctx
     # for long <think> CoT). For the W2SR student use /vol/merged/w2sr_r1_7b.
-    model: str = modal.parameter(default="/vol/merged/w2sr_r1_7b_strong")
-    max_model_len: int = modal.parameter(default=32768)
+    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
+    max_model_len: int = modal.parameter(default=8192)
     tensor_parallel: int = modal.parameter(default=1)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)
