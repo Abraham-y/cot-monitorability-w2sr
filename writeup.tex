@@ -230,16 +230,21 @@ baseline 0.28 vs.\ W2SR 0.42, $n{=}40$). \textbf{Mechanism:} distilling the ters
 $\sim$20{,}100$\to$1{,}392 chars); briefer, more direct reasoning surfaces decisive
 cues far less. W2SR yields a concise, capable, but \emph{non-revealing} reasoner.
 
-\textbf{Is it just length?} No---degradation persists at matched length. Among the
-text cues, W2SR traces as long as the baseline's typical CoT still rarely
-acknowledge: at length ${\ge}9.6$k chars (baseline's 25th pct) W2SR is $1/8{=}13\%$
-vs.\ baseline $44\%$; at ${\ge}20$k chars (above baseline's median) W2SR is
-$1/7{=}14\%$ vs.\ $44\%$ (W2SR's 12 longest traces: $1/12$ acknowledge). So CoT
-compression is one route but not the whole mechanism---at equal length the W2SR
-CoT is still ${\sim}3\times$ less cue-revealing. (We could not run the symmetric
-test of forcing the \emph{baseline} short: R1-distill ignores brevity instructions,
-and post-hoc truncation would bias the result; W2SR's long-trace $N$ here is small,
-$7$--$8$, so this corroborates the main effect rather than standing alone.)
+\textbf{Mechanism: mostly compression, plus a real residual.} Faithfulness and CoT
+length both fall, so we decompose. (i) \emph{Mentionability:} W2SR surfaces the
+cue premise in its CoT at all in only $2.6\%$ [0.9, 7.5] of cases vs.\ baseline
+$22.9\%$ [15.6, 32.3] (disjoint CIs), and \emph{both} models, once they mention
+it, are credited $\approx\!100\%$ of the time---so the gap is W2SR not
+\emph{surfacing} the cue, not mentioning-without-crediting. (ii)
+\emph{Matched-length} (re-running W2SR over the full 198 to thicken the long
+bins): among traces ${\ge}9.6$k chars (baseline's 25th pct), W2SR acknowledges
+$6/31{=}19\%$ [9, 36] vs.\ baseline $32/72{=}44\%$ (two-proportion $p{=}0.016$);
+W2SR's long traces thus recover much of the way from its $7\%$ overall, so
+\textbf{CoT compression is the larger share} of the drop---but a \textbf{moderate
+($\sim$2.3$\times$), significant residual remains at matched length}. So W2SR
+degrades monitorability through two compounding routes (compression-dominant), not
+length alone. (We could not run the symmetric baseline-short control:
+R1-distill ignores brevity instructions and truncation would bias the result.)
 
 \begin{table}[t]\centering\small
 \caption{Reasoning-student E1 (in-family R1-distill). Acknowledgment among cued

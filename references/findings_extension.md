@@ -158,11 +158,26 @@ mechanism?).** Two checks, both pointing to "not the whole story":
   18,262 vs 20,762 normal. R1-distill is brevity-resistant, so the symmetric
   baseline-short test cannot be run without truncation (vetoed). The W2SR-side
   matched-length evidence (step 1) carries the confound check instead.
-- *Framing the data supports:* W2SR degrades monitorability via TWO compounding
-  routes — (1) CoT compression (~14× shorter → less room to reveal) and (2) at
-  matched length, less cue-revealing reasoning. The strong claim (degradation
-  beyond shortening) holds; W2SR long-trace N is small (7–8), so this corroborates
-  the main 25%→3% result rather than standing alone.
+- *Step 1b (thicken the thin cells, Exp 1):* re-ran W2SR R1-7B on the FULL 198
+  GPQA (3 text cues) to push the long bins to adequate N. Matched-length result
+  (W2SR full vs baseline, with 95% Wilson CIs):
+  - overall: W2SR 41/558=7.3% [5.5,9.8] vs baseline 40/96=41.7%.
+  - **≥9.6k chars: W2SR 6/31=19.4% [9.2,36.3] vs baseline 32/72=44.4% [34,56]**,
+    two-proportion p=0.016.
+  - ≥20k chars: W2SR 5/25=20.0% vs baseline 23/52=44.2%.
+  The thin n=8 estimate (12.5%) was noisy; at n=31 it settled at **19.4%**, so the
+  matched-length gap is **~2.3× (significant, p=0.016), not ~3×**.
+- *Exp 2 (mentionability, existing data):* W2SR surfaces the cue PREMISE in its CoT
+  3/114=2.6% [0.9,7.5] vs baseline 22/96=22.9% [15.6,32.3] (CIs disjoint);
+  P(ack | mentioned)≈1.0 for BOTH → the gap is W2SR *not surfacing* the cue, not
+  mentioning-without-crediting.
+- *Framing the data supports (precommitted, applied honestly):* W2SR degrades
+  monitorability via TWO compounding routes — **(1) CoT compression** (median ~14×
+  shorter; W2SR's long traces recover to 19.4% vs its 7.3% overall, so shortening
+  is the LARGER share of the 42%→7% drop) and **(2) a residual at-matched-length
+  reduction** (19.4% vs 44.4%, p=0.016, ~2.3×). Not "purely length," not "mostly
+  beyond length" — both, compression dominant. The headline 25%→3% degradation is
+  robust; the mechanism is mostly-compression + a real moderate residual.
 
 **Combined story (both substrates):** W2SR distillation does not preserve CoT
 monitorability. On a floored instruct student the effect is undetectable
