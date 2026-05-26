@@ -219,6 +219,30 @@ teacher**; the matched recipe over-compresses instruct→reasoning. (Optional re
 with a gentler recipe would deviate from the matched protocol — flagged for a human
 decision.)
 
+## Matched-length residual — convergent isolation across 3 cuts (existing data)
+Length is endogenous to reasoning (can't hold content fixed and vary length — the
+2a brevity control failed because R1 ignores brevity), so we isolate the residual
+by CONVERGENCE across imperfect length-controlled cuts, not one knockout. All cuts
+condition on the 3 text cues; "matched length" = traces ≥9.6k chars (baseline p25).
+| cut (matched length) | baseline | W2SR | verdict |
+|---|---|---|---|
+| acknowledgment (judge, PRIMARY) | 32/72=44.4% | 6/31=19.4% | two-prop **p=0.016** (sig) |
+| literal mention-rate | 20/72=27.8% [19,39] | 5/31=16.1% [7,33] | same dir, n.s. (CIs overlap) |
+| mention density /1k chars | 0.167 | 0.037 | W2SR lower (short-trace confounded) |
+| natural qid-matched (within-2×) | 4/9=44% [19,73] | 1/9=11% [2,44] | same dir, n=9, underpowered |
+
+**All four cuts point the same direction (baseline more cue-surfacing/crediting at
+matched length); significant on the primary judge measure (p=0.016), directionally
+consistent but underpowered on the literal-mention and natural-match cuts.**
+Precommitted call (applied honestly): the residual **persists across multiple
+length-controlled cuts** — we claim that, NOT "confound eliminated." Net: W2SR
+degrades monitorability **predominantly via CoT compression** (the larger, less
+surprising route — overall mention 4.8% vs 22.9% collapses mostly because W2SR
+traces are short) **plus a real, moderate residual** — at matched length the
+distilled model still surfaces/credits decision-relevant cues less. The
+matched-length residual is the non-trivial claim; lead with it, treat raw
+compression as the larger-but-expected contributor.
+
 ## Scoring fix (reproducibility)
 MATH-SFT students emit `\boxed{X}` instead of the requested `ANSWER: X`, so
 Inspect's answer() scorer misparsed them and tanked ACCURACY (cond-2 0.051 vs

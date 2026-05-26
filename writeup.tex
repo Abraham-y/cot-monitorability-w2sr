@@ -230,21 +230,31 @@ baseline 0.28 vs.\ W2SR 0.42, $n{=}40$). \textbf{Mechanism:} distilling the ters
 $\sim$20{,}100$\to$1{,}392 chars); briefer, more direct reasoning surfaces decisive
 cues far less. W2SR yields a concise, capable, but \emph{non-revealing} reasoner.
 
-\textbf{Mechanism: mostly compression, plus a real residual.} Faithfulness and CoT
-length both fall, so we decompose. (i) \emph{Mentionability:} W2SR surfaces the
-cue premise in its CoT at all in only $2.6\%$ [0.9, 7.5] of cases vs.\ baseline
-$22.9\%$ [15.6, 32.3] (disjoint CIs), and \emph{both} models, once they mention
-it, are credited $\approx\!100\%$ of the time---so the gap is W2SR not
-\emph{surfacing} the cue, not mentioning-without-crediting. (ii)
-\emph{Matched-length} (re-running W2SR over the full 198 to thicken the long
-bins): among traces ${\ge}9.6$k chars (baseline's 25th pct), W2SR acknowledges
-$6/31{=}19\%$ [9, 36] vs.\ baseline $32/72{=}44\%$ (two-proportion $p{=}0.016$);
-W2SR's long traces thus recover much of the way from its $7\%$ overall, so
-\textbf{CoT compression is the larger share} of the drop---but a \textbf{moderate
-($\sim$2.3$\times$), significant residual remains at matched length}. So W2SR
-degrades monitorability through two compounding routes (compression-dominant), not
-length alone. (We could not run the symmetric baseline-short control:
-R1-distill ignores brevity instructions and truncation would bias the result.)
+\textbf{Mechanism: compression-dominant, plus a real matched-length residual.}
+Faithfulness and CoT length both fall; the near-trivial half is that shorter CoT
+surfaces cues less, so the claim of interest is that W2SR surfaces cues less
+\emph{even at matched length}. Length is endogenous to reasoning (we cannot hold
+content fixed and vary length---a brevity-prompt control failed, as R1-distill
+ignores it), so we isolate the residual by \emph{convergence} across imperfect
+length-controlled cuts on the long ($\ge\!9.6$k-char) traces: (a) acknowledgment
+(judge): W2SR $6/31{=}19\%$ vs.\ baseline $32/72{=}44\%$, two-proportion
+$p{=}0.016$; (b) literal cue-mention rate: $16\%$ vs.\ $28\%$ (same direction,
+n.s.); (c) per-1k-char mention density: $0.037$ vs.\ $0.167$; (d) natural
+length-matched question pairs (within $2\times$): $1/9$ vs.\ $4/9$ (same direction,
+underpowered). \textbf{All four cuts point the same way; the primary (judge) cut is
+significant.} So most of the $42\%\!\to\!7\%$ drop is \textbf{compression} (W2SR's
+long traces recover to $19\%$ from its $7\%$ overall), with a \textbf{real, moderate
+residual at matched length} ($\sim$2.3$\times$, $p{=}0.016$): the distilled model
+surfaces decision-relevant cues less even per unit reasoning. We claim the residual
+\emph{persists across length-controlled cuts}, not that the confound is eliminated.
+
+\textbf{Teacher strength does not rescue it.} Distilling a \emph{strong} in-family
+teacher (R1-Distill-Qwen-14B) into the same student degrades faithfulness almost as
+much as the weak teacher: $7.4\%$ vs.\ baseline $25\%$ ($p{=}1.1\!\times\!10^{-5}$),
+and is not distinguishable from the weak-teacher student's $3.2\%$ ($p{=}0.07$),
+with the same ${\sim}13\times$ CoT compression. The degradation is driven by
+distillation-induced compression \emph{generally}, not by teacher weakness---W2SR
+(weak$\to$strong) is not uniquely harmful.
 
 \begin{table}[t]\centering\small
 \caption{Reasoning-student E1 (in-family R1-distill). Acknowledgment among cued
