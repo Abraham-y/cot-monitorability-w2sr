@@ -6,7 +6,9 @@ references/pdfs/
 
 # Data, checkpoints, eval outputs — live on the Modal Volume in practice
 data/
-results/
+results/*
+!results/reanalysis/
+!results/figs/
 checkpoints/
 save/
 *.ckpt
@@ -14,6 +16,7 @@ save/
 
 # Secrets — never commit tokens
 .env
+.eval
 *.secret
 hf_token*
 

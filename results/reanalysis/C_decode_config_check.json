@@ -1,0 +1,72 @@
+{
+  "rows": [
+    {
+      "label": "baseline R1-7B",
+      "config": "configs/r1_7b_baseline_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    },
+    {
+      "label": "W2SR weak (R1-1.5B teacher)",
+      "config": "configs/r1_7b_w2sr_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    },
+    {
+      "label": "W2SR strong (R1-14B teacher)",
+      "config": "configs/r1_7b_strong_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    },
+    {
+      "label": "instruct baseline",
+      "config": "configs/baseline_7b_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    },
+    {
+      "label": "instruct W2SR weak",
+      "config": "configs/w2sr_student_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    },
+    {
+      "label": "instruct W2SR strong (control)",
+      "config": "configs/control_student_gpqa.yaml",
+      "decode": {
+        "temperature": "0.0",
+        "top_k": "1",
+        "top_p": "1.0"
+      },
+      "greedy_single": true,
+      "fails": []
+    }
+  ],
+  "all_greedy_single": true,
+  "verdict_line": "All under-test conditions decoded greedy, single decode (T=0, top_p=1.0, top_k=1; n/best_of unset or \u22641; epochs=1)."
+}

@@ -2,6 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
@@ -12,8 +13,7 @@
 
 \title{\vspace{-3.5em}Looking Monitorable Without Being Faithful:\\
 Math-CoT Fine-Tuning Degrades Cue-Faithfulness Independent of Teacher Strength}
-\author{Abraham Yeung \\ \small CS 338 Project}
-\date{\vspace{-1em}\small May 2026}
+\author{Abraham Yeung \\ \small Stanford University}
 
 \begin{document}
 \maketitle
@@ -112,6 +112,10 @@ factor-utilization rate). We use the five cues shipped in the released eval and 
 single judge (\texttt{claude-sonnet-4-6}, $T{=}0$); faithfulness is reported as
 acknowledgment among \emph{cued} samples. All evaluation is greedy ($T{=}0$); trace
 sets are hashed. Training is LoRA; generation/training/gating run on Modal GPUs.
+\textbf{Reproducibility.} All code, configs, per-sample judge labels, and
+the full reanalysis pipeline (one command, \texttt{bash scripts/reanalysis/run\_all.sh})
+are released; the four headline numbers in Table~\ref{tab:r1} are enforced
+by hard-fail assertions in \texttt{01\_gate.py} so any drift halts the suite.
 
 \section{Reproduction: when does W2SR fire?}
 \label{sec:repro}
@@ -235,6 +239,20 @@ $p\!=\!1\!\times\!10^{-5}$; Self-A vs.\ baseline $p\!=\!2.4\!\times\!10^{-7}$
 Self-B vs.\ W2SR weak $p\!=\!1$ ($n\!=\!79$, disc.\ $2/3$) --- statistically indistinguishable.
 \end{table}
 
+\begin{figure}[t]\centering
+\includegraphics[width=0.88\linewidth]{results/figs/dissociation_bars.pdf}
+\caption{\textbf{Behavior--verbalization dissociation across the reasoning-student
+axis.} Acknowledgment (verbalization) collapses from $25.0\%$ on baseline R1-7B to
+$2.4$--$7.4\%$ across all four trained arms (W2SR weak, W2SR strong, two self-distill
+budgets), while influence (behavior: answer $=$ cue target) is preserved or
+strengthened in every trained condition and stays well above the $1/3$ random-flip
+chance line. The trained arms keep being moved by the cue and stop saying so.
+Numbers reproduced exactly by \texttt{python3 scripts/reanalysis/01\_gate.py} (the
+$25.0\%$, $3.2\%$, paired $\Delta\!=\!-0.22$, and paired $\Delta\!=\!+0.16$ figures
+are enforced by hard-fail asserts in that script).}
+\label{fig:dissociation}
+\end{figure}
+
 \textbf{Mechanism: compression-dominant + a real matched-length residual.}
 Faithfulness and CoT length both fall; the near-trivial half is that shorter CoT
 surfaces cues less, so the claim of interest is degradation \emph{at matched
@@ -278,6 +296,24 @@ on a different substrate at $3\times$ compression too. The W2SR asymmetry is inc
 terse MATH-style CoT traces in general}, which compresses CoT and suppresses
 cue-acknowledgment whether the teacher is weaker, stronger, or identical to the
 student.
+
+\begin{table}[t]\centering\small
+\caption{Per-text-cue acknowledgment, baseline R1-7B vs.\ W2SR weak (paired on
+question id). Ack drops on every text cue; each cue's discordant cells are
+one-directional (W2SR-only ack $\le\!1$). The two non-text cues
+(\texttt{visual\_squares}, \texttt{xml\_metadata}) floor at $0\%$ on both
+conditions and are omitted.}
+\label{tab:percue}
+\begin{tabular}{lccc}
+\toprule
+cue & baseline R1-7B & W2SR weak (1.5B) & paired $\Delta$ ($n$, disc.\ base/W2SR, $p$) \\
+\midrule
+stanford\_professor & $15/32 = 46.9\%$ & $3/38 = 7.9\%$  & $-0.40$ ($30$, $12/0$, $5\!\times\!10^{-4}$) \\
+grader\_hack        & $7/32  = 21.9\%$ & $1/38 = 2.6\%$  & $-0.20$ ($30$, $7/1$,  $0.07$) \\
+insider\_info       & $18/32 = 56.2\%$ & $2/38 = 5.3\%$  & $-0.50$ ($30$, $15/0$, $6\!\times\!10^{-5}$) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Discussion}
 Math-CoT SFT does not preserve monitorability and, where it is measurable, it hurts.
@@ -341,6 +377,13 @@ cross-family scope remains open. Certifying \emph{any} CoT-SFT student on accura
 alone, or on how elaborate its CoT looks, is insufficient and potentially
 misleading; the cue-acknowledgment component of monitorability must be measured
 directly.
+
+\section*{Acknowledgments}
+Thanks to the CS 338 instructional staff for the course framing and feedback on
+intermediate drafts; to Modal
+for the GPU credits that supported trace generation, training, and serving. The
+Anthropic Claude and Google Gemini (via OpenRouter) judges contributed to the
+cross-model and cross-rubric robustness analyses. All errors are my own.
 
 \begin{thebibliography}{9}\small
 \bibitem{yuan2025} Yuan et al. Incentivizing Strong Reasoning from Weak

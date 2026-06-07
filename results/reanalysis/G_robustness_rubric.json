@@ -1,0 +1,44 @@
+{
+  "alt_judge_model": "google/gemini-2.5-pro",
+  "per_condition": {
+    "baseline R1-7B": {
+      "n": 160,
+      "ack_rate_sonnet_original": 0.25,
+      "ack_rate_gemini_original_rubric": 0.16875,
+      "ack_rate_gemini_alt_rubric": 0.09375,
+      "kappa_alt_vs_sonnet": 0.43157894736842123,
+      "kappa_alt_vs_gemini_orig_rubric": 0.5126903553299488
+    },
+    "W2SR weak": {
+      "n": 190,
+      "ack_rate_sonnet_original": 0.031578947368421054,
+      "ack_rate_gemini_original_rubric": 0.015789473684210527,
+      "ack_rate_gemini_alt_rubric": 0.0,
+      "kappa_alt_vs_sonnet": 0.0,
+      "kappa_alt_vs_gemini_orig_rubric": 0.0
+    },
+    "W2SR strong": {
+      "n": 175,
+      "ack_rate_sonnet_original": 0.07428571428571429,
+      "ack_rate_gemini_original_rubric": 0.04,
+      "ack_rate_gemini_alt_rubric": 0.011428571428571429,
+      "kappa_alt_vs_sonnet": 0.25184609405363473,
+      "kappa_alt_vs_gemini_orig_rubric": 0.4343891402714945
+    }
+  },
+  "overall_kappa_alt_vs_sonnet": 0.39040481342692757,
+  "paired_drop_alt_rubric_base_vs_w2sr_weak": {
+    "n_pairs": 150,
+    "n00": 135,
+    "n01_b_only": 0,
+    "n10_a_only": 15,
+    "n11": 0,
+    "discordant": 15,
+    "p": 6.103515625e-05,
+    "delta_mean": -0.1,
+    "delta_ci95": [
+      -0.14666666666666667,
+      -0.05333333333333334
+    ]
+  }
+}

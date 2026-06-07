@@ -1,0 +1,337 @@
+{
+  "per_condition_summaries": {
+    "baseline R1-7B": {
+      "cue_at_wrong": {
+        "n_restricted": 95,
+        "n_flippers": 47,
+        "switch_to_cue_k": 36,
+        "switch_to_cue_rate": 0.37894736842105264,
+        "switch_to_cue_ci95": [
+          0.28789651358466833,
+          0.4794079412197865
+        ],
+        "flip_to_cue_k": 36,
+        "flip_to_cue_rate": 0.7659574468085106,
+        "flip_to_cue_ci95": [
+          0.6277546774315923,
+          0.8639686357607541
+        ],
+        "p_one_sided_vs_chance_one_third": 1.5705701017128122e-09
+      },
+      "cue_at_correct": {
+        "n_restricted": 28,
+        "n_flippers": 21,
+        "switch_to_cue_k": 8,
+        "switch_to_cue_rate": 0.2857142857142857,
+        "switch_to_cue_ci95": [
+          0.15253815848329969,
+          0.470596357370175
+        ],
+        "flip_to_cue_k": 8,
+        "flip_to_cue_rate": 0.38095238095238093,
+        "flip_to_cue_ci95": [
+          0.20750767797982506,
+          0.5912170418449848
+        ],
+        "p_one_sided_vs_chance_one_third": 0.39923811538240317
+      },
+      "pooled": {
+        "n_restricted": 123,
+        "n_flippers": 68,
+        "switch_to_cue_k": 44,
+        "switch_to_cue_rate": 0.35772357723577236,
+        "switch_to_cue_ci95": [
+          0.278503383040199,
+          0.4455619078422875
+        ],
+        "flip_to_cue_k": 44,
+        "flip_to_cue_rate": 0.6470588235294118,
+        "flip_to_cue_ci95": [
+          0.5284083420991774,
+          0.7499818941984553
+        ],
+        "p_one_sided_vs_chance_one_third": 1.2274148898873346e-07
+      }
+    },
+    "W2SR weak (R1-1.5B teacher)": {
+      "cue_at_wrong": {
+        "n_restricted": 127,
+        "n_flippers": 87,
+        "switch_to_cue_k": 64,
+        "switch_to_cue_rate": 0.5039370078740157,
+        "switch_to_cue_ci95": [
+          0.418149182069332,
+          0.5894936471226071
+        ],
+        "flip_to_cue_k": 64,
+        "flip_to_cue_rate": 0.735632183908046,
+        "flip_to_cue_ci95": [
+          0.6344340373111473,
+          0.8169010338456796
+        ],
+        "p_one_sided_vs_chance_one_third": 2.0206331626075034e-14
+      },
+      "cue_at_correct": {
+        "n_restricted": 52,
+        "n_flippers": 34,
+        "switch_to_cue_k": 24,
+        "switch_to_cue_rate": 0.46153846153846156,
+        "switch_to_cue_ci95": [
+          0.3334025986239788,
+          0.5949662160231659
+        ],
+        "flip_to_cue_k": 24,
+        "flip_to_cue_rate": 0.7058823529411765,
+        "flip_to_cue_ci95": [
+          0.5383077411853625,
+          0.8316554739006805
+        ],
+        "p_one_sided_vs_chance_one_third": 9.987455359818384e-06
+      },
+      "pooled": {
+        "n_restricted": 179,
+        "n_flippers": 121,
+        "switch_to_cue_k": 88,
+        "switch_to_cue_rate": 0.49162011173184356,
+        "switch_to_cue_ci95": [
+          0.4193310856640395,
+          0.5642612696861654
+        ],
+        "flip_to_cue_k": 88,
+        "flip_to_cue_rate": 0.7272727272727273,
+        "flip_to_cue_ci95": [
+          0.6418418594124898,
+          0.7987164160341561
+        ],
+        "p_one_sided_vs_chance_one_third": 9.809833547678157e-19
+      }
+    },
+    "W2SR strong (R1-14B teacher)": {
+      "cue_at_wrong": {
+        "n_restricted": 126,
+        "n_flippers": 97,
+        "switch_to_cue_k": 72,
+        "switch_to_cue_rate": 0.5714285714285714,
+        "switch_to_cue_ci95": [
+          0.48416701538105367,
+          0.6544634389571552
+        ],
+        "flip_to_cue_k": 72,
+        "flip_to_cue_rate": 0.7422680412371134,
+        "flip_to_cue_ci95": [
+          0.6471721989159661,
+          0.818905292912803
+        ],
+        "p_one_sided_vs_chance_one_third": 2.1434081435169905e-16
+      },
+      "cue_at_correct": {
+        "n_restricted": 39,
+        "n_flippers": 22,
+        "switch_to_cue_k": 16,
+        "switch_to_cue_rate": 0.41025641025641024,
+        "switch_to_cue_ci95": [
+          0.2707908943540048,
+          0.5658165152665509
+        ],
+        "flip_to_cue_k": 16,
+        "flip_to_cue_rate": 0.7272727272727273,
+        "flip_to_cue_ci95": [
+          0.5184787630099802,
+          0.8684941798418556
+        ],
+        "p_one_sided_vs_chance_one_third": 0.0001831757458677851
+      },
+      "pooled": {
+        "n_restricted": 165,
+        "n_flippers": 119,
+        "switch_to_cue_k": 88,
+        "switch_to_cue_rate": 0.5333333333333333,
+        "switch_to_cue_ci95": [
+          0.4573189068484033,
+          0.6078309140488163
+        ],
+        "flip_to_cue_k": 88,
+        "flip_to_cue_rate": 0.7394957983193278,
+        "flip_to_cue_ci95": [
+          0.6540282672512996,
+          0.8099839240584847
+        ],
+        "p_one_sided_vs_chance_one_third": 1.5837322950145737e-19
+      }
+    },
+    "instruct baseline (Qwen2.5-7B-Inst)": {
+      "cue_at_wrong": {
+        "n_restricted": 750,
+        "n_flippers": 520,
+        "switch_to_cue_k": 413,
+        "switch_to_cue_rate": 0.5506666666666666,
+        "switch_to_cue_ci95": [
+          0.5148980145877262,
+          0.5859189209594762
+        ],
+        "flip_to_cue_k": 413,
+        "flip_to_cue_rate": 0.7942307692307692,
+        "flip_to_cue_ci95": [
+          0.7573864361440684,
+          0.8267596110579866
+        ],
+        "p_one_sided_vs_chance_one_third": 3.920416135392418e-103
+      },
+      "cue_at_correct": {
+        "n_restricted": 215,
+        "n_flippers": 116,
+        "switch_to_cue_k": 76,
+        "switch_to_cue_rate": 0.35348837209302325,
+        "switch_to_cue_ci95": [
+          0.29266971053123797,
+          0.41945083693322943
+        ],
+        "flip_to_cue_k": 76,
+        "flip_to_cue_rate": 0.6551724137931034,
+        "flip_to_cue_ci95": [
+          0.5649527181283869,
+          0.7354438052825154
+        ],
+        "p_one_sided_vs_chance_one_third": 1.470139688062689e-12
+      },
+      "pooled": {
+        "n_restricted": 965,
+        "n_flippers": 636,
+        "switch_to_cue_k": 489,
+        "switch_to_cue_rate": 0.5067357512953368,
+        "switch_to_cue_ci95": [
+          0.4752271795791805,
+          0.5381909065145627
+        ],
+        "flip_to_cue_k": 489,
+        "flip_to_cue_rate": 0.7688679245283019,
+        "flip_to_cue_ci95": [
+          0.7345492956844958,
+          0.7999579948699164
+        ],
+        "p_one_sided_vs_chance_one_third": 5.995992236204282e-112
+      }
+    },
+    "instruct W2SR weak": {
+      "cue_at_wrong": {
+        "n_restricted": 153,
+        "n_flippers": 108,
+        "switch_to_cue_k": 75,
+        "switch_to_cue_rate": 0.49019607843137253,
+        "switch_to_cue_ci95": [
+          0.41219888687175693,
+          0.5686735347306751
+        ],
+        "flip_to_cue_k": 75,
+        "flip_to_cue_rate": 0.6944444444444444,
+        "flip_to_cue_ci95": [
+          0.6021321544819462,
+          0.7733989537997663
+        ],
+        "p_one_sided_vs_chance_one_third": 1.9888934829150828e-14
+      },
+      "cue_at_correct": {
+        "n_restricted": 63,
+        "n_flippers": 44,
+        "switch_to_cue_k": 29,
+        "switch_to_cue_rate": 0.4603174603174603,
+        "switch_to_cue_ci95": [
+          0.34308665416425693,
+          0.5821096307840388
+        ],
+        "flip_to_cue_k": 29,
+        "flip_to_cue_rate": 0.6590909090909091,
+        "flip_to_cue_ci95": [
+          0.5113886797193951,
+          0.7812436737136005
+        ],
+        "p_one_sided_vs_chance_one_third": 1.0101355139933427e-05
+      },
+      "pooled": {
+        "n_restricted": 216,
+        "n_flippers": 152,
+        "switch_to_cue_k": 104,
+        "switch_to_cue_rate": 0.48148148148148145,
+        "switch_to_cue_ci95": [
+          0.41575425209628597,
+          0.5478559108574044
+        ],
+        "flip_to_cue_k": 104,
+        "flip_to_cue_rate": 0.6842105263157895,
+        "flip_to_cue_ci95": [
+          0.6065477721897748,
+          0.7527914543068731
+        ],
+        "p_one_sided_vs_chance_one_third": 1.1210079649484188e-18
+      }
+    },
+    "instruct W2SR strong (control)": {
+      "cue_at_wrong": {
+        "n_restricted": 114,
+        "n_flippers": 79,
+        "switch_to_cue_k": 54,
+        "switch_to_cue_rate": 0.47368421052631576,
+        "switch_to_cue_ci95": [
+          0.384386213899234,
+          0.5646979804769455
+        ],
+        "flip_to_cue_k": 54,
+        "flip_to_cue_rate": 0.6835443037974683,
+        "flip_to_cue_ci95": [
+          0.5745170514704335,
+          0.7755486160202957
+        ],
+        "p_one_sided_vs_chance_one_third": 2.1916992518599692e-10
+      },
+      "cue_at_correct": {
+        "n_restricted": 53,
+        "n_flippers": 47,
+        "switch_to_cue_k": 28,
+        "switch_to_cue_rate": 0.5283018867924528,
+        "switch_to_cue_ci95": [
+          0.3965985230075645,
+          0.6561797239101858
+        ],
+        "flip_to_cue_k": 28,
+        "flip_to_cue_rate": 0.5957446808510638,
+        "flip_to_cue_ci95": [
+          0.45341868236312644,
+          0.7236017103861182
+        ],
+        "p_one_sided_vs_chance_one_third": 0.00020095112948080148
+      },
+      "pooled": {
+        "n_restricted": 167,
+        "n_flippers": 126,
+        "switch_to_cue_k": 82,
+        "switch_to_cue_rate": 0.49101796407185627,
+        "switch_to_cue_ci95": [
+          0.41625455643288867,
+          0.566185317696129
+        ],
+        "flip_to_cue_k": 82,
+        "flip_to_cue_rate": 0.6507936507936508,
+        "flip_to_cue_ci95": [
+          0.5642112392113556,
+          0.728453053280419
+        ],
+        "p_one_sided_vs_chance_one_third": 3.415458057524765e-13
+      }
+    }
+  },
+  "paired_switch_to_cue_clean_base_vs_w2sr_weak": {
+    "n_pairs": 64,
+    "n00": 19,
+    "n01_b_only": 20,
+    "n10_a_only": 9,
+    "n11": 16,
+    "discordant": 29,
+    "p": 0.06142834573984146,
+    "delta_mean": 0.171875,
+    "delta_ci95": [
+      0.015625,
+      0.328125
+    ]
+  },
+  "attrition_note": "Baseline R1-7B loses 23% of cued samples to no-answer (parseable filter); trained students lose \u22646%. The paired test conditions on baseline producing an answer, which selects easier/shorter cases for baseline \u2014 biases the paired \u0394 toward zero (against W2SR). So \u0394 is a conservative lower bound."
+}

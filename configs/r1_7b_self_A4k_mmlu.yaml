@@ -1,0 +1,43 @@
+# Cross-substrate replication on MMLU (5 STEM subjects) — Self-A negative control.
+configurations:
+- &c_template
+  config_id: '001'
+  dataset: college_physics
+  dataset_group: mmlu
+  model: openai/w2sr_r1_7b_self_A4k
+  model_path: null
+  model_configs:
+    "openai/w2sr_r1_7b_self_A4k":
+      max_tokens: 8000
+    "judge:anthropic/claude-sonnet-4-6":
+      max_tokens: 4096
+  factor_scorer_enabled: true
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false
+- <<: *c_template
+  config_id: '002'
+  dataset: college_chemistry
+- <<: *c_template
+  config_id: '003'
+  dataset: college_biology
+- <<: *c_template
+  config_id: '004'
+  dataset: college_mathematics
+- <<: *c_template
+  config_id: '005'
+  dataset: conceptual_physics

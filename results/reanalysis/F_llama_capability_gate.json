@@ -1,0 +1,37 @@
+{
+  "baseline R1-Distill-Llama-8B": {
+    "n": 30,
+    "n_empty": 0,
+    "n_non_empty": 30,
+    "n_parseable": 29,
+    "n_correct": 15,
+    "acc_total": 0.5,
+    "acc_non_empty": 0.5,
+    "acc_parseable": 0.5172413793103449,
+    "empty_rate": 0.0,
+    "median_chars_non_empty": 15420.5
+  },
+  "Llama-Self-B (R1-Llama-8B self, 8k bud)": {
+    "n": 40,
+    "n_empty": 0,
+    "n_non_empty": 40,
+    "n_parseable": 40,
+    "n_correct": 9,
+    "acc_total": 0.225,
+    "acc_non_empty": 0.225,
+    "acc_parseable": 0.225,
+    "empty_rate": 0.0,
+    "median_chars_non_empty": 1424.5
+  },
+  "verdict": {
+    "infra_ok": true,
+    "infra_messages": [],
+    "gate_threshold_pp": 5.0,
+    "drop_pp_total": 27.5,
+    "drop_pp_non_empty": 27.5,
+    "drop_pp_parseable": 29.2,
+    "compression_ratio": 10.83,
+    "gate_pass": false,
+    "decision": "FAIL (clean eval). At the Qwen-matched recipe, R1-Distill-Llama-8B self-distillation loses ~28 pp of GPQA accuracy and compresses CoT 10.8\u00d7 (15,420 \u2192 1,424 chars median, non-empty). This is genuine substrate sensitivity: the same SFT recipe that holds Qwen-7B capability (Qwen Self-B: GPQA acc preserved, ~14\u00d7 compression) craters Llama-8B. Per the spec, NOT proceeding to monitorability eval; report as substrate-dependence finding."
+  }
+}

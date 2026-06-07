@@ -114,15 +114,15 @@ MINUTES = 60
     volumes={VOL_MOUNT: volume},
     secrets=[hf_secret],
     timeout=60 * MINUTES,
-    scaledown_window=10 * MINUTES,  # spin down after 10 min idle (cost control)
+    scaledown_window=30 * MINUTES,  # bumped from 10→30 so the server doesn't recycle mid-eval
 )
 @modal.concurrent(max_inputs=32)
 class VLLMServer:
     # Deployed web endpoint serves whatever this default is (flip + redeploy per
     # model). Currently: baseline reasoning student R1-distill-7B (cond-1', 32k ctx
     # for long <think> CoT). For the W2SR student use /vol/merged/w2sr_r1_7b.
-    model: str = modal.parameter(default="Qwen/Qwen2.5-7B-Instruct")
-    max_model_len: int = modal.parameter(default=8192)
+    model: str = modal.parameter(default="/vol/merged/w2sr_llama_self_B8k")
+    max_model_len: int = modal.parameter(default=32768)
     tensor_parallel: int = modal.parameter(default=1)
 
     @modal.web_server(port=serving.VLLM_PORT, startup_timeout=20 * MINUTES)

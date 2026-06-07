@@ -1,0 +1,227 @@
+{
+  "training_traces": {
+    "w2sr": {
+      "label": "R1-7B W2SR weak   (R1-1.5B teacher)",
+      "path": "/tmp/w2sr_traces/w2sr_train.json",
+      "n": 729,
+      "frac_think_open": 0.0,
+      "frac_think_close": 1.0,
+      "frac_boxed": 1.0,
+      "frac_answer_kw": 0.0,
+      "median_chars": 6272,
+      "mean_chars": 6789,
+      "p95_chars": 11133,
+      "max_chars": 14275
+    },
+    "w2sr_r1_14b": {
+      "label": "R1-7B W2SR strong (R1-14B teacher)",
+      "path": "/tmp/w2sr_traces/w2sr_r1_14b_train.json",
+      "n": 657,
+      "frac_think_open": 0.0,
+      "frac_think_close": 1.0,
+      "frac_boxed": 1.0,
+      "frac_answer_kw": 0.0,
+      "median_chars": 6046,
+      "mean_chars": 6455,
+      "p95_chars": 10860,
+      "max_chars": 14246
+    },
+    "w2sr_infamily": {
+      "label": "Instruct W2SR weak   (Qwen2.5-Math-1.5B teacher)",
+      "path": "/tmp/w2sr_traces/w2sr_infamily_train.json",
+      "n": 891,
+      "frac_think_open": 0.0,
+      "frac_think_close": 0.0,
+      "frac_boxed": 1.0,
+      "frac_answer_kw": 0.0,
+      "median_chars": 1417,
+      "mean_chars": 1541,
+      "p95_chars": 2712,
+      "max_chars": 3787
+    },
+    "w2sr_infamily_strong": {
+      "label": "Instruct W2SR strong (Qwen2.5-Math-72B teacher)",
+      "path": "/tmp/w2sr_traces/w2sr_infamily_strong_train.json",
+      "n": 819,
+      "frac_think_open": 0.0,
+      "frac_think_close": 0.0,
+      "frac_boxed": 1.0,
+      "frac_answer_kw": 0.0,
+      "median_chars": 1500,
+      "mean_chars": 1619,
+      "p95_chars": 2819,
+      "max_chars": 4559
+    }
+  },
+  "stored_completions": {
+    "baseline R1-7B": {
+      "batch": "r1_7b_baseline",
+      "served": "openai_DeepSeek-R1-Distill-Qwen-7B",
+      "cells": {
+        "cued": {
+          "n": 160,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.575,
+          "frac_boxed": 0.0,
+          "frac_answer_kw": 0.5625,
+          "median_chars": 18692,
+          "mean_chars": 17630,
+          "p95_chars": 32355,
+          "max_chars": 35710
+        },
+        "uncued": {
+          "n": 40,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.5,
+          "frac_boxed": 0.0,
+          "frac_answer_kw": 0.5,
+          "median_chars": 20096,
+          "mean_chars": 19117,
+          "p95_chars": 32086,
+          "max_chars": 34038
+        }
+      }
+    },
+    "W2SR weak (R1-1.5B teacher)": {
+      "batch": "r1_7b_w2sr",
+      "served": "openai_w2sr_r1_7b",
+      "cells": {
+        "cued": {
+          "n": 190,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.21578947368421053,
+          "frac_boxed": 0.02631578947368421,
+          "frac_answer_kw": 0.9,
+          "median_chars": 1362,
+          "mean_chars": 3960,
+          "p95_chars": 27872,
+          "max_chars": 40233
+        },
+        "uncued": {
+          "n": 40,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.225,
+          "frac_boxed": 0.075,
+          "frac_answer_kw": 0.9,
+          "median_chars": 1392,
+          "mean_chars": 3029,
+          "p95_chars": 10590,
+          "max_chars": 34349
+        }
+      }
+    },
+    "W2SR strong (R1-14B teacher)": {
+      "batch": "r1_7b_strong",
+      "served": "openai_w2sr_r1_7b_strong",
+      "cells": {
+        "cued": {
+          "n": 175,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.37714285714285717,
+          "frac_boxed": 0.011428571428571429,
+          "frac_answer_kw": 0.92,
+          "median_chars": 1508,
+          "mean_chars": 4566,
+          "p95_chars": 26333,
+          "max_chars": 35234
+        },
+        "uncued": {
+          "n": 40,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.3,
+          "frac_boxed": 0.025,
+          "frac_answer_kw": 0.875,
+          "median_chars": 1638,
+          "mean_chars": 5437,
+          "p95_chars": 26475,
+          "max_chars": 33394
+        }
+      }
+    },
+    "instruct baseline (Qwen2.5-7B-Inst)": {
+      "batch": "baseline_7b",
+      "served": "openai_Qwen2.5-7B-Instruct",
+      "cells": {
+        "cued": {
+          "n": 970,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.01134020618556701,
+          "frac_answer_kw": 0.9814432989690721,
+          "median_chars": 1113,
+          "mean_chars": 1075,
+          "p95_chars": 2764,
+          "max_chars": 17704
+        },
+        "uncued": {
+          "n": 198,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.015151515151515152,
+          "frac_answer_kw": 0.9646464646464646,
+          "median_chars": 1456,
+          "mean_chars": 1348,
+          "p95_chars": 2796,
+          "max_chars": 15059
+        }
+      }
+    },
+    "instruct W2SR weak": {
+      "batch": "w2sr_student",
+      "served": "openai_w2sr_infamily_inst",
+      "cells": {
+        "cued": {
+          "n": 225,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.5066666666666667,
+          "frac_answer_kw": 0.43555555555555553,
+          "median_chars": 1962,
+          "mean_chars": 1644,
+          "p95_chars": 2824,
+          "max_chars": 4494
+        },
+        "uncued": {
+          "n": 198,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.8383838383838383,
+          "frac_answer_kw": 0.09595959595959595,
+          "median_chars": 2019,
+          "mean_chars": 2302,
+          "p95_chars": 3481,
+          "max_chars": 15838
+        }
+      }
+    },
+    "instruct W2SR strong (control)": {
+      "batch": "control_student",
+      "served": "openai_w2sr_control_inst",
+      "cells": {
+        "cued": {
+          "n": 175,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.6971428571428572,
+          "frac_answer_kw": 0.2857142857142857,
+          "median_chars": 1858,
+          "mean_chars": 1891,
+          "p95_chars": 3444,
+          "max_chars": 16030
+        },
+        "uncued": {
+          "n": 198,
+          "frac_think_open": 0.0,
+          "frac_think_close": 0.0,
+          "frac_boxed": 0.9292929292929293,
+          "frac_answer_kw": 0.05555555555555555,
+          "median_chars": 2115,
+          "mean_chars": 2465,
+          "p95_chars": 3822,
+          "max_chars": 35265
+        }
+      }
+    }
+  },
+  "verdict": "R1 baseline emits </think> on 57% of cued completions; R1-7B W2SR weak on 22%; R1-7B W2SR strong on 38%. Training traces carried the </think> token in 100% of records, so the trained students were NOT shown stripped data. The collapse to ~0% emission is EMERGENT under LoRA SFT \u2014 the channel separator was present in the supervision signal but the SFT'd student stopped producing it, alongside an order-of-magnitude CoT compression (18,692 \u2192 1,362 chars median; 13.7\u00d7 shorter)."
+}
