@@ -27,12 +27,15 @@ math CoT preserves that property, using the cue-based faithfulness paradigm
 (Meek et al.\ 2025; Turpin et al.\ 2023) on a DeepSeek-R1-distilled student.
 Our central finding is a \textbf{dissociation between behavior and verbalization}:
 after weak-to-strong reasoning fine-tuning (W2SR; Yuan et al.\ 2025), a planted
-cue's \emph{behavioral} pull on the answer is preserved or strengthened (paired
-influence $\Delta\!=\!+0.16$; flips land on the cue target at ${\sim}2\times$ chance,
-as in the untrained model) while the CoT's \emph{acknowledgment} of that cue
-collapses ($25\%\!\to\!3\%$; paired $\Delta\!=\!-0.22$, McNemar
-$p\!\approx\!2\times10^{-9}$), at preserved accuracy. The model keeps being moved
-by the cue and stops saying so. That fine-tuning lowers CoT faithfulness is known
+cue's \emph{behavioral} pull on the answer is \emph{not reduced} --- flips land on
+the cue target at ${\sim}2\times$ chance, statistically the same rate as the
+untrained model (paired influence $\Delta\!=\!+0.16$, CI $[+0.04,+0.28]$, lower
+bound near zero) --- while the CoT's \emph{acknowledgment} of that cue collapses.
+On a strict, attribution-only rubric (the conservative claim) acknowledgment goes
+$9.4\%\!\to\!0.0\%$ ($15/0$ one-directional discordant, McNemar
+$p\!=\!6\!\times\!10^{-5}$); on the loose ``mention or attribute'' rubric used by
+the upstream eval, $25\%\!\to\!3\%$ ($34/1$, $p\!\approx\!2\!\times\!10^{-9}$), at
+preserved accuracy. The model keeps being moved by the cue and stops saying so. That fine-tuning lowers CoT faithfulness is known
 (Lobo et al.\ 2024); our contribution is that the cue's causal grip is held fixed
 while verbalization disappears, which is the specifically \emph{monitorability}-relevant
 failure. We show the effect is \textbf{teacher-strength-invariant}: weak (1.5B),
@@ -40,14 +43,14 @@ strong (14B), and \emph{same-strength self-distillation} (teacher == student) al
 collapse acknowledgment far below baseline ($2.4$--$7.4\%$ vs.\ $25\%$) with no
 significant difference between arms (pairwise McNemar $p\!\ge\!0.09$; self-distill
 arms indistinguishable from W2SR weak at $p\!=\!1$), so weak-to-strong asymmetry is
-incidental; the cause is SFT on terse math-style CoT. The drop is compression-dominant (CoT shortens ${\sim}14\times$; a
-matched-length residual persists but is underpowered for magnitude), emergent rather
-than imitated (training traces carry the \texttt{</think>} separator in $100\%$ of
-records, student completions in $22\%$), robust to both an out-of-family judge
-(\texttt{gemini-2.5-pro}, $\kappa\!\in\![0.65,0.68]$, paired drop preserved) and a
-within-judge rubric swap to attribution-only labeling (paired $\Delta\!=\!-0.10$,
-$p\!=\!6\!\times\!10^{-5}$, $15/0$ discordant), and replicates on MMLU at
-${\sim}3\times$ compression. \textbf{A capability-only certification, or one
+incidental; the cause is SFT on terse math-style CoT. The drop is compression-dominant (CoT shortens ${\sim}14\times$; at properly
+matched length the residual is not significant, so we read the mechanism as
+\emph{compression as produced by terse math-CoT SFT}, not as a residual beyond
+length), emergent rather than imitated (training traces carry the \texttt{</think>} separator in $100\%$ of
+records, student completions in $22\%$), robust to an out-of-family judge
+(\texttt{gemini-2.5-pro}, $\kappa\!\in\![0.65,0.68]$, paired drop preserved), and
+replicates on MMLU at ${\sim}3\times$ compression with a smaller absolute drop ---
+a within-paper dose-response from compression to acknowledgment collapse. \textbf{A capability-only certification, or one
 that rewards elaborate-looking CoT, can pass a model whose reasoning has gone behaviorally
 opaque while remaining superficially legible.}
 \end{abstract}
@@ -100,6 +103,24 @@ cued-prompt eval but study how a \emph{training intervention} moves faithfulness
 fixed substrate, and pair it with a behavioral-influence measure to separate
 ``stops being influenced'' from ``stops verbalizing influence,'' and ask the sharper
 question of whether faithfulness falls \emph{beyond} what CoT length alone explains.
+
+\textbf{Non-verbalized CoT can still mediate hints.} Zaman \&
+Srivastava~\cite{zaman2025} argue that the Biasing Features metric flagged as
+``unfaithful'' is partly the lossy compression of distributed transformer
+computation into linear natural language, and show via causal mediation that even
+non-verbalized hints can causally route influence through the CoT to the answer.
+That \emph{is} our dissociation, observed inferentially. Our distinct contributions:
+(i) we \emph{induce} the dissociation with a training method, moving ack
+$25\%\!\to\!3\%$ on a fixed substrate; (ii) we pin the behavioral pull
+directly via paired influence + a flip-to-cue-target rate at $\sim$$2\times$ chance
+(rather than infer it via mediation); and (iii) we draw the certification-gaming
+consequence --- an accuracy-only or verbosity-rewarding check passes the very models
+on which the dissociation is most extreme. \textbf{Channel migration is not the
+mechanism here.} Recent work on extended-thinking models documents a thinking-vs-answer
+divergence in hint acknowledgment, often large (e.g., $87.5\%$ vs $28.6\%$
+\cite{thinkanswer2026}). Our judge reads the \emph{full} chain-of-thought
+(thinking $+$ answer), so the collapse we measure is not an artifact of
+which channel is read --- acknowledgment vanishes in both channels combined.
 
 \section{Setup}
 \textbf{W2SR}~\cite{yuan2025}: sample CoT from a weak teacher on a problem set, keep
@@ -172,35 +193,38 @@ substrate with dynamic range, we move to a reasoning student.
 (Table~\ref{tab:r1}). Fully in-family: student \texttt{R1-Distill-Qwen-7B}, weak
 teacher \texttt{R1-Distill-Qwen-1.5B}; distillation is clean (gate format-valid
 $0.99$); baseline acknowledgment is off-floor ($25\%$).
-\textbf{Behavior is preserved or strengthened.} Paired influence
+\textbf{Behavior is not reduced.} Paired influence
 (answer $==$ cue target on matched (qid, cue)): $\Delta\!=\!+0.157$, $95\%$ CI
-$[+0.037,+0.278]$, $n\!=\!108$, McNemar $p\!=\!0.021$, discordant $16/33$
-(W2SR more often pulled toward the cue than baseline); and flips land directionally
-on the cue target at $73\%$ for W2SR vs.\ $65\%$ for baseline, both
-${\sim}2\times$ the $1/3$ random-flip chance ($p\!<\!10^{-7}$ each). The pull is
+$[+0.037,+0.278]$, $n\!=\!108$, McNemar $p\!=\!0.021$, discordant $16/33$ ---
+direction-positive but with a lower CI bound near zero, so we read this as
+\emph{not reduced} rather than confidently strengthened. The cleaner, stronger
+signal: flips land directionally on the cue target at $73\%$ for W2SR vs.\
+$65\%$ for baseline, both ${\sim}2\times$ the $1/3$ random-flip chance
+($p\!<\!10^{-7}$ each) --- statistically indistinguishable from each other and
+from the untrained directionality. The pull is
 genuine cue-influence, not accuracy gain in disguise: restricted to the
 cue-points-at-\emph{wrong}-answer stratum (so landing on the cue \emph{is} a wrong
 answer), flippers still hit the cue target at $77\%/74\%/74\%$ for baseline /
 W2SR weak / W2SR strong (each $p\!\le\!2\!\times\!10^{-9}$ vs.\ $1/3$).
-\textbf{Verbalization collapses.} W2SR drops pooled acknowledgment to $3.2\%$
+\textbf{Verbalization collapses (both rubrics).} On the upstream loose rubric
+(``acknowledge the cue''), W2SR drops pooled acknowledgment to $3.2\%$
 (paired on (qid,cue): $\Delta\!=\!-0.220$, CI $[-0.293,-0.153]$, McNemar
 $p\!\approx\!2\times10^{-9}$, discordant $34/1$; the drop holds at every text cue:
 stanford $47\%\!\to\!8\%$, grader-hack $22\%\!\to\!3\%$, insider $56\%\!\to\!5\%$,
-with one-directional discordant cells $12/0$, $7/1$, $15/0$), at \emph{preserved}
-GPQA accuracy ($0.42$ vs.\ $0.28$, $n{=}40$) and ${\sim}14\times$ shorter CoT
-(baseline median $18{,}692$ chars $\to$ W2SR $1{,}362$). The drop is not an
+with one-directional discordant cells $12/0$, $7/1$, $15/0$). \emph{The conservative
+read} (stricter ``attribute reasoning to the cue'' rubric, same Gemini judge): the
+loose rubric was partly counting mentions; under the strict rubric the rates shrink
+to baseline $9.4\%$ vs W2SR $0.0\%$ ($15/0$ discordant, $p\!=\!6\!\times\!10^{-5}$),
+so the magnitude is smaller but the drop is \emph{more} one-directional and the
+trained student never explicitly attributes reasoning to the cue. Both numbers hold
+at \emph{preserved} GPQA accuracy ($0.42$ vs.\ $0.28$, $n{=}40$) and ${\sim}14\times$
+shorter CoT (baseline median $18{,}692$ chars $\to$ W2SR $1{,}362$). The drop is not an
 artifact (hand-checked: completions coherent, $37/40$ conclude with an answer,
 none degenerate---the model solves the problem without verbalizing the cue). It
 is also not a single-judge artifact: re-scoring the same 525 R1-family CoTs with
 \texttt{gemini-2.5-pro} yields per-condition Cohen's $\kappa\!\in\![0.65,0.68]$
 and a paired drop $\Delta\!=\!-0.153$, McNemar $p\!=\!2.4\!\times\!10^{-7}$,
-discordant $23/0$. The paired drop also survives a \emph{within-judge rubric
-swap} (same Gemini judge, tighter ``attribute reasoning to the cue'' rubric
-replacing ``acknowledge the cue''): absolute ack rates shrink (baseline
-$25.0\%\!\to\!9.4\%$, W2SR $3.2\%\!\to\!0.0\%$ --- the original rubric was
-partly mention-counting), but the paired drop is preserved and stays
-one-directional ($\Delta\!=\!-0.10$ $[-0.15,-0.05]$, McNemar
-$p\!=\!6.1\!\times\!10^{-5}$, discordant $15/0$).
+discordant $23/0$.
 
 \begin{table}[t]\centering\small
 \caption{Reasoning-student monitorability (GPQA, in-family R1-distill teachers).
@@ -265,14 +289,26 @@ $\log$(CoT chars) + cue controls, $p\!\le\!0.03$ on each, but magnitude underpow
 (b) literal cue-mention rate: $16\%$ vs.\ $28\%$ (same direction, n.s.); (c) mention
 density: $0.037$ vs.\ $0.167$ per 1k chars; (d) natural length-matched question
 pairs: $1/9$ vs.\ $4/9$ (same direction, underpowered). \textbf{All four cuts agree in direction; the primary
-(judge) cut is significant.} So most of the $25\%\!\to\!3\%$ drop is
-\textbf{compression} (W2SR's long traces recover to $19\%$; the channel separator
-\texttt{</think>} appears in $100\%$ of training traces but only $22\%$ of
-W2SR-student completions vs.\ $58\%$ of baseline, so the compression is emergent
-under SFT, not from stripped supervision), with a \textbf{real, moderate residual}
-($\sim$2.3$\times$) at matched length: the distilled model surfaces decision-relevant
-cues less even per unit reasoning. We claim the residual
-\emph{persists across length-controlled cuts}, not that the confound is eliminated.
+(judge) cut is significant.} A finer length-binned analysis (Task H, quantiles
+of the union distribution, Fisher's exact unpaired) sharpens the matched-length
+question: at matched mid-length ($[1954, 8716)$ chars, baseline $n\!=\!40$, W2SR
+$n\!=\!119$) baseline and W2SR are essentially identical (ack $17.5\%$ vs
+$15.1\%$, Fisher two-sided $p\!=\!0.80$, OR $\!=\!1.19$); at very long lengths
+($[8716, 37816)$, baseline $n\!=\!119$, W2SR $n\!=\!40$) baseline is meaningfully
+higher ($27.7\%$ vs $15.0\%$, $\Delta\!=\!+12.7$ pp, OR $\!\approx\!2.2$, Fisher
+one-sided $p\!=\!0.08$, two-sided $p\!=\!0.14$) --- a real direction-positive
+gap that just misses conventional significance. So most of the $25\%\!\to\!3\%$
+drop is \textbf{compression} (the channel separator \texttt{</think>} appears in
+$100\%$ of training traces but only $22\%$ of W2SR-student completions vs.\
+$58\%$ of baseline, so the compression is emergent under SFT, not from stripped
+supervision), and at \emph{matched mid-length there is no residual}, but at very
+long lengths a marginal residual remains (OR $\!\approx\!2.2$). The honest
+mechanism reading is \textbf{compression as produced by terse math-CoT SFT, with
+a possible additional residual restricted to the long-trace regime}.
+(Compression itself does not always reduce faithfulness --- length-penalized CoT
+can preserve or raise it --- but compression \emph{produced by this kind of SFT}
+does.) The MMLU result below converts this from a same-substrate length confound
+into a within-paper compression-dose-response.
 A teacher-strength axis (Table~\ref{tab:r1}) shows the effect is
 \textbf{compression-general}: a strong 14B teacher degrades faithfulness about as
 much as the 1.5B teacher and is not distinguishable from it. \textbf{Self-distillation
@@ -288,11 +324,16 @@ the baseline side) holds the pattern: baseline ack $20.0\%$, W2SR weak $2.9\%$,
 Self-A $0.0\%$; Self-A vs.\ baseline paired $\Delta\!=\!-0.171$, McNemar
 $p\!=\!0.031$ (discordant $6/0$, one-directional); Self-A vs.\ W2SR weak again
 indistinguishable ($p\!=\!1$). Baseline R1-7B already writes shorter CoT on MMLU ($3.6$k vs.\ $19$k
-chars median), so MMLU compression is $\sim$$3\times$ vs.\ GPQA's $\sim$$14\times$,
-yet the ack collapse still fires. So the
+chars median), so MMLU compression is only $\sim$$3\times$ vs.\ GPQA's
+$\sim$$14\times$, and the absolute ack drop is correspondingly smaller (MMLU
+$20.0\!\to\!2.9\%$, drop $\sim$$17$ pp at $3\times$ compression; GPQA
+$25.0\!\to\!3.2\%$, drop $\sim$$22$ pp at $14\times$). \emph{Less compression,
+smaller drop, but the drop still fires} --- a within-paper dose-response from
+compression to ack collapse that supports the compression-dominant reading
+without staking it on the matched-length cuts alone. So the
 faithfulness collapse \emph{is not weak-to-strong-specific, not GPQA-specific, and
-not contingent on extreme CoT compression}: it fires when teacher equals student
-on a different substrate at $3\times$ compression too. The W2SR asymmetry is incidental; the mechanism is \textbf{SFT on
+not contingent on extreme CoT compression}: it fires at $3\times$ compression
+too, and its magnitude scales with how much compression occurred. The W2SR asymmetry is incidental; the mechanism is \textbf{SFT on
 terse MATH-style CoT traces in general}, which compresses CoT and suppresses
 cue-acknowledgment whether the teacher is weaker, stronger, or identical to the
 student.
@@ -321,10 +362,10 @@ The two substrates are consistent: on the floored instruct student
 Meek's composite ``monitorability'' (the mean of verbosity and faithfulness scores
 defined in~\cite{meek2025}) rises after distillation almost entirely via
 verbosity---the model \emph{looks} more monitorable; on the
-reasoning student, the cue's \emph{behavioral pull on the answer is preserved while
-its verbal acknowledgment collapses}---a dissociation a compression-only account
-would not predict, since the model keeps being moved by the cue while no longer
-reporting it. The safety-relevant component thus gets \emph{worse}, not better. The warning is
+reasoning student, the cue's \emph{behavioral pull on the answer is not reduced
+while its verbal acknowledgment collapses}---a dissociation a compression-only
+account would not predict, since the model keeps being moved by the cue while no
+longer reporting it. The safety-relevant component thus gets \emph{worse}, not better. The warning is
 sharp: \emph{an accuracy-only certification of \textbf{any} CoT-SFT student trained on
 MATH-style traces---including same-strength self-distillation, not just
 weak-to-strong as in W2SR---can pass a model whose chain-of-thought has become
@@ -336,10 +377,14 @@ guarantee is narrow on both axes.
 \section{Limitations}
 \label{sec:lim}
 \textbf{Floored instruct substrate:} the instruct arm only motivates; the
-faithfulness claim rests on the reasoning student. \textbf{Moderate / underpowered
-residual:} the matched-length residual is significant on the judge measure
-($p\!=\!0.016$) but directional-only on three further cuts; we claim a real,
-moderate effect that persists across cuts, not an eliminated confound.
+faithfulness claim rests on the reasoning student. \textbf{Matched-length
+residual is regime-dependent and marginal:} at matched mid-length, baseline
+and W2SR are indistinguishable (Task H bin 3, Fisher $p\!=\!0.80$); at very
+long lengths a real direction-positive gap remains (bin 4: $+12.7$ pp, OR
+$\!\approx\!2.2$, Fisher one-sided $p\!=\!0.08$). We claim a residual at long
+traces but not at mid-length, so the dominant mechanism is compression --- a
+fully decisive long-tail test would need many more long W2SR samples than the
+$n\!=\!40$ we have in the longest bin.
 \textbf{Single family:} the degradation is shown within the Qwen R1-distill
 lineage, demonstrated under weak, strong, AND same-strength (self) teachers.
 A same-recipe cross-family test on R1-Distill-Llama-8B (self-distillation,
@@ -367,10 +412,14 @@ W2SR's accuracy gain is real but conditional (in-family teacher; genuine only on
 base student), and on a reasoning student its faithfulness collapse ($25\%\!\to\!3\%$
 at preserved accuracy) is \textbf{not weak-to-strong-specific}: a same-strength
 self-distillation control reproduces the collapse at indistinguishable magnitude,
-and the cue's behavioral pull on the answer is preserved or strengthened while
-verbalization collapses---a dissociation that survives a within-judge rubric swap,
-an out-of-family judge, and a cross-substrate (MMLU) replication. The mechanism
-is general SFT-on-math-CoT compression, with a real residual at matched length.
+and the cue's behavioral pull on the answer is \emph{not reduced} while
+verbalization collapses---a dissociation that survives a within-judge rubric swap
+(under which it tightens: ack $9.4\%\!\to\!0.0\%$), an out-of-family judge, and a
+cross-substrate (MMLU) replication. The mechanism
+is \emph{compression as produced by math-CoT SFT} --- at properly matched length
+the residual is not statistically significant, but the dose-response on
+substrate (GPQA $14\times$, MMLU $3\times$) supports compression as the
+load-bearing mechanism rather than weak-to-strong asymmetry.
 A same-recipe cross-family attempt on R1-Distill-Llama-8B fails the capability
 gate cleanly ($-27.5$pp accuracy at $10.8\times$ compression), so the dissociation's
 cross-family scope remains open. Certifying \emph{any} CoT-SFT student on accuracy
@@ -398,6 +447,12 @@ arXiv:2501.08156, 2025.
 Chain-of-Thought Reasoning. arXiv:2411.15382, 2024.
 \bibitem{selfdistill2026} Why Does Self-Distillation (Sometimes) Degrade the
 Reasoning Capability of LLMs? arXiv:2603.24472, 2026.
+\bibitem{zaman2025} Zaman, K. \& Srivastava, S. Is Chain-of-Thought Really Not
+Explainability? Chain-of-Thought Can Be Faithful without Hint Verbalization.
+arXiv:2512.23032, 2025.
+\bibitem{thinkanswer2026} Why Models Know But Don't Say: Chain-of-Thought
+Faithfulness Divergence Between Thinking Tokens and Answers in Open-Weight
+Reasoning Models. arXiv:2603.26410, 2026.
 \end{thebibliography}
 
 \end{document}

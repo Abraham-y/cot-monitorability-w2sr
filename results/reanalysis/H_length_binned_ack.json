@@ -1,0 +1,150 @@
+{
+  "edges": [
+    -1,
+    1118,
+    1465,
+    1954,
+    8716,
+    37816
+  ],
+  "rows": [
+    {
+      "bin": 2,
+      "range_chars": [
+        1465,
+        1954
+      ],
+      "median_chars_in_bin": 1659,
+      "baseline": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci95": [
+          0.0,
+          0.7934567085261071
+        ]
+      },
+      "w2sr": {
+        "k": 12,
+        "n": 157,
+        "rate": 0.07643312101910828,
+        "ci95": [
+          0.04426062501130635,
+          0.12883887163632712
+        ]
+      },
+      "delta_pp": -7.643312101910828,
+      "odds_ratio": 0.0,
+      "fisher_two_sided_p": 1.0,
+      "fisher_one_sided_p_baseline_gt_w2sr": 1.0,
+      "paired": {
+        "n_pairs": 1,
+        "n00": 1,
+        "n01_b_only": 0,
+        "n10_a_only": 0,
+        "n11": 0,
+        "discordant": 0,
+        "p": 1.0,
+        "delta_mean": 0.0,
+        "delta_ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "bin": 3,
+      "range_chars": [
+        1954,
+        8716
+      ],
+      "median_chars_in_bin": 3418,
+      "baseline": {
+        "k": 7,
+        "n": 40,
+        "rate": 0.175,
+        "ci95": [
+          0.08745302996883067,
+          0.3195029205439244
+        ]
+      },
+      "w2sr": {
+        "k": 18,
+        "n": 119,
+        "rate": 0.15126050420168066,
+        "ci95": [
+          0.09787218291929412,
+          0.22646094201558137
+        ]
+      },
+      "delta_pp": 2.3739495798319328,
+      "odds_ratio": 1.1902356902356903,
+      "fisher_two_sided_p": 0.8022727454911527,
+      "fisher_one_sided_p_baseline_gt_w2sr": 0.4465936250431156,
+      "paired": {
+        "n_pairs": 3,
+        "n00": 2,
+        "n01_b_only": 0,
+        "n10_a_only": 1,
+        "n11": 0,
+        "discordant": 1,
+        "p": 1.0,
+        "delta_mean": -0.3333333333333333,
+        "delta_ci95": [
+          -1.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "bin": 4,
+      "range_chars": [
+        8716,
+        37816
+      ],
+      "median_chars_in_bin": 24316,
+      "baseline": {
+        "k": 33,
+        "n": 119,
+        "rate": 0.2773109243697479,
+        "ci95": [
+          0.20480261028046137,
+          0.3637474574490374
+        ]
+      },
+      "w2sr": {
+        "k": 6,
+        "n": 40,
+        "rate": 0.15,
+        "ci95": [
+          0.07061091708507436,
+          0.2907262603902002
+        ]
+      },
+      "delta_pp": 12.731092436974793,
+      "odds_ratio": 2.1744186046511627,
+      "fisher_two_sided_p": 0.13745398047712024,
+      "fisher_one_sided_p_baseline_gt_w2sr": 0.07649241744122187,
+      "paired": {
+        "n_pairs": 9,
+        "n00": 8,
+        "n01_b_only": 0,
+        "n10_a_only": 0,
+        "n11": 1,
+        "discordant": 0,
+        "p": 1.0,
+        "delta_mean": 0.0,
+        "delta_ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "n_bins": 3,
+    "bins_with_w2sr_lower": 2,
+    "bins_fisher_two_sided_p_lt_0p05": 0,
+    "bins_fisher_one_sided_p_lt_0p05": 0
+  }
+}
