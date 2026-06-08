@@ -20,6 +20,12 @@ save/
 *.secret
 hf_token*
 
+# Local tool / IDE state (never commit)
+.claude/
+CLAUDE.md
+.vscode/
+.idea/
+
 # Python
 __pycache__/
 *.py[cod]
