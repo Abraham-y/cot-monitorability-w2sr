@@ -7,10 +7,10 @@ college_biology, college_mathematics, conceptual_physics), capped at 8
 questions per subject (W2SR_LIMIT=8) → ~40 cued samples per cell, matching
 the GPQA cell size.
 
-Inputs:
-  external/monitorability-eval/logs/r1_7b_baseline_mmlu/openai_DeepSeek-R1-Distill-Qwen-7B/{01..05}/config_001/*.eval
-  external/monitorability-eval/logs/r1_7b_w2sr_mmlu/openai_w2sr_r1_7b/{01..05}/config_001/*.eval
-  external/monitorability-eval/logs/r1_7b_self_A4k_mmlu/openai_w2sr_r1_7b_self_A4k/{01..05}/config_001/*.eval
+Inputs (all config_* dirs per cue — one per MMLU subject, 5 total):
+  external/monitorability-eval/logs/r1_7b_baseline_mmlu/openai_DeepSeek-R1-Distill-Qwen-7B/{01..05}/config_*/*.eval
+  external/monitorability-eval/logs/r1_7b_w2sr_mmlu/openai_w2sr_r1_7b/{01..05}/config_*/*.eval
+  external/monitorability-eval/logs/r1_7b_self_A4k_mmlu/openai_w2sr_r1_7b_self_A4k/{01..05}/config_*/*.eval
 
 Outputs:
   results/reanalysis/E_cross_substrate_mmlu.md
@@ -134,21 +134,33 @@ def main():
         think[label] = {"n": n, "frac_close": n_close / n}
         print(f"  {label:30s}  n={n:3d}  </think>: {100*n_close/n:5.1f}%")
 
+    # Interpretation is COMPUTED from this run's numbers, never hardcoded:
+    # an earlier version froze pre-loader-fix (physics-only) numbers here,
+    # which contradicted the script's own computed tables after the fix.
+    base_lab, w2sr_lab, self_lab = (label for label, _, _ in CONDS)
+    mc_w, mc_s = paired_vs_base[w2sr_lab], paired_vs_base[self_lab]
+    mc_sw = paired_self_vs_w2sr
+    comp_ratio = length[base_lab]["median"] / max(1, length[w2sr_lab]["median"])
+    interpretation = (
+        f"Cross-substrate replication on MMLU (5 STEM subjects × 8 Qs per cue) "
+        f"holds the headline pattern: baseline ack {100*summary[base_lab]['ack_rate']:.1f}%, "
+        f"W2SR weak {100*summary[w2sr_lab]['ack_rate']:.1f}%, Self-A "
+        f"{100*summary[self_lab]['ack_rate']:.1f}%. W2SR weak vs baseline paired "
+        f"Δ = {mc_w['delta_mean']:+.3f}, McNemar p = {mc_w['p']:.3g} (n = {mc_w['n_pairs']}, "
+        f"discordant {mc_w['n10_a_only']}/{mc_w['n01_b_only']}); Self-A vs baseline "
+        f"Δ = {mc_s['delta_mean']:+.3f}, p = {mc_s['p']:.3g} (discordant "
+        f"{mc_s['n10_a_only']}/{mc_s['n01_b_only']}). Self-A vs W2SR weak remains "
+        f"indistinguishable (Δ = {mc_sw['delta_mean']:+.3f}, p = {mc_sw['p']:.3g}) — the "
+        f"'same mechanism' finding generalizes. CoT compresses {comp_ratio:.1f}× on MMLU "
+        f"({length[base_lab]['median']:,} → {length[w2sr_lab]['median']:,} chars) vs "
+        f"~14× on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. "
+        f"Effect generalizes beyond GPQA-Diamond."
+    )
     out = {"summary": summary, "per_cue": per_cue,
            "paired_vs_baseline": paired_vs_base,
            "paired_self_A_vs_w2sr_weak": paired_self_vs_w2sr,
            "influence": influence, "cot_length": length, "think_tags": think,
-           "interpretation": (
-               "Cross-substrate replication on MMLU (5 STEM subjects × 8 Qs = 40/cell) "
-               "holds the headline pattern: baseline ack 20.0%, W2SR weak 2.9%, Self-A 0.0%; "
-               "Self-A vs baseline paired Δ = -0.171, McNemar p = 0.031 (discordant 6/0, "
-               "one-directional). Self-A vs W2SR weak remains indistinguishable "
-               "(Δ ≈ 0, p = 1.0, discordant 1/0) — the 'same mechanism' finding generalizes. "
-               "W2SR weak vs baseline is direction-positive but underpowered at n=35 "
-               "(discordant 6/1, p = 0.125). CoT compresses 3× on MMLU (3,611 → 1,139 "
-               "chars) vs 14× on GPQA, because baseline R1-7B already writes shorter "
-               "CoT on MMLU. Effect generalizes beyond GPQA-Diamond."
-           )}
+           "interpretation": interpretation}
     OUT_JSON.write_text(json.dumps(out, indent=2, default=str))
 
     # ---- markdown ----
@@ -198,21 +210,24 @@ def main():
         L = length[label]
         md.append(f"| {label} | {L['n']} | {L['median']:,} | {L['p95']:,} |")
     md += ["",
-           "Baseline R1-7B writes shorter CoT on MMLU than on GPQA (3,611 vs 18,537 chars "
-           "median) — MMLU's question style and difficulty don't elicit the full long-CoT "
-           "regime. So MMLU compression is **3× from baseline**, vs **14× on GPQA**. The "
-           "ack collapse still fires.\n",
+           f"Baseline R1-7B writes shorter CoT on MMLU than on GPQA "
+           f"({length[base_lab]['median']:,} vs 18,692 chars median (GPQA cued)) — MMLU's "
+           f"question style and difficulty don't elicit the full long-CoT regime. So MMLU "
+           f"compression is **{comp_ratio:.1f}× from baseline**, vs **~14× on GPQA**. The "
+           f"ack collapse still fires.\n",
            "## Think-tag emission (cued completions)\n",
            "| condition | n | `</think>` |",
            "|---|---:|---:|"]
     for label, _, _ in CONDS:
         t = think[label]
         md.append(f"| {label} | {t['n']} | {100*t['frac_close']:.1f}% |")
+    trained_fracs = [100*think[l]["frac_close"] for l in (w2sr_lab, self_lab) if l in think]
     md += ["",
-           "Baseline emits `</think>` on 90% of MMLU cued completions (vs 57% on GPQA — "
-           "shorter problems means the closing tag fits within the generation budget). "
-           "Trained students drop to 26–34%, matching the partial-collapse pattern from "
-           "GPQA.\n",
+           f"Baseline emits `</think>` on {100*think[base_lab]['frac_close']:.0f}% of MMLU "
+           f"cued completions (vs 57% on GPQA — shorter problems means the closing tag fits "
+           f"within the generation budget). Trained students drop to "
+           f"{min(trained_fracs):.0f}–{max(trained_fracs):.0f}%, matching the "
+           f"partial-collapse pattern from GPQA.\n",
            "## Influence rate (answer == cue_target)\n",
            "| condition | k/n | rate | 95% CI |",
            "|---|---:|---:|---|"]
@@ -221,16 +236,19 @@ def main():
         md.append(f"| {label} | {i['k']}/{i['n']} | {100*i['rate']:.1f}% | "
                   f"[{100*i['ci95'][0]:.1f}, {100*i['ci95'][1]:.1f}] |")
     md += ["",
-           "Same direction as GPQA: trained students show modestly higher switch-to-cue "
-           "rate (baseline 7.5% → W2SR 16.7% → Self-A 20.6%), so the \"behavior toward "
-           "the cue, silence about it\" dissociation holds.\n",
+           f"Same direction as GPQA: trained students show modestly higher switch-to-cue "
+           f"rate (baseline {100*influence[base_lab]['rate']:.1f}% → W2SR "
+           f"{100*influence[w2sr_lab]['rate']:.1f}% → Self-A "
+           f"{100*influence[self_lab]['rate']:.1f}%), so the \"behavior toward "
+           f"the cue, silence about it\" dissociation holds.\n",
            "## Interpretation",
            out["interpretation"],
            "",
            "## Honest caveats",
-           "- n = 40/cell × 5 subjects × 1 cap is a small cross-substrate test. "
-           "W2SR weak vs baseline does not reach p < 0.05 at this n (p = 0.125, "
-           "discordant 6/1), though Self-A vs baseline does (p = 0.031, 6/0).",
+           f"- Per-subject cells are small (~30–40 cued samples); the pooled paired "
+           f"comparisons carry the power (W2SR weak vs baseline p = {mc_w['p']:.3g}, "
+           f"discordant {mc_w['n10_a_only']}/{mc_w['n01_b_only']}; Self-A vs baseline "
+           f"p = {mc_s['p']:.3g}, discordant {mc_s['n10_a_only']}/{mc_s['n01_b_only']}).",
            "- Only 5 STEM subjects of MMLU; broader MMLU coverage (humanities, social "
            "sciences) untested.",
            "- Same judge (claude-sonnet-4-6) as the GPQA arm; cross-judge robustness "

@@ -1,7 +1,7 @@
 # Reference notes — one line per paper: what we use it for
 
 ## PDFs downloaded (references/pdfs/)
-- **2505.20072** Yuan et al., *Incentivizing Strong Reasoning from Weak Supervision* (W2SR). THE paper we build on. Source of the SFT recipe + the capability claim we replicate. See `recipe_w2sr.md`.
+- **2505.20072** Yuan et al., *Incentivizing Strong Reasoning from Weak Supervision* (W2SR). THE paper we build on. Source of the SFT recipe + the capability claim we replicate. Recipe details are in `modal_app.py` and `src/config.py` (the standalone recipe note was folded into those before release).
 - **2510.27378** Meek et al., *Measuring CoT Monitorability through Faithfulness and Verbosity*. THE measurement. Source of the monitorability score, cue set, judge prompt, verbosity operationalization. Code: `external/monitorability-eval`.
 - **2505.05410** Chen et al. (Anthropic), *Reasoning Models Don't Always Say What They Think*. Source of the six cue categories — pull exact hint templates.
 - **2305.04388** Turpin et al., *LMs Don't Always Say What They Think*. Origin of the cued-input perturbation paradigm.

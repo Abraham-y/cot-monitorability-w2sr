@@ -55,18 +55,23 @@ def measure(batch: str, served: str) -> dict:
     if not evs:
         return {"missing": True}
     lens = []; n_empty = 0; parsed = 0; correct = 0
-    with zipfile.ZipFile(evs[0]) as z:
-        samples = [n for n in z.namelist() if n.startswith("samples/") and n.endswith(".json")]
-        for name in samples:
-            d = json.loads(z.read(name))
-            comp = _normalize_bpe(d.get("output", {}).get("completion") or "")
-            lens.append(len(comp))
-            if not comp:
-                n_empty += 1; continue
-            ans, _ = patched_extract(comp)
-            if ans is None: continue
-            parsed += 1
-            if ans == (d.get("target") or "").strip(): correct += 1
+    # Read every .eval in the cell, not just the first — a re-run leaves more
+    # than one and silently dropping them would under-count n.
+    samples_all = []
+    for ev in evs:
+        with zipfile.ZipFile(ev) as z:
+            for name in z.namelist():
+                if name.startswith("samples/") and name.endswith(".json"):
+                    samples_all.append(json.loads(z.read(name)))
+    for d in samples_all:
+        comp = _normalize_bpe(d.get("output", {}).get("completion") or "")
+        lens.append(len(comp))
+        if not comp:
+            n_empty += 1; continue
+        ans, _ = patched_extract(comp)
+        if ans is None: continue
+        parsed += 1
+        if ans == (d.get("target") or "").strip(): correct += 1
     n = len(lens)
     non_empty = n - n_empty
     nz_lens = [l for l in lens if l > 0]

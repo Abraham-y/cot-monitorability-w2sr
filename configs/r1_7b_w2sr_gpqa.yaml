@@ -1,6 +1,7 @@
 # cond-2' W2SR reasoning student (R1-7B distilled from R1-1.5B) on GPQA-Diamond. Reasoning model (long <think> CoT) served via Modal
-# vLLM at 32k ctx; generator 30k tokens to avoid truncating reasoning (match
-# cond-4a). Judge = anthropic/claude-sonnet-4-6. OPENAI_BASE_URL=endpoint, KEY=EMPTY.
+# vLLM at 32k ctx; generator max_tokens=8000 (see below) — NOT the 30k used by
+# the teacher-reference configs, so teacher-vs-student comparisons are not
+# budget-matched; all baseline-vs-trained comparisons are (both 8000). Judge = anthropic/claude-sonnet-4-6. OPENAI_BASE_URL=endpoint, KEY=EMPTY.
 configurations:
 - config_id: '001'
   dataset: gpqa_diamond

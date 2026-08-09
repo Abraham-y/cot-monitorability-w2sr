@@ -78,6 +78,136 @@
       ],
       "p_one_sided_vs_chance_one_third": 1.5837322950145737e-19
     },
+    "Self-A (R1-7B self, 4k bud)": {
+      "n_cued_with_parseable_and_target": 83,
+      "n_dropped_baseline_eq_target": 0,
+      "n_restricted": 83,
+      "switch_to_cue_k": 35,
+      "switch_to_cue_n": 83,
+      "switch_to_cue_rate": 0.42168674698795183,
+      "switch_to_cue_ci95": [
+        0.3212284435427638,
+        0.5290737157910118
+      ],
+      "n_flippers": 58,
+      "flip_to_cue_k": 35,
+      "flip_to_cue_rate": 0.603448275862069,
+      "flip_to_cue_ci95": [
+        0.47492982807449885,
+        0.7191143104988886
+      ],
+      "flip_to_other_k": 23,
+      "flip_to_other_rate": 0.39655172413793105,
+      "flip_to_other_ci95": [
+        0.2808856895011113,
+        0.5250701719255011
+      ],
+      "p_one_sided_vs_chance_one_third": 2.2714125728011132e-05
+    },
+    "Self-B (R1-7B self, 8k bud)": {
+      "n_cued_with_parseable_and_target": 83,
+      "n_dropped_baseline_eq_target": 0,
+      "n_restricted": 83,
+      "switch_to_cue_k": 43,
+      "switch_to_cue_n": 83,
+      "switch_to_cue_rate": 0.5180722891566265,
+      "switch_to_cue_ci95": [
+        0.4121756969766282,
+        0.6223699585617313
+      ],
+      "n_flippers": 52,
+      "flip_to_cue_k": 43,
+      "flip_to_cue_rate": 0.8269230769230769,
+      "flip_to_cue_ci95": [
+        0.7026887630639471,
+        0.9061763124353222
+      ],
+      "flip_to_other_k": 9,
+      "flip_to_other_rate": 0.17307692307692307,
+      "flip_to_other_ci95": [
+        0.0938236875646778,
+        0.29731123693605277
+      ],
+      "p_one_sided_vs_chance_one_third": 3.242261058758581e-13
+    },
+    "baseline R1-7B (MMLU)": {
+      "n_cued_with_parseable_and_target": 188,
+      "n_dropped_baseline_eq_target": 0,
+      "n_restricted": 188,
+      "switch_to_cue_k": 33,
+      "switch_to_cue_n": 188,
+      "switch_to_cue_rate": 0.17553191489361702,
+      "switch_to_cue_ci95": [
+        0.1278055210316092,
+        0.2362531607141644
+      ],
+      "n_flippers": 51,
+      "flip_to_cue_k": 33,
+      "flip_to_cue_rate": 0.6470588235294118,
+      "flip_to_cue_ci95": [
+        0.5098580497281073,
+        0.7636569461874021
+      ],
+      "flip_to_other_k": 18,
+      "flip_to_other_rate": 0.35294117647058826,
+      "flip_to_other_ci95": [
+        0.2363430538125979,
+        0.49014195027189267
+      ],
+      "p_one_sided_vs_chance_one_third": 4.573838750677649e-06
+    },
+    "W2SR weak (MMLU)": {
+      "n_cued_with_parseable_and_target": 189,
+      "n_dropped_baseline_eq_target": 0,
+      "n_restricted": 189,
+      "switch_to_cue_k": 43,
+      "switch_to_cue_n": 189,
+      "switch_to_cue_rate": 0.2275132275132275,
+      "switch_to_cue_ci95": [
+        0.17352256585046583,
+        0.29236031419201464
+      ],
+      "n_flippers": 67,
+      "flip_to_cue_k": 43,
+      "flip_to_cue_rate": 0.6417910447761194,
+      "flip_to_cue_ci95": [
+        0.5221828769475225,
+        0.7460211161864552
+      ],
+      "flip_to_other_k": 24,
+      "flip_to_other_rate": 0.3582089552238806,
+      "flip_to_other_ci95": [
+        0.2539788838135447,
+        0.47781712305247737
+      ],
+      "p_one_sided_vs_chance_one_third": 2.401234124855128e-07
+    },
+    "Self-A (MMLU)": {
+      "n_cued_with_parseable_and_target": 193,
+      "n_dropped_baseline_eq_target": 0,
+      "n_restricted": 193,
+      "switch_to_cue_k": 47,
+      "switch_to_cue_n": 193,
+      "switch_to_cue_rate": 0.24352331606217617,
+      "switch_to_cue_ci95": [
+        0.18835964449479692,
+        0.3086978880592973
+      ],
+      "n_flippers": 80,
+      "flip_to_cue_k": 47,
+      "flip_to_cue_rate": 0.5875,
+      "flip_to_cue_ci95": [
+        0.4780384112688303,
+        0.6889431348848691
+      ],
+      "flip_to_other_k": 33,
+      "flip_to_other_rate": 0.4125,
+      "flip_to_other_ci95": [
+        0.31105686511513087,
+        0.5219615887311697
+      ],
+      "p_one_sided_vs_chance_one_third": 2.7871815574463246e-06
+    },
     "instruct baseline (Qwen2.5-7B-Inst)": {
       "n_cued_with_parseable_and_target": 965,
       "n_dropped_baseline_eq_target": 0,
@@ -205,53 +335,6 @@
         ]
       }
     },
-    "W2SR weak (R1-1.5B teacher)": {
-      "grader_hack_validation": {
-        "k": 24,
-        "n": 37,
-        "rate": 0.6486486486486487,
-        "ci95": [
-          0.48758729517569566,
-          0.7817459336889914
-        ]
-      },
-      "insider_information": {
-        "k": 21,
-        "n": 35,
-        "rate": 0.6,
-        "ci95": [
-          0.43572419581519467,
-          0.7444949506669274
-        ]
-      },
-      "stanford_professor_recommends": {
-        "k": 21,
-        "n": 36,
-        "rate": 0.5833333333333334,
-        "ci95": [
-          0.4219996966427768,
-          0.7285966649491271
-        ]
-      },
-      "visual_squares_correct": {
-        "k": 5,
-        "n": 36,
-        "rate": 0.1388888888888889,
-        "ci95": [
-          0.060817253631150966,
-          0.2865985128039319
-        ]
-      },
-      "xml_metadata_success_rate": {
-        "k": 17,
-        "n": 35,
-        "rate": 0.4857142857142857,
-        "ci95": [
-          0.3299398039125274,
-          0.6443146037328836
-        ]
-      }
-    },
     "W2SR strong (R1-14B teacher)": {
       "grader_hack_validation": {
         "k": 22,
@@ -298,6 +381,53 @@
           0.6593093737195102
         ]
       }
+    },
+    "W2SR weak (R1-1.5B teacher)": {
+      "grader_hack_validation": {
+        "k": 24,
+        "n": 37,
+        "rate": 0.6486486486486487,
+        "ci95": [
+          0.48758729517569566,
+          0.7817459336889914
+        ]
+      },
+      "insider_information": {
+        "k": 21,
+        "n": 35,
+        "rate": 0.6,
+        "ci95": [
+          0.43572419581519467,
+          0.7444949506669274
+        ]
+      },
+      "stanford_professor_recommends": {
+        "k": 21,
+        "n": 36,
+        "rate": 0.5833333333333334,
+        "ci95": [
+          0.4219996966427768,
+          0.7285966649491271
+        ]
+      },
+      "visual_squares_correct": {
+        "k": 5,
+        "n": 36,
+        "rate": 0.1388888888888889,
+        "ci95": [
+          0.060817253631150966,
+          0.2865985128039319
+        ]
+      },
+      "xml_metadata_success_rate": {
+        "k": 17,
+        "n": 35,
+        "rate": 0.4857142857142857,
+        "ci95": [
+          0.3299398039125274,
+          0.6443146037328836
+        ]
+      }
     }
   },
   "paired_switch_to_cue_base_vs_w2sr_weak": {
@@ -314,6 +444,17 @@
       0.037037037037037035,
       0.2777777777777778
     ]
+  },
+  "flip_to_cue_rate_baseline_vs_w2sr": {
+    "baseline_k": 44,
+    "baseline_n": 68,
+    "baseline_rate": 0.6470588235294118,
+    "w2sr_k": 88,
+    "w2sr_n": 121,
+    "w2sr_rate": 0.7272727272727273,
+    "odds_ratio": 0.6875,
+    "fisher_two_sided_p": 0.2533957865141562,
+    "indistinguishable_at_05": true
   },
   "attrition_note": "Baseline R1-7B loses 23% of cued samples to no-answer (37/160); both trained students lose \u22646%. Paired tests therefore condition on questions where the BASELINE actually produced a parseable answer \u2014 these are biased toward easier/shorter cases for baseline R1 (the tail it ran out of generation budget on is dropped). This biases the paired \u0394 for switch-to-cue toward zero (or against W2SR) because the easier cases are also the ones where baseline R1 was more likely to be pulled."
 }

@@ -1,0 +1,46 @@
+{
+  "acknowledge": {
+    "n": 99,
+    "ack": 5,
+    "rate": 0.050505050505050504
+  },
+  "icl_example": {
+    "n": 100,
+    "ack": 9,
+    "rate": 0.09
+  },
+  "long_cot": {
+    "n": 99,
+    "ack": 6,
+    "rate": 0.06060606060606061
+  },
+  "none": {
+    "n": 99,
+    "ack": 1,
+    "rate": 0.010101010101010102
+  },
+  "paired_acknowledge_vs_none": {
+    "n_pairs": 98,
+    "acknowledge_only": 4,
+    "none_only": 0,
+    "both": 1,
+    "neither": 93,
+    "p": 0.125
+  },
+  "paired_icl_example_vs_none": {
+    "n_pairs": 99,
+    "icl_example_only": 8,
+    "none_only": 0,
+    "both": 1,
+    "neither": 90,
+    "p": 0.0078125
+  },
+  "paired_long_cot_vs_none": {
+    "n_pairs": 98,
+    "long_cot_only": 5,
+    "none_only": 0,
+    "both": 1,
+    "neither": 92,
+    "p": 0.0625
+  }
+}

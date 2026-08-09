@@ -159,6 +159,271 @@
         "p_one_sided_vs_chance_one_third": 1.5837322950145737e-19
       }
     },
+    "Self-A (R1-7B self, 4k bud)": {
+      "cue_at_wrong": {
+        "n_restricted": 54,
+        "n_flippers": 41,
+        "switch_to_cue_k": 29,
+        "switch_to_cue_rate": 0.5370370370370371,
+        "switch_to_cue_ci95": [
+          0.40605127016254966,
+          0.6631031100758948
+        ],
+        "flip_to_cue_k": 29,
+        "flip_to_cue_rate": 0.7073170731707317,
+        "flip_to_cue_ci95": [
+          0.5552024292386029,
+          0.8239098236694111
+        ],
+        "p_one_sided_vs_chance_one_third": 1.1015958613308656e-06
+      },
+      "cue_at_correct": {
+        "n_restricted": 29,
+        "n_flippers": 17,
+        "switch_to_cue_k": 6,
+        "switch_to_cue_rate": 0.20689655172413793,
+        "switch_to_cue_ci95": [
+          0.0984593651558521,
+          0.3839044660825772
+        ],
+        "flip_to_cue_k": 6,
+        "flip_to_cue_rate": 0.35294117647058826,
+        "flip_to_cue_ci95": [
+          0.17309486143904904,
+          0.5870003327878818
+        ],
+        "p_one_sided_vs_chance_one_third": 0.5223348138409897
+      },
+      "pooled": {
+        "n_restricted": 83,
+        "n_flippers": 58,
+        "switch_to_cue_k": 35,
+        "switch_to_cue_rate": 0.42168674698795183,
+        "switch_to_cue_ci95": [
+          0.3212284435427638,
+          0.5290737157910118
+        ],
+        "flip_to_cue_k": 35,
+        "flip_to_cue_rate": 0.603448275862069,
+        "flip_to_cue_ci95": [
+          0.47492982807449885,
+          0.7191143104988886
+        ],
+        "p_one_sided_vs_chance_one_third": 2.2714125728011132e-05
+      }
+    },
+    "Self-B (R1-7B self, 8k bud)": {
+      "cue_at_wrong": {
+        "n_restricted": 55,
+        "n_flippers": 33,
+        "switch_to_cue_k": 28,
+        "switch_to_cue_rate": 0.509090909090909,
+        "switch_to_cue_ci95": [
+          0.38076038407484447,
+          0.636234395128984
+        ],
+        "flip_to_cue_k": 28,
+        "flip_to_cue_rate": 0.8484848484848485,
+        "flip_to_cue_ci95": [
+          0.6907978686153953,
+          0.9334964074203904
+        ],
+        "p_one_sided_vs_chance_one_third": 1.4922123802547247e-09
+      },
+      "cue_at_correct": {
+        "n_restricted": 28,
+        "n_flippers": 19,
+        "switch_to_cue_k": 15,
+        "switch_to_cue_rate": 0.5357142857142857,
+        "switch_to_cue_ci95": [
+          0.3581239514210167,
+          0.7046869626034041
+        ],
+        "flip_to_cue_k": 15,
+        "flip_to_cue_rate": 0.7894736842105263,
+        "flip_to_cue_ci95": [
+          0.5666528575973392,
+          0.9149246150840843
+        ],
+        "p_one_sided_vs_chance_one_third": 6.064986408088496e-05
+      },
+      "pooled": {
+        "n_restricted": 83,
+        "n_flippers": 52,
+        "switch_to_cue_k": 43,
+        "switch_to_cue_rate": 0.5180722891566265,
+        "switch_to_cue_ci95": [
+          0.4121756969766282,
+          0.6223699585617313
+        ],
+        "flip_to_cue_k": 43,
+        "flip_to_cue_rate": 0.8269230769230769,
+        "flip_to_cue_ci95": [
+          0.7026887630639471,
+          0.9061763124353222
+        ],
+        "p_one_sided_vs_chance_one_third": 3.242261058758581e-13
+      }
+    },
+    "baseline R1-7B (MMLU)": {
+      "cue_at_wrong": {
+        "n_restricted": 175,
+        "n_flippers": 44,
+        "switch_to_cue_k": 26,
+        "switch_to_cue_rate": 0.14857142857142858,
+        "switch_to_cue_ci95": [
+          0.10344941553276563,
+          0.20879113700087307
+        ],
+        "flip_to_cue_k": 26,
+        "flip_to_cue_rate": 0.5909090909090909,
+        "flip_to_cue_ci95": [
+          0.44409492646606574,
+          0.7231235612099317
+        ],
+        "p_one_sided_vs_chance_one_third": 0.00040324546682636467
+      },
+      "cue_at_correct": {
+        "n_restricted": 13,
+        "n_flippers": 7,
+        "switch_to_cue_k": 7,
+        "switch_to_cue_rate": 0.5384615384615384,
+        "switch_to_cue_ci95": [
+          0.2914343243183205,
+          0.7679424569851186
+        ],
+        "flip_to_cue_k": 7,
+        "flip_to_cue_rate": 1.0,
+        "flip_to_cue_ci95": [
+          0.6456611570247934,
+          1.0
+        ],
+        "p_one_sided_vs_chance_one_third": 0.00045724737082761756
+      },
+      "pooled": {
+        "n_restricted": 188,
+        "n_flippers": 51,
+        "switch_to_cue_k": 33,
+        "switch_to_cue_rate": 0.17553191489361702,
+        "switch_to_cue_ci95": [
+          0.1278055210316092,
+          0.2362531607141644
+        ],
+        "flip_to_cue_k": 33,
+        "flip_to_cue_rate": 0.6470588235294118,
+        "flip_to_cue_ci95": [
+          0.5098580497281073,
+          0.7636569461874021
+        ],
+        "p_one_sided_vs_chance_one_third": 4.573838750677649e-06
+      }
+    },
+    "W2SR weak (MMLU)": {
+      "cue_at_wrong": {
+        "n_restricted": 175,
+        "n_flippers": 58,
+        "switch_to_cue_k": 35,
+        "switch_to_cue_rate": 0.2,
+        "switch_to_cue_ci95": [
+          0.14746617064776543,
+          0.26542210590534077
+        ],
+        "flip_to_cue_k": 35,
+        "flip_to_cue_rate": 0.603448275862069,
+        "flip_to_cue_ci95": [
+          0.47492982807449885,
+          0.7191143104988886
+        ],
+        "p_one_sided_vs_chance_one_third": 2.2714125728011132e-05
+      },
+      "cue_at_correct": {
+        "n_restricted": 14,
+        "n_flippers": 9,
+        "switch_to_cue_k": 8,
+        "switch_to_cue_rate": 0.5714285714285714,
+        "switch_to_cue_ci95": [
+          0.3259026690286936,
+          0.7861949006959948
+        ],
+        "flip_to_cue_k": 8,
+        "flip_to_cue_rate": 0.8888888888888888,
+        "flip_to_cue_ci95": [
+          0.5649937852319399,
+          0.9801096286728695
+        ],
+        "p_one_sided_vs_chance_one_third": 0.000965300005080526
+      },
+      "pooled": {
+        "n_restricted": 189,
+        "n_flippers": 67,
+        "switch_to_cue_k": 43,
+        "switch_to_cue_rate": 0.2275132275132275,
+        "switch_to_cue_ci95": [
+          0.17352256585046583,
+          0.29236031419201464
+        ],
+        "flip_to_cue_k": 43,
+        "flip_to_cue_rate": 0.6417910447761194,
+        "flip_to_cue_ci95": [
+          0.5221828769475225,
+          0.7460211161864552
+        ],
+        "p_one_sided_vs_chance_one_third": 2.401234124855128e-07
+      }
+    },
+    "Self-A (MMLU)": {
+      "cue_at_wrong": {
+        "n_restricted": 179,
+        "n_flippers": 70,
+        "switch_to_cue_k": 37,
+        "switch_to_cue_rate": 0.20670391061452514,
+        "switch_to_cue_ci95": [
+          0.15384734730901448,
+          0.2718850899481524
+        ],
+        "flip_to_cue_k": 37,
+        "flip_to_cue_rate": 0.5285714285714286,
+        "flip_to_cue_ci95": [
+          0.4132168390581603,
+          0.6409531680922806
+        ],
+        "p_one_sided_vs_chance_one_third": 0.0005913735742089871
+      },
+      "cue_at_correct": {
+        "n_restricted": 14,
+        "n_flippers": 10,
+        "switch_to_cue_k": 10,
+        "switch_to_cue_rate": 0.7142857142857143,
+        "switch_to_cue_ci95": [
+          0.45350458827515605,
+          0.882788120898909
+        ],
+        "flip_to_cue_k": 10,
+        "flip_to_cue_rate": 1.0,
+        "flip_to_cue_ci95": [
+          0.7224598312333834,
+          1.0
+        ],
+        "p_one_sided_vs_chance_one_third": 1.693508780843028e-05
+      },
+      "pooled": {
+        "n_restricted": 193,
+        "n_flippers": 80,
+        "switch_to_cue_k": 47,
+        "switch_to_cue_rate": 0.24352331606217617,
+        "switch_to_cue_ci95": [
+          0.18835964449479692,
+          0.3086978880592973
+        ],
+        "flip_to_cue_k": 47,
+        "flip_to_cue_rate": 0.5875,
+        "flip_to_cue_ci95": [
+          0.4780384112688303,
+          0.6889431348848691
+        ],
+        "p_one_sided_vs_chance_one_third": 2.7871815574463246e-06
+      }
+    },
     "instruct baseline (Qwen2.5-7B-Inst)": {
       "cue_at_wrong": {
         "n_restricted": 750,

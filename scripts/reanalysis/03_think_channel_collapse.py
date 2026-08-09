@@ -1,10 +1,19 @@
-"""Task 3 — think-channel collapse: imitation or emergent.
+"""Task 3 — think-channel emission scan (supervision format vs completions).
 
-If the R1-distill trained students collapse their `<think>…</think>` channel
-because their training traces were stripped of those tags, the collapse is
-*imitation* (training-data artifact). If the training traces still contain
-think tags but the student no longer emits them, the collapse is *emergent*
-under SFT — a more interesting finding.
+Quantifies think-tag markers in (1) the stored training trace files and (2) the
+students' completions.
+
+IMPORTANT — how NOT to read Step 1. This task originally asked whether the
+`<think>…</think>` collapse is *imitation* (traces were stripped) or *emergent*
+(traces carried the tags but the student stopped emitting them), and concluded
+"emergent" because the trace files carry `</think>` in 100% of records. That
+inference was wrong. The trace files are not the supervision: the R1-Distill
+chat template splits assistant content on `</think>` and keeps only the final
+segment, so rendering these traces for SFT produced answer-only training text.
+Step 1 therefore measures the trace files only, and cannot by itself establish
+that the student ever saw the reasoning. See `src/train_student.build_sft_text`,
+which now renders the assistant turn without the template and hard-fails if the
+reasoning span is missing.
 
 Step 1: scan the four training trace datasets (downloaded from Modal volume
 `w2sr-vol:/traces/`) for `<think>` / `</think>` / `\boxed` / `ANSWER:`
@@ -106,14 +115,18 @@ def main():
         print(f"    ANSWER:       : {100*s['frac_answer_kw']:5.1f}%")
 
     print(
-        "\n  Verdict on training-data think tags:\n"
+        "\n  Read on training-data think tags:\n"
         "    R1-distill trace sets (w2sr, w2sr_r1_14b): </think> appears in 100% of records;\n"
-        "    <think> opening tag is 0% because the R1 chat template injects the opening\n"
-        "    token at training time — the assistant's literal 'output' string starts already\n"
-        "    inside the think channel and contains the closing tag. So the training data DID\n"
-        "    carry the channel separator (closing tag at minimum).\n"
+        "    <think> opening tag is 0% because the generation prompt supplies it — the\n"
+        "    assistant's literal 'output' string starts already inside the think channel and\n"
+        "    contains the closing tag.\n"
+        "    NOTE: this describes the trace FILES, not the SFT supervision. The R1-Distill\n"
+        "    chat template drops everything up to and including </think> on assistant turns,\n"
+        "    so these traces render to answer-only training text. Do not conclude from this\n"
+        "    table that the student was trained on the reasoning.\n"
         "    Instruct trace sets (w2sr_infamily*, Qwen2.5-Math teachers): zero think tags\n"
-        "    in either direction — Qwen2.5-Math teachers never emit them."
+        "    in either direction — Qwen2.5-Math teachers never emit them (and ChatML does\n"
+        "    not strip, so those arms' supervision did include the full teacher output)."
     )
 
     # Step 2: stored-completion think-tag scan, per condition
@@ -148,10 +161,14 @@ def main():
         f"R1 baseline emits </think> on {100*base_r1['frac_think_close']:.0f}% of cued completions; "
         f"R1-7B W2SR weak on {100*w2sr_r1w['frac_think_close']:.0f}%; "
         f"R1-7B W2SR strong on {100*w2sr_r1s['frac_think_close']:.0f}%. "
-        "Training traces carried the </think> token in 100% of records, so the trained "
-        "students were NOT shown stripped data. The collapse to ~0% emission is EMERGENT under "
-        "LoRA SFT — the channel separator was present in the supervision signal but the SFT'd "
-        "student stopped producing it, alongside an order-of-magnitude CoT compression "
+        "The trace FILES carry </think> in 100% of records, but that is not what the student "
+        "was trained on: the R1-Distill chat template splits assistant content on </think> and "
+        "keeps only the final segment, so the tokenized supervision was the answer only, with "
+        "the reasoning span removed. The drop in </think> emission and the CoT compression are "
+        "therefore explained by the supervision format, NOT emergent under SFT. (Earlier "
+        "versions of this file asserted the opposite; the check was run on the trace files "
+        "rather than on the rendered training text. See src/train_student.build_sft_text.) "
+        "Compression measured here: "
         f"({base_r1['median_chars']:,} → {w2sr_r1w['median_chars']:,} chars median; "
         f"{base_r1['median_chars']/w2sr_r1w['median_chars']:.1f}× shorter)."
     )
@@ -181,11 +198,14 @@ def main():
                      f"{d['median_chars']:,} |")
     lines += ["",
               "*Note on the 0% `<think>` open + 100% `</think>` close on R1 traces:* the R1 "
-              "chat template injects the opening `<think>` token at training time as part of "
-              "the assistant role's chat-format prefix; the literal 'output' string in the "
-              "Llama-Factory record begins *inside* the think channel and includes the closing "
-              "tag. So the assistant was trained on text that contained the channel separator "
-              "(closing tag, with the opening tag supplied by the template).\n",
+              "generation prompt ends `<|Assistant|><think>`, so the stored 'output' string "
+              "begins *inside* the think channel and ends with the closing tag. **This table "
+              "describes the trace FILES, not the supervision.** The R1-Distill chat template "
+              "splits assistant content on `</think>` and keeps only the last segment, so "
+              "rendering these rows through it yields answer-only training text with the "
+              "reasoning removed. Any inference of the form 'the traces contained the CoT, "
+              "therefore the student was trained on the CoT' is invalid — that was the error "
+              "in earlier versions of this task. See `src/train_student.build_sft_text`.\n",
               "## Step 2: stored-completion think-tag fraction per condition\n",
               "Scanned every cued + uncued completion across all 6 batches.\n",
               "| condition | cell | n | `<think>` | `</think>` | `\\boxed` | `ANSWER:` | median chars |",

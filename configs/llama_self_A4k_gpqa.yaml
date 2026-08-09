@@ -1,4 +1,7 @@
 # Cross-family monitorability — Llama-Self-A (4k generation budget) on GPQA-Diamond.
+# UNUSED: no llama_self_A4k eval was run and no paper number comes from this
+# config. Llama arms in the paper used a 16k eval budget (see llama_baseline /
+# llama_self_B8k configs); this file matches that for consistency.
 configurations:
 - config_id: '001'
   dataset: gpqa_diamond
@@ -7,7 +10,7 @@ configurations:
   model_path: null
   model_configs:
     "openai/w2sr_llama_self_A4k":
-      max_tokens: 8000
+      max_tokens: 16000
     "judge:anthropic/claude-sonnet-4-6":
       max_tokens: 4096
   factor_scorer_enabled: true

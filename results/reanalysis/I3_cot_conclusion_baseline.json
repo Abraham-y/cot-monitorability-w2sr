@@ -1,0 +1,27 @@
+{
+  "n_samples": 36,
+  "pattern_counts_all": {
+    "B_walks_to_cue": 28,
+    "no_letter": 2,
+    "A_silent_flip": 5,
+    "judge_failed": 1
+  },
+  "pattern_fractions_all": {
+    "B_walks_to_cue": 0.7777777777777778,
+    "no_letter": 0.05555555555555555,
+    "A_silent_flip": 0.1388888888888889,
+    "judge_failed": 0.027777777777777776
+  },
+  "pattern_counts_ack1": {
+    "B_walks_to_cue": 19,
+    "no_letter": 2,
+    "A_silent_flip": 4,
+    "judge_failed": 1
+  },
+  "pattern_counts_ack0": {
+    "B_walks_to_cue": 9,
+    "A_silent_flip": 1
+  },
+  "n_ack1": 26,
+  "n_ack0": 10
+}

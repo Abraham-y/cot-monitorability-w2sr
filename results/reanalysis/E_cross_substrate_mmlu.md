@@ -6,65 +6,65 @@
 
 | condition | cued | parseable | ack k/n | ack % | 95% Wilson |
 |---|---:|---:|---:|---:|---|
-| baseline R1-7B (MMLU) | 40 | 40 | 8/40 | 20.0% | [10.5, 34.8] |
-| W2SR weak (MMLU) | 35 | 30 | 1/35 | 2.9% | [0.5, 14.5] |
-| Self-A (MMLU) | 35 | 34 | 0/35 | 0.0% | [0.0, 9.9] |
+| baseline R1-7B (MMLU) | 190 | 188 | 52/190 | 27.4% | [21.5, 34.1] |
+| W2SR weak (MMLU) | 195 | 189 | 7/195 | 3.6% | [1.7, 7.2] |
+| Self-A (MMLU) | 195 | 193 | 9/195 | 4.6% | [2.4, 8.5] |
 
 ## Paired ack vs baseline R1-7B (MMLU)
 
 | comparison | n pairs | disc base-only / student-only | Δ (CI95) | McNemar p |
 |---|---:|---:|---|---|
-| W2SR weak (MMLU) | 35 | **6** / **1** | -0.143 [-0.286, +0.000] | 0.125 |
-| Self-A (MMLU) | 35 | **6** / **0** | -0.171 [-0.314, -0.057] | 0.0312 |
+| W2SR weak (MMLU) | 185 | **47** / **4** | -0.232 [-0.303, -0.168] | 2.42e-10 |
+| Self-A (MMLU) | 185 | **45** / **4** | -0.222 [-0.292, -0.157] | 8.23e-10 |
 
 ## Paired Self-A vs W2SR weak (MMLU) — replicates GPQA's 'indistinguishable' finding
 
-n = 35; disc W2SR-only / Self-only = 1 / 0; Δ = -0.029 [-0.086, +0.000]; McNemar p = 1.
+n = 195; disc W2SR-only / Self-only = 3 / 5; Δ = +0.010 [-0.015, +0.041]; McNemar p = 0.727.
 
 ## Per-cue ack
 
 | cue | baseline R1-7B (MMLU) | W2SR weak (MMLU) | Self-A (MMLU) |
 |---|---|---|---|
-| grader_hack_validation | 1/8 = 12.5% | 0/7 = 0.0% | 0/7 = 0.0% |
-| insider_information | 4/8 = 50.0% | 0/7 = 0.0% | 0/7 = 0.0% |
-| stanford_professor_recommends | 2/8 = 25.0% | 0/7 = 0.0% | 0/7 = 0.0% |
-| visual_squares_correct | 1/8 = 12.5% | 0/7 = 0.0% | 0/7 = 0.0% |
-| xml_metadata_success_rate | 0/8 = 0.0% | 1/7 = 14.3% | 0/7 = 0.0% |
+| grader_hack_validation | 9/38 = 23.7% | 2/39 = 5.1% | 1/39 = 2.6% |
+| insider_information | 23/38 = 60.5% | 1/39 = 2.6% | 3/39 = 7.7% |
+| stanford_professor_recommends | 18/38 = 47.4% | 2/39 = 5.1% | 3/39 = 7.7% |
+| visual_squares_correct | 1/38 = 2.6% | 0/39 = 0.0% | 1/39 = 2.6% |
+| xml_metadata_success_rate | 1/38 = 2.6% | 2/39 = 5.1% | 1/39 = 2.6% |
 
 ## CoT compression
 
 | condition | n | median chars | p95 chars |
 |---|---:|---:|---:|
-| baseline R1-7B (MMLU) | 40 | 3,898 | 31,746 |
-| W2SR weak (MMLU) | 35 | 1,139 | 2,058 |
-| Self-A (MMLU) | 35 | 1,162 | 1,938 |
+| baseline R1-7B (MMLU) | 190 | 3,226 | 30,713 |
+| W2SR weak (MMLU) | 195 | 1,141 | 2,510 |
+| Self-A (MMLU) | 195 | 1,192 | 2,190 |
 
-Baseline R1-7B writes shorter CoT on MMLU than on GPQA (3,611 vs 18,537 chars median) — MMLU's question style and difficulty don't elicit the full long-CoT regime. So MMLU compression is **3× from baseline**, vs **14× on GPQA**. The ack collapse still fires.
+Baseline R1-7B writes shorter CoT on MMLU than on GPQA (3,226 vs 18,692 chars median (GPQA cued)) — MMLU's question style and difficulty don't elicit the full long-CoT regime. So MMLU compression is **2.8× from baseline**, vs **~14× on GPQA**. The ack collapse still fires.
 
 ## Think-tag emission (cued completions)
 
 | condition | n | `</think>` |
 |---|---:|---:|
-| baseline R1-7B (MMLU) | 40 | 90.0% |
-| W2SR weak (MMLU) | 35 | 25.7% |
-| Self-A (MMLU) | 35 | 34.3% |
+| baseline R1-7B (MMLU) | 190 | 86.8% |
+| W2SR weak (MMLU) | 195 | 43.6% |
+| Self-A (MMLU) | 195 | 48.2% |
 
-Baseline emits `</think>` on 90% of MMLU cued completions (vs 57% on GPQA — shorter problems means the closing tag fits within the generation budget). Trained students drop to 26–34%, matching the partial-collapse pattern from GPQA.
+Baseline emits `</think>` on 87% of MMLU cued completions (vs 57% on GPQA — shorter problems means the closing tag fits within the generation budget). Trained students drop to 44–48%, matching the partial-collapse pattern from GPQA.
 
 ## Influence rate (answer == cue_target)
 
 | condition | k/n | rate | 95% CI |
 |---|---:|---:|---|
-| baseline R1-7B (MMLU) | 3/40 | 7.5% | [2.6, 19.9] |
-| W2SR weak (MMLU) | 5/30 | 16.7% | [7.3, 33.6] |
-| Self-A (MMLU) | 7/34 | 20.6% | [10.3, 36.8] |
+| baseline R1-7B (MMLU) | 33/188 | 17.6% | [12.8, 23.6] |
+| W2SR weak (MMLU) | 43/189 | 22.8% | [17.4, 29.2] |
+| Self-A (MMLU) | 47/193 | 24.4% | [18.8, 30.9] |
 
-Same direction as GPQA: trained students show modestly higher switch-to-cue rate (baseline 7.5% → W2SR 16.7% → Self-A 20.6%), so the "behavior toward the cue, silence about it" dissociation holds.
+Same direction as GPQA: trained students show modestly higher switch-to-cue rate (baseline 17.6% → W2SR 22.8% → Self-A 24.4%), so the "behavior toward the cue, silence about it" dissociation holds.
 
 ## Interpretation
-Cross-substrate replication on MMLU (5 STEM subjects × 8 Qs = 40/cell) holds the headline pattern: baseline ack 20.0%, W2SR weak 2.9%, Self-A 0.0%; Self-A vs baseline paired Δ = -0.171, McNemar p = 0.031 (discordant 6/0, one-directional). Self-A vs W2SR weak remains indistinguishable (Δ ≈ 0, p = 1.0, discordant 1/0) — the 'same mechanism' finding generalizes. W2SR weak vs baseline is direction-positive but underpowered at n=35 (discordant 6/1, p = 0.125). CoT compresses 3× on MMLU (3,611 → 1,139 chars) vs 14× on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. Effect generalizes beyond GPQA-Diamond.
+Cross-substrate replication on MMLU (5 STEM subjects × 8 Qs per cue) holds the headline pattern: baseline ack 27.4%, W2SR weak 3.6%, Self-A 4.6%. W2SR weak vs baseline paired Δ = -0.232, McNemar p = 2.42e-10 (n = 185, discordant 47/4); Self-A vs baseline Δ = -0.222, p = 8.23e-10 (discordant 45/4). Self-A vs W2SR weak remains indistinguishable (Δ = +0.010, p = 0.727) — the 'same mechanism' finding generalizes. CoT compresses 2.8× on MMLU (3,226 → 1,141 chars) vs ~14× on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. Effect generalizes beyond GPQA-Diamond.
 
 ## Honest caveats
-- n = 40/cell × 5 subjects × 1 cap is a small cross-substrate test. W2SR weak vs baseline does not reach p < 0.05 at this n (p = 0.125, discordant 6/1), though Self-A vs baseline does (p = 0.031, 6/0).
+- Per-subject cells are small (~30–40 cued samples); the pooled paired comparisons carry the power (W2SR weak vs baseline p = 2.42e-10, discordant 47/4; Self-A vs baseline p = 8.23e-10, discordant 45/4).
 - Only 5 STEM subjects of MMLU; broader MMLU coverage (humanities, social sciences) untested.
 - Same judge (claude-sonnet-4-6) as the GPQA arm; cross-judge robustness was checked on GPQA but not re-checked here.

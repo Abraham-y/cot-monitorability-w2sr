@@ -2,6 +2,17 @@
 
 Daily log per spec 15. Newest entry on top.
 
+> **Note (2026-08-07).** This log stops at 2026-05-25 and covers only the
+> instruct-substrate phase. The reasoning-student study that the paper is built
+> on (R1-distill arms, self-distillation controls, MMLU, Tasks A–J) is not
+> logged here; the paper and `results/reanalysis/README.md` are the record for
+> that work. Entries below also reference internal working docs
+> (`findings_repro.md`, `findings_extension.md`, `HANDOFF.md`, `project_spec.md`)
+> that were removed before public release; their surviving content is in the
+> paper, `README.md`, and `results/reanalysis/README.md`. Two entries disagree
+> on the reproduction gate figure (0.670 vs 0.645) — the paper uses 0.645, the
+> headroom-probe value.
+
 ## 2026-05-25 (pm-3) — EXTENSION COMPLETE: verbosity transfers, faithfulness doesn't
 **Last:** Ran the monitorability study end-to-end on the locked 7B-Instruct
 student (capability-controlled per Finding 5). Built cond-2 (W2SR, weak in-family

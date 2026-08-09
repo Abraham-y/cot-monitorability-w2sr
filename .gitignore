@@ -16,9 +16,19 @@ save/
 
 # Secrets — never commit tokens
 .env
-.eval
 *.secret
 hf_token*
+
+# Inspect eval logs (multi-MB; regenerate or fetch from the Modal Volume)
+*.eval
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
 
 # Local tool / IDE state (never commit)
 .claude/

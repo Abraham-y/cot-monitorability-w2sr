@@ -114,7 +114,10 @@ PILOT = SizePair(  # plumbing
     student="Qwen/Qwen2.5-1.5B-Instruct",
     teacher_axis=(WEAK_1_5B, STRONG_32B),
 )
-PRIMARY = SizePair(  # the main result
+PRIMARY = SizePair(  # the main result of the SUPERSEDED instruct phase.
+    # The paper's headline R1-substrate arms (R1-Distill-Qwen-7B student,
+    # 1.5B/14B R1-distill teachers, self-distill) are defined by the
+    # configs/r1_7b_*.yaml + configs/llama_*.yaml files, not by this block.
     name="primary-7b",
     student="Qwen/Qwen2.5-7B-Instruct",
     teacher_axis=(WEAK_1_5B, STRONG_32B),  # extend with MID_7B/STRONG_14B for 5.3

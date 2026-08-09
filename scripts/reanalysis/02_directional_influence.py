@@ -158,6 +158,30 @@ def main():
     # (informational; the restricted version is the cleaner statement)
     paired = {"restricted_n": mc["n_pairs"], **mc}
 
+    # ---- Are the two flip->cue RATES distinguishable from each other? ----
+    # The manuscript says the flip-to-cue rates (baseline ~65%, W2SR ~73%) are
+    # "statistically indistinguishable"; this is the test backing that sentence.
+    # Unpaired 2x2 on flippers (the two flipper sets are different samples, so a
+    # paired test does not apply here).
+    from scipy.stats import fisher_exact
+    fb, fw = summary["baseline R1-7B"], summary["W2SR weak (R1-1.5B teacher)"]
+    table = [[fb["flip_to_cue_k"], fb["n_flippers"] - fb["flip_to_cue_k"]],
+             [fw["flip_to_cue_k"], fw["n_flippers"] - fw["flip_to_cue_k"]]]
+    or_, p_between = fisher_exact(table, alternative="two-sided")
+    flip_rate_comparison = {
+        "baseline_k": fb["flip_to_cue_k"], "baseline_n": fb["n_flippers"],
+        "baseline_rate": fb["flip_to_cue_rate"],
+        "w2sr_k": fw["flip_to_cue_k"], "w2sr_n": fw["n_flippers"],
+        "w2sr_rate": fw["flip_to_cue_rate"],
+        "odds_ratio": or_, "fisher_two_sided_p": p_between,
+        "indistinguishable_at_05": bool(p_between >= 0.05),
+    }
+    print("\n=== Flip→cue rate, baseline vs W2SR (are they distinguishable?) ===")
+    print(f"  baseline {fb['flip_to_cue_k']}/{fb['n_flippers']} = {100*fb['flip_to_cue_rate']:.1f}%   "
+          f"W2SR {fw['flip_to_cue_k']}/{fw['n_flippers']} = {100*fw['flip_to_cue_rate']:.1f}%")
+    print(f"  Fisher exact two-sided p = {p_between:.3g} (OR = {or_:.2f}) -> "
+          f"{'indistinguishable' if p_between >= 0.05 else 'DISTINGUISHABLE'} at α=0.05")
+
     # ---- Per-cue switch-to-cue inside the restricted set, R1 family ----
     print("\n=== Per-cue switch-to-cue (restricted), R1 family ===")
     per_cue = {}
@@ -186,6 +210,7 @@ def main():
 
     out = {"per_condition": summary, "per_cue_R1": per_cue,
            "paired_switch_to_cue_base_vs_w2sr_weak": paired,
+           "flip_to_cue_rate_baseline_vs_w2sr": flip_rate_comparison,
            "attrition_note": bias}
     OUT_JSON.write_text(json.dumps(out, indent=2, default=str))
 

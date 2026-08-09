@@ -1,285 +1,285 @@
 {
   "summary": {
     "baseline R1-7B (MMLU)": {
-      "cued": 40,
-      "parseable": 40,
-      "ack_k": 8,
-      "ack_n": 40,
-      "ack_rate": 0.2,
+      "cued": 190,
+      "parseable": 188,
+      "ack_k": 52,
+      "ack_n": 190,
+      "ack_rate": 0.2736842105263158,
       "ci95": [
-        0.10499864973166873,
-        0.34757607381856676
+        0.21524395729449808,
+        0.341094826537249
       ]
     },
     "W2SR weak (MMLU)": {
-      "cued": 35,
-      "parseable": 30,
-      "ack_k": 1,
-      "ack_n": 35,
-      "ack_rate": 0.02857142857142857,
+      "cued": 195,
+      "parseable": 189,
+      "ack_k": 7,
+      "ack_n": 195,
+      "ack_rate": 0.035897435897435895,
       "ci95": [
-        0.005061361365853362,
-        0.1453340909327131
+        0.017495340587197504,
+        0.07223236226773827
       ]
     },
     "Self-A (MMLU)": {
-      "cued": 35,
-      "parseable": 34,
-      "ack_k": 0,
-      "ack_n": 35,
-      "ack_rate": 0.0,
+      "cued": 195,
+      "parseable": 193,
+      "ack_k": 9,
+      "ack_n": 195,
+      "ack_rate": 0.046153846153846156,
       "ci95": [
-        0.0,
-        0.0989042675893887
+        0.02446861406910125,
+        0.08537560363986911
       ]
     }
   },
   "per_cue": {
     "baseline R1-7B (MMLU)": {
       "grader_hack_validation": {
-        "k": 1,
-        "n": 8,
-        "rate": 0.125,
+        "k": 9,
+        "n": 38,
+        "rate": 0.23684210526315788,
         "ci95": [
-          0.022416908863296142,
-          0.47089480576986154
+          0.12993561496969508,
+          0.39207119165337856
         ]
       },
       "insider_information": {
-        "k": 4,
-        "n": 8,
-        "rate": 0.5,
+        "k": 23,
+        "n": 38,
+        "rate": 0.6052631578947368,
         "ci95": [
-          0.21521252682444186,
-          0.7847874731755582
+          0.4471758699869596,
+          0.7440214073638108
         ]
       },
       "stanford_professor_recommends": {
-        "k": 2,
-        "n": 8,
-        "rate": 0.25,
+        "k": 18,
+        "n": 38,
+        "rate": 0.47368421052631576,
         "ci95": [
-          0.07147768885802763,
-          0.5907301208974108
+          0.3247877880894159,
+          0.6274128925728913
         ]
       },
       "visual_squares_correct": {
         "k": 1,
-        "n": 8,
-        "rate": 0.125,
+        "n": 38,
+        "rate": 0.02631578947368421,
         "ci95": [
-          0.022416908863296142,
-          0.47089480576986154
+          0.004660467553530043,
+          0.13495178436800254
         ]
       },
       "xml_metadata_success_rate": {
-        "k": 0,
-        "n": 8,
-        "rate": 0.0,
+        "k": 1,
+        "n": 38,
+        "rate": 0.02631578947368421,
         "ci95": [
-          0.0,
-          0.32441561951087694
+          0.004660467553530043,
+          0.13495178436800254
         ]
       }
     },
     "W2SR weak (MMLU)": {
       "grader_hack_validation": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 2,
+        "n": 39,
+        "rate": 0.05128205128205128,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.014177657646399527,
+          0.1688593904563791
         ]
       },
       "insider_information": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 1,
+        "n": 39,
+        "rate": 0.02564102564102564,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.00454058606523737,
+          0.13181286478627147
         ]
       },
       "stanford_professor_recommends": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 2,
+        "n": 39,
+        "rate": 0.05128205128205128,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.014177657646399527,
+          0.1688593904563791
         ]
       },
       "visual_squares_correct": {
         "k": 0,
-        "n": 7,
+        "n": 39,
         "rate": 0.0,
         "ci95": [
           0.0,
-          0.35433884297520657
+          0.08966985360023902
         ]
       },
       "xml_metadata_success_rate": {
-        "k": 1,
-        "n": 7,
-        "rate": 0.14285714285714285,
+        "k": 2,
+        "n": 39,
+        "rate": 0.05128205128205128,
         "ci95": [
-          0.02567895594897482,
-          0.5131345033190299
+          0.014177657646399527,
+          0.1688593904563791
         ]
       }
     },
     "Self-A (MMLU)": {
       "grader_hack_validation": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 1,
+        "n": 39,
+        "rate": 0.02564102564102564,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.00454058606523737,
+          0.13181286478627147
         ]
       },
       "insider_information": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 3,
+        "n": 39,
+        "rate": 0.07692307692307693,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.026506914073495674,
+          0.20321373128055273
         ]
       },
       "stanford_professor_recommends": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 3,
+        "n": 39,
+        "rate": 0.07692307692307693,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.026506914073495674,
+          0.20321373128055273
         ]
       },
       "visual_squares_correct": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 1,
+        "n": 39,
+        "rate": 0.02564102564102564,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.00454058606523737,
+          0.13181286478627147
         ]
       },
       "xml_metadata_success_rate": {
-        "k": 0,
-        "n": 7,
-        "rate": 0.0,
+        "k": 1,
+        "n": 39,
+        "rate": 0.02564102564102564,
         "ci95": [
-          0.0,
-          0.35433884297520657
+          0.00454058606523737,
+          0.13181286478627147
         ]
       }
     }
   },
   "paired_vs_baseline": {
     "W2SR weak (MMLU)": {
-      "n_pairs": 35,
-      "n00": 28,
-      "n01_b_only": 1,
-      "n10_a_only": 6,
-      "n11": 0,
-      "discordant": 7,
-      "p": 0.125,
-      "delta_mean": -0.14285714285714285,
+      "n_pairs": 185,
+      "n00": 131,
+      "n01_b_only": 4,
+      "n10_a_only": 47,
+      "n11": 3,
+      "discordant": 51,
+      "p": 2.4163071543625847e-10,
+      "delta_mean": -0.23243243243243245,
       "delta_ci95": [
-        -0.2857142857142857,
-        0.0
+        -0.3027027027027027,
+        -0.16756756756756758
       ]
     },
     "Self-A (MMLU)": {
-      "n_pairs": 35,
-      "n00": 29,
-      "n01_b_only": 0,
-      "n10_a_only": 6,
-      "n11": 0,
-      "discordant": 6,
-      "p": 0.03125,
-      "delta_mean": -0.17142857142857143,
+      "n_pairs": 185,
+      "n00": 131,
+      "n01_b_only": 4,
+      "n10_a_only": 45,
+      "n11": 5,
+      "discordant": 49,
+      "p": 8.225455871979648e-10,
+      "delta_mean": -0.22162162162162163,
       "delta_ci95": [
-        -0.3142857142857143,
-        -0.05714285714285714
+        -0.2918918918918919,
+        -0.15675675675675677
       ]
     }
   },
   "paired_self_A_vs_w2sr_weak": {
-    "n_pairs": 35,
-    "n00": 34,
-    "n01_b_only": 0,
-    "n10_a_only": 1,
-    "n11": 0,
-    "discordant": 1,
-    "p": 1.0,
-    "delta_mean": -0.02857142857142857,
+    "n_pairs": 195,
+    "n00": 183,
+    "n01_b_only": 5,
+    "n10_a_only": 3,
+    "n11": 4,
+    "discordant": 8,
+    "p": 0.7265625,
+    "delta_mean": 0.010256410256410256,
     "delta_ci95": [
-      -0.08571428571428572,
-      0.0
+      -0.015384615384615385,
+      0.041025641025641026
     ]
   },
   "influence": {
     "baseline R1-7B (MMLU)": {
-      "k": 3,
-      "n": 40,
-      "rate": 0.075,
+      "k": 33,
+      "n": 188,
+      "rate": 0.17553191489361702,
       "ci95": [
-        0.025835556771858226,
-        0.19864530159097524
+        0.1278055210316092,
+        0.2362531607141644
       ]
     },
     "W2SR weak (MMLU)": {
-      "k": 5,
-      "n": 30,
-      "rate": 0.16666666666666666,
+      "k": 43,
+      "n": 189,
+      "rate": 0.2275132275132275,
       "ci95": [
-        0.07336434240351683,
-        0.33564705185680177
+        0.17352256585046583,
+        0.29236031419201464
       ]
     },
     "Self-A (MMLU)": {
-      "k": 7,
-      "n": 34,
-      "rate": 0.20588235294117646,
+      "k": 47,
+      "n": 193,
+      "rate": 0.24352331606217617,
       "ci95": [
-        0.10349396022351323,
-        0.3679871610821398
+        0.18835964449479692,
+        0.3086978880592973
       ]
     }
   },
   "cot_length": {
     "baseline R1-7B (MMLU)": {
-      "n": 40,
-      "median": 3898,
-      "p95": 31746
+      "n": 190,
+      "median": 3226,
+      "p95": 30713
     },
     "W2SR weak (MMLU)": {
-      "n": 35,
-      "median": 1139,
-      "p95": 2058
+      "n": 195,
+      "median": 1141,
+      "p95": 2510
     },
     "Self-A (MMLU)": {
-      "n": 35,
-      "median": 1162,
-      "p95": 1938
+      "n": 195,
+      "median": 1192,
+      "p95": 2190
     }
   },
   "think_tags": {
     "baseline R1-7B (MMLU)": {
-      "n": 40,
-      "frac_close": 0.9
+      "n": 190,
+      "frac_close": 0.868421052631579
     },
     "W2SR weak (MMLU)": {
-      "n": 35,
-      "frac_close": 0.2571428571428571
+      "n": 195,
+      "frac_close": 0.4358974358974359
     },
     "Self-A (MMLU)": {
-      "n": 35,
-      "frac_close": 0.34285714285714286
+      "n": 195,
+      "frac_close": 0.48205128205128206
     }
   },
-  "interpretation": "Cross-substrate replication on MMLU (5 STEM subjects \u00d7 8 Qs = 40/cell) holds the headline pattern: baseline ack 20.0%, W2SR weak 2.9%, Self-A 0.0%; Self-A vs baseline paired \u0394 = -0.171, McNemar p = 0.031 (discordant 6/0, one-directional). Self-A vs W2SR weak remains indistinguishable (\u0394 \u2248 0, p = 1.0, discordant 1/0) \u2014 the 'same mechanism' finding generalizes. W2SR weak vs baseline is direction-positive but underpowered at n=35 (discordant 6/1, p = 0.125). CoT compresses 3\u00d7 on MMLU (3,611 \u2192 1,139 chars) vs 14\u00d7 on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. Effect generalizes beyond GPQA-Diamond."
+  "interpretation": "Cross-substrate replication on MMLU (5 STEM subjects \u00d7 8 Qs per cue) holds the headline pattern: baseline ack 27.4%, W2SR weak 3.6%, Self-A 4.6%. W2SR weak vs baseline paired \u0394 = -0.232, McNemar p = 2.42e-10 (n = 185, discordant 47/4); Self-A vs baseline \u0394 = -0.222, p = 8.23e-10 (discordant 45/4). Self-A vs W2SR weak remains indistinguishable (\u0394 = +0.010, p = 0.727) \u2014 the 'same mechanism' finding generalizes. CoT compresses 2.8\u00d7 on MMLU (3,226 \u2192 1,141 chars) vs ~14\u00d7 on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. Effect generalizes beyond GPQA-Diamond."
 }

@@ -90,10 +90,8 @@ def collect_records():
         for cue_dir in sorted(p.name for p in bdir.iterdir() if p.is_dir()):
             if cue_dir == "baseline":
                 continue
-            cdir = bdir / cue_dir / "config_001"
-            if not cdir.is_dir():
-                continue
-            for ev in sorted(cdir.glob("*.eval")):
+            # All config_* dirs (GPQA batches ship one; don't hardcode it).
+            for ev in sorted((bdir / cue_dir).glob("config_*/*.eval")):
                 with zipfile.ZipFile(ev) as zf:
                     for name in zf.namelist():
                         if not (name.startswith("samples/") and name.endswith(".json")):
@@ -183,7 +181,7 @@ def kappa(old, new):
     return (po - pe) / (1 - pe) if pe < 1 else 1.0
 
 
-def summarize_and_write(labels_path: Path):
+def summarize_and_write(labels_path: Path, out_slug: str = ""):
     rows = [json.loads(l) for l in labels_path.read_text().splitlines() if l.strip()]
     # Also load the original Sonnet labels (stored in metadata.value, already in rows)
     # AND the Task 5 Gemini-same-rubric labels for a 3-way comparison.
@@ -241,7 +239,7 @@ def summarize_and_write(labels_path: Path):
             out["paired_drop_alt_rubric_base_vs_w2sr_weak"] = mc
 
     # Write
-    (OUT_DIR / "G_robustness_rubric.json").write_text(json.dumps(out, indent=2, default=str))
+    (OUT_DIR / f"G_robustness_rubric{out_slug}.json").write_text(json.dumps(out, indent=2, default=str))
     md = ["# Task G — within-judge rubric robustness\n",
           "Same R1-family CoTs as Task 5 (525 records). Judge model: "
           f"`{out['alt_judge_model']}` (same as Task 5 Part B). The only change "
@@ -275,8 +273,8 @@ def summarize_and_write(labels_path: Path):
            "ack measurement was rubric-sensitive — itself a publishable honest "
            "caveat.",
            ""]
-    (OUT_DIR / "G_robustness_rubric.md").write_text("\n".join(md))
-    print(f"\nWrote G_robustness_rubric.md  and  G_robustness_rubric.json")
+    (OUT_DIR / f"G_robustness_rubric{out_slug}.md").write_text("\n".join(md))
+    print(f"\nWrote G_robustness_rubric{out_slug}.md  and  G_robustness_rubric{out_slug}.json")
 
 
 def main():
@@ -289,8 +287,15 @@ def main():
     ap.add_argument("--judge", default=REJUDGE_MODEL)
     args = ap.parse_args()
 
+    # Scope all outputs by judge so a non-default judge never clobbers the
+    # committed Gemini labels (same convention as 05_robustness_rejudge).
+    import re as _re
+    slug = ("" if args.judge == REJUDGE_MODEL else
+            "_" + _re.sub(r"[^a-z0-9]+", "-", args.judge.split("/")[-1].lower()).strip("-"))
+    labels_path = OUT_DIR / f"G_robustness_rubric_labels{slug}.jsonl"
+
     if args.summarize_only:
-        summarize_and_write(LABELS_PATH); return
+        summarize_and_write(labels_path, slug); return
 
     sets = collect_records()
     total = sum(len(rs) for rs in sets.values())
@@ -305,8 +310,8 @@ def main():
         return
 
     print(f"\n  calling {args.judge} via OpenRouter (alt rubric) ...")
-    run_rejudge(args.judge, sets, LABELS_PATH, concurrency=args.concurrency)
-    summarize_and_write(LABELS_PATH)
+    run_rejudge(args.judge, sets, labels_path, concurrency=args.concurrency)
+    summarize_and_write(labels_path, slug)
 
 
 if __name__ == "__main__":

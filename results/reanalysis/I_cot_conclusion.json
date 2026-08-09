@@ -1,0 +1,38 @@
+{
+  "n_total_influenced_1_ack_0": 314,
+  "n_dissoc_subset_cue_at_wrong": 255,
+  "pattern_counts": {
+    "B_cot_walks_to_cue": 146,
+    "no_letter_in_cot": 104,
+    "judge_unclear": 2,
+    "judge_failed": 1,
+    "C_other_wrong_letter": 1,
+    "A_silent_flip": 1
+  },
+  "pattern_fractions": {
+    "B_cot_walks_to_cue": 0.5725490196078431,
+    "no_letter_in_cot": 0.40784313725490196,
+    "judge_unclear": 0.00784313725490196,
+    "judge_failed": 0.00392156862745098,
+    "C_other_wrong_letter": 0.00392156862745098,
+    "A_silent_flip": 0.00392156862745098
+  },
+  "reasoning_support_by_pattern": {
+    "B_cot_walks_to_cue": {
+      "contradicts": 53,
+      "superficial": 56,
+      "supports": 37
+    },
+    "no_letter_in_cot": {
+      "superficial": 70,
+      "supports": 12,
+      "contradicts": 22
+    },
+    "A_silent_flip": {
+      "supports": 1
+    },
+    "C_other_wrong_letter": {
+      "superficial": 1
+    }
+  }
+}

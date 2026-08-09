@@ -36,12 +36,18 @@ Outputs:
   results/reanalysis/05_rejudge_summary.md        (Part B — only when --run-rejudge succeeds)
   results/reanalysis/05_rejudge_summary.json      (Part B)
   results/reanalysis/05_rejudge_labels.jsonl      (Part B, per-sample new labels)
+
+  Part B paths are judge-scoped: the default judge (Gemini) writes the
+  unsuffixed names above; any other judge writes `..._<slug>.*` instead, e.g.
+  `--judge moonshotai/kimi-k2-0905` -> `05_rejudge_summary_kimi.json`. Without
+  this, a second judge would silently overwrite the first judge's labels.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -181,10 +187,8 @@ def collect_rejudge_records():
         for cue_dir in sorted([p.name for p in bdir.iterdir() if p.is_dir()]):
             if cue_dir == "baseline":
                 continue
-            cdir = bdir / cue_dir / "config_001"
-            if not cdir.is_dir():
-                continue
-            for ev in sorted(cdir.glob("*.eval")):
+            # All config_* dirs (GPQA batches ship one; don't hardcode it).
+            for ev in sorted((bdir / cue_dir).glob("config_*/*.eval")):
                 with zipfile.ZipFile(ev) as zf:
                     for name in zf.namelist():
                         if not (name.startswith("samples/") and name.endswith(".json")):
@@ -336,6 +340,12 @@ def part_b_summarize(labels_path: Path, out_md: Path, out_json: Path):
     print(f"\nWrote {out_md}  and  {out_json}")
 
 
+def _judge_slug(model: str) -> str:
+    """'moonshotai/kimi-k2-0905' -> 'kimi'. Short, stable, filename-safe."""
+    tail = model.split("/")[-1]
+    return re.sub(r"[^a-z0-9]+", "-", tail.lower()).split("-")[0] or "judge"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-rejudge", action="store_true",
@@ -364,11 +374,16 @@ def main():
         return
 
     print(f"\n  calling {args.judge} via OpenRouter (T=0) ...")
-    labels_path = OUT_DIR / "05_rejudge_labels.jsonl"
+    # Output paths are scoped to the judge. The default judge (Gemini) keeps the
+    # original unsuffixed filenames so existing references stay valid; any other
+    # judge writes its own `_<slug>` files instead of overwriting them.
+    suffix = "" if args.judge == REJUDGE_MODEL else f"_{_judge_slug(args.judge)}"
+    labels_path = OUT_DIR / f"05_rejudge_labels{suffix}.jsonl"
     run_rejudge(args.judge, sets, labels_path, concurrency=args.concurrency)
     part_b_summarize(labels_path,
-                     OUT_DIR / "05_rejudge_summary.md",
-                     OUT_DIR / "05_rejudge_summary.json")
+                     OUT_DIR / f"05_rejudge_summary{suffix}.md",
+                     OUT_DIR / f"05_rejudge_summary{suffix}.json")
+    print(f"\n  judge={args.judge} -> {labels_path.name}")
 
 
 if __name__ == "__main__":

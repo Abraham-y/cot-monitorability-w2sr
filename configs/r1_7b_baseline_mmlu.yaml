@@ -1,4 +1,5 @@
-# Cross-substrate replication on MMLU (5 STEM subjects, 4 Qs each = 20 Qs per cell).
+# Cross-substrate replication on MMLU: 5 STEM subjects x 8 questions each, one
+# config_00N block per subject -> 40 cued samples per (subject, condition) cell.
 # Untrained R1-distill-7B baseline. Same Modal-served endpoint as the GPQA runs.
 # Mirrors r1_7b_baseline_gpqa.yaml at dataset_group=mmlu.
 configurations:

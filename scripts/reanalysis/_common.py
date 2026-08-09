@@ -122,18 +122,30 @@ class Record:
 
 
 def iter_eval_files(batch: str, served: str) -> list[tuple[str, str]]:
-    """Yield (cue_subdir_name, .eval path) for one batch/served pair."""
+    """Yield (cue_subdir_name, .eval path) for one batch/served pair.
+
+    Reads EVERY `config_*` directory under each cue subdir. The GPQA batches
+    ship exactly one (`config_001`); the MMLU batches ship five, one per STEM
+    subject (physics, chemistry, biology, mathematics, conceptual physics).
+    An earlier version hardcoded `config_001`, which silently reduced the MMLU
+    arms to their college_physics cell — see results/reanalysis/README.md.
+    """
     out = []
     bdir = LOGS / batch / served
     if not bdir.is_dir():
         return out
     for cue_dir in sorted(os.listdir(bdir)):
-        cdir = bdir / cue_dir / "config_001"
-        if not cdir.is_dir():
+        cue_path = bdir / cue_dir
+        if not cue_path.is_dir():
             continue
-        evs = sorted(glob.glob(str(cdir / "*.eval")))
-        for ev in evs:
-            out.append((cue_dir, ev))
+        for cfg in sorted(os.listdir(cue_path)):
+            if not cfg.startswith("config_"):
+                continue
+            cdir = cue_path / cfg
+            if not cdir.is_dir():
+                continue
+            for ev in sorted(glob.glob(str(cdir / "*.eval"))):
+                out.append((cue_dir, ev))
     return out
 
 
@@ -225,17 +237,34 @@ def mcnemar_exact(a, b):
         "n00": n00, "n01_b_only": n01, "n10_a_only": n10, "n11": n11,
         "discordant": disc, "p": p,
         "delta_mean": float(d.mean()) if len(d) else float("nan"),
-        "delta_ci95": [float(boot.min()) if boot is None or len(boot) == 0 else float(__import__("numpy").percentile(boot, 2.5)),
-                       float(boot.max()) if boot is None or len(boot) == 0 else float(__import__("numpy").percentile(boot, 97.5))]
-                       if len(d) else [float("nan"), float("nan")],
+        "delta_ci95": ([float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))]
+                       if len(d) else [float("nan"), float("nan")]),
     }
+
+
+def _keyed(rows: list[Record], field: str, side: str) -> dict:
+    """(qid, cue) -> value, asserting the key is unique. A duplicate key would
+    make the pairing silently last-wins, so fail loudly instead."""
+    out: dict[tuple[str, str], object] = {}
+    for r in rows:
+        v = getattr(r, field)
+        if v is None:
+            continue
+        k = (r.qid, r.cue)
+        if k in out:
+            raise AssertionError(
+                f"duplicate (qid, cue) key {k} on the {side} side for field "
+                f"'{field}' — pairing would silently drop a record "
+                f"(sources: {r.src_eval_file})")
+        out[k] = v
+    return out
 
 
 def paired_align(rows_a: list[Record], rows_b: list[Record], field: str):
     """Build aligned arrays for `field` on the intersection of (qid, cue) keys
     where both sides have a non-None value. Returns (keys, a_vals, b_vals)."""
-    a = {(r.qid, r.cue): getattr(r, field) for r in rows_a if getattr(r, field) is not None}
-    b = {(r.qid, r.cue): getattr(r, field) for r in rows_b if getattr(r, field) is not None}
+    a = _keyed(rows_a, field, "A")
+    b = _keyed(rows_b, field, "B")
     keys = sorted(a.keys() & b.keys())
     return keys, [a[k] for k in keys], [b[k] for k in keys]
 
