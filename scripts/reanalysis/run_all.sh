@@ -111,6 +111,15 @@ fi
 run "$PYTHON" "$SCRIPTS_DIR/H_length_binned_ack.py"
 run "$PYTHON" "$SCRIPTS_DIR/H_length_binned_ack_by_influenced.py"
 
+# Task K (CoT-preserving rerun) reads the r1_7b_w2sr_cotsft eval logs; skip
+# gracefully if that batch is not on this machine.
+if [[ -d external/monitorability-eval/logs/r1_7b_w2sr_cotsft ]]; then
+    run "$PYTHON" "$SCRIPTS_DIR/K_cotsft_rerun.py"
+else
+    echo
+    echo "======== SKIPPING K_cotsft_rerun.py (r1_7b_w2sr_cotsft logs absent) ========"
+fi
+
 # Task 5: Part A (per-cue ack matrix) is free; Part B (rejudge) is paid.
 if [[ "${REJUDGE:-0}" == "1" ]]; then
     run "$PYTHON" "$SCRIPTS_DIR/05_robustness_rejudge.py" \

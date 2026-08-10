@@ -37,7 +37,11 @@ legible.
 > does not affect the behavioral measurements, the paired acknowledgment
 > collapse, or the matched-length residual. `src/train_student.py` now renders
 > the assistant turn without the template and hard-fails if the reasoning span
-> is missing from a rendered example.
+> is missing from a rendered example. **Task K re-runs the W2SR-weak arm with
+> the fixed renderer**: compression disappears (median CoT 13,721 chars) and
+> acknowledgment recovers only partially (3.2% → 14.4%, still below baseline's
+> 25.0%, paired p = 0.005) at preserved capability — so the format explains
+> most, but not all, of the collapse (`results/reanalysis/K_cotsft_rerun.*`).
 
 ## Headline numbers (all reproduce exactly from disk)
 
@@ -102,6 +106,7 @@ scripts/reanalysis/           — the reproducibility pipeline
   I2_cot_conclusion_with_question.py — I2 with answer choices in context
   I3_cot_conclusion_baseline_control.py — baseline control for I2
   J_inference_time_recovery.py — inference-time system-prompt recovery (Task J)
+  K_cotsft_rerun.py           — CoT-preserving SFT rerun of the W2SR-weak arm (Task K)
   make_length_binned_fig.py   — length-binned figure
   make_mechanism_fig.py       — mechanism + recovery 2-panel figure
   run_all.sh                  — one command runs the whole free (no-API) suite
@@ -181,7 +186,9 @@ Sole author. All errors are mine. Substantive limitations are stated in the
 Limitations section of the paper: (a) **the supervision was answer-only** — the
 student chat template stripped the reasoning span from the SFT examples (see the
 caveat above), which explains the CoT compression and weakens the
-teacher-invariance evidence; (b) single model family — a same-recipe
+teacher-invariance evidence; the Task K rerun with fixed supervision recovers
+acknowledgment only partially (one arm, one seed, single judge), and the other
+trained arms have not been rerun; (b) single model family — a same-recipe
 cross-family attempt on R1-Distill-Llama-8B fails the capability gate cleanly;
 (c) matched-length residual across all cued samples is marginal (the significant
 residual is on the safety-relevant `influenced=1` subset, which conditions on a

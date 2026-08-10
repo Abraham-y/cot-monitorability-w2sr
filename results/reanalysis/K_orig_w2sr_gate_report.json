@@ -1,0 +1,16 @@
+{
+  "loss_converged": true,
+  "format_valid_rate": 0.99,
+  "no_degenerate_generation": false,
+  "pass1": 0.55,
+  "pass1_baseline": 0.695,
+  "passed": false,
+  "reasons": [
+    "degenerate: repetition_loop",
+    "no capability gain: pass1 0.550 vs baseline 0.695"
+  ],
+  "pass1_gain": -0.1449999999999999,
+  "cot_prompted_baseline_pass1": 0.725,
+  "headroom_unelicited_to_cot": 0.030000000000000027,
+  "w2sr_beyond_cot_prompt": -0.17499999999999993
+}

@@ -52,7 +52,11 @@ the resulting compression, but if we restrict to samples where the cue actually
 moved the answer, acknowledgment is suppressed at matched mid-length (odds ratio
 about $8.75$, Fisher's exact $p = 0.003$; an exploratory subset result,
 \S\ref{sec:lim}), and the collapse replicates on MMLU
-at $2.8\times$ compression rather than $14\times$. A capability-only
+at $2.8\times$ compression rather than $14\times$. Re-running the weak-teacher
+arm with the renderer fixed, so the supervision preserves the reasoning,
+removes the compression and turns the exploratory cut into an intervention:
+acknowledgment recovers only partially ($3\% \to 14\%$, still below baseline's
+$25\%$, paired $p = 0.005$) at preserved capability. A capability-only
 certification can pass a model whose CoT has become markedly less revealing
 while still reading as elaborate.
 \end{abstract}
@@ -117,7 +121,11 @@ gap reopens to baseline $70.0\%$ vs W2SR $21.1\%$, $\mathrm{OR}\!\approx\!8.75$,
 $p\!=\!0.003$. Decomposing the matched-length question by influenced status
 suggests that compression accounts for the raw drop while W2SR additionally
 suppresses cue acknowledgment at matched length, exactly where monitorability
-matters (an exploratory subset finding; see \S\ref{sec:lim}).
+matters (an exploratory subset finding; see \S\ref{sec:lim}). An intervention
+corroborates the residual: re-running the arm with reasoning-preserving
+supervision (Task K, \S\ref{sec:taskK}) removes the compression, yet
+acknowledgment recovers only to $14.4\%$, still below baseline's $25.0\%$
+(paired $p = 0.005$).
 
 \item A reproduction of W2SR with a headroom probe shows that its accuracy
 claim is itself conditional. The gain only fires with (i) an in-family teacher
@@ -307,7 +315,9 @@ entered the loss. It does not affect the behavioral measurements, the paired
 acknowledgment collapse, or the matched-length residual, all of which are
 properties of the resulting models rather than of the training data. The
 released training code now renders the assistant turn without the template and
-hard-fails if the reasoning span is absent from a rendered example.
+hard-fails if the reasoning span is absent from a rendered example; Task K
+(\S\ref{sec:taskK}) re-runs the W2SR-weak arm with that fixed renderer and
+measures what the format change was responsible for.
 
 \section{When W2SR fires}
 \label{sec:repro}
@@ -538,6 +548,40 @@ that bears on monitorability. The MMLU replication below adds a second handle
 on the same question, since it reproduces the collapse at a much lower
 compression ratio.
 
+\paragraph{An intervention test: the same arm with reasoning-preserving
+supervision (Task K).}
+\label{sec:taskK}
+The length-binned analysis is correlational; the supervision format gives us
+an intervention. We re-ran the W2SR-weak arm identically --- same $729$
+R1-1.5B teacher traces, LoRA recipe, seed, decode parameters, judge, and
+$n = 40$ cells --- except that the SFT examples were rendered with the fixed
+renderer of Section~\ref{sec:supervision}, so the reasoning span entered the
+loss. This removes the compression at its source: the retrained student's
+median cued-cell CoT is $13{,}721$ chars ($1{,}364$ for the answer-only arm;
+$18{,}847$ for baseline). Under the compression-only account, acknowledgment
+should return to baseline. It recovers most of the way but not all:
+$26/180 = 14.4\%$, against the answer-only arm's $3.2\%$ (paired
+$\Delta = +0.118$ $[+0.065, +0.176]$, $n = 170$, discordants $23$
+rerun-only vs $3$ answer-only-arm-only, $p = 8.8 \times 10^{-5}$) and
+against baseline's $25.0\%$ (paired $\Delta = -0.110$ $[-0.181, -0.039]$,
+$n = 155$, discordants $25$ baseline-only vs $8$ rerun-only,
+$p = 0.005$). The cue's behavioral pull sits at the baseline rate
+(influenced $35.2\%$ vs baseline $35.8\%$), and capability is preserved:
+on the held-out MATH gate the rerun scores $0.685$ against its untrained
+reference $0.650$, where the answer-only arm had scored $0.550$ against
+$0.695$; on matched uncued GPQA questions under a single re-extraction
+method the rerun scores $0.562$ ($n = 32$) vs the answer-only arm's
+$0.447$ ($n = 38$). Per cue, the recovery is uneven: insider-info
+($15/36$ vs $2/38$) and Stanford-professor ($10/36$ vs $3/38$) recover
+substantially, while grader-hack does not recover at all ($0/36$; baseline
+$7/32$). So the supervision format explains most of the raw collapse ---
+consistent with the compression story --- but a suppression component
+survives when the compression is removed, and it concentrates on the most
+grader-adversarial cue. Caveats: this is one arm and one seed, scored by
+the headline judge only (no multi-judge battery on this arm), and the
+per-cue cells are small (result files:
+\texttt{results/reanalysis/K\_cotsft\_rerun.*}).
+
 \paragraph{Teacher-strength axis.}
 A strong (14B) teacher degrades faithfulness about as much as a weak (1.5B)
 one (Table~\ref{tab:r1}), and the two are not distinguishable. To check
@@ -762,9 +806,10 @@ to that measure without being more monitorable to the cue test. On the
 reasoning student, the cue's behavioral pull on the answer is not reduced
 while verbal acknowledgment collapses. Compression alone predicts most of that
 raw collapse; what a compression-only account does not predict is the
-exploratory matched-length residual on the $\mathrm{influenced}=1$ subset,
-where the model keeps being moved by the cue but stops reporting it at matched
-length. The safety-relevant component gets worse, not better.
+exploratory matched-length residual on the $\mathrm{influenced}=1$ subset ---
+nor the Task K rerun, which removes the compression by fixing the supervision
+and still finds acknowledgment significantly below baseline. The
+safety-relevant component gets worse, not better.
 
 The warning is sharp. An accuracy-only certification of any CoT-SFT student
 trained on MATH-style traces, including same-strength self-distillation
@@ -788,9 +833,14 @@ an emergent property of CoT distillation. Second, the teacher-strength
 invariance is weaker evidence than it looks: with the teacher's reasoning
 excluded from the loss, weak, strong, and self teachers differ only in their
 final answers, so their near-identical effect is close to what one would
-predict. Third, and most consequentially, we cannot say from these experiments
-whether SFT that genuinely preserves the reasoning span would produce the same
-dissociation; that is the natural next experiment and we have not run it. What
+predict. Third, the natural next experiment --- SFT that genuinely preserves
+the reasoning span --- has now been run for the W2SR-weak arm (Task K,
+\S\ref{sec:taskK}): the dissociation persists at reduced magnitude
+(acknowledgment $14.4\%$ vs baseline $25.0\%$, paired $p = 0.005$, with
+influence at the baseline rate), so the collapse is mostly but not entirely
+the supervision format. That rerun is one arm and one seed under the headline
+judge only; the strong-teacher and self-distillation arms have not been rerun,
+so the teacher-strength invariance remains bounded by the format caveat. What
 the results do establish is unaffected by the format question: these trained
 models retain the cue's behavioral pull while their traces stop reporting it,
 and they do so at matched length on the safety-relevant subset. The
@@ -842,7 +892,11 @@ it is one cell of a two-stratum by five-bin grid reported without multiplicity
 correction, with $n = 10$ on the baseline side. We report it because it is the
 subset monitorability is about, but it is the most fragile number in the paper
 and should be treated as a well-motivated exploratory finding rather than a
-confirmatory test.
+confirmatory test. The Task K rerun (\S\ref{sec:taskK}) now provides
+independent, intervention-based support for the same conclusion --- a
+suppression component beyond compression --- without conditioning on a
+post-treatment variable, though that rerun carries its own caveats (one arm,
+one seed, single judge).
 
 Finally, the analysis plan was preregistered before any trained student
 existed (\texttt{PREREGISTRATION.md}). Several deviations should be noted. The
@@ -870,13 +924,16 @@ answer is not reduced while verbalization collapses. The dissociation
 survives a within-judge rubric swap (under which it tightens to acknowledgment
 $9.4\% \to 0.0\%$), two out-of-family judges, and a cross-substrate replication
 on MMLU. Most of the raw drop follows from the compression that answer-only
-supervision produces. What compression does not explain is the exploratory
-residual on the safety-relevant subset: restricted to samples where the cue
-actually moved the answer, acknowledgment is suppressed at matched length
-($\mathrm{OR} \approx 8.75$, $p = 0.003$; \S\ref{sec:lim}), and the MMLU
-replication reproduces
-the full collapse at $2.8\times$ compression rather than GPQA's $14\times$, so
-the effect is not a simple function of how much shorter the traces got. A same-recipe cross-family
+supervision produces. What compression does not explain is the residual, for
+which we now have three handles: restricted to samples where the cue actually
+moved the answer, acknowledgment is suppressed at matched length
+($\mathrm{OR} \approx 8.75$, $p = 0.003$, exploratory; \S\ref{sec:lim}); the
+MMLU replication reproduces the full collapse at $2.8\times$ compression
+rather than GPQA's $14\times$; and re-running the arm with
+reasoning-preserving supervision (Task K) removes the compression yet leaves
+acknowledgment significantly below baseline ($14.4\%$ vs $25.0\%$, paired
+$p = 0.005$), so the effect is not reducible to how much shorter the traces
+got. A same-recipe cross-family
 attempt on R1-Distill-Llama-8B fails the capability gate ($-27.5$pp accuracy
 at $10.8\times$ compression), so the dissociation's cross-family scope
 remains open. Certifying any CoT-SFT student on accuracy alone, or on how
