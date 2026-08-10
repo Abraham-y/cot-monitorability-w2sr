@@ -168,6 +168,11 @@ def train_student_lora(
         lr_scheduler_type=cfg.lr_scheduler,
         warmup_ratio=cfg.warmup_ratio,
         max_length=cfg.max_seq_len,
+        # CoT-preserving rendering makes real ~4.5k-token sequences (answer-only
+        # supervision was a few hundred); checkpoint activations so 7B + LoRA
+        # fits A100-40GB with headroom.
+        gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
         bf16=cfg.bf16,
         logging_steps=1,
         save_strategy="epoch",
