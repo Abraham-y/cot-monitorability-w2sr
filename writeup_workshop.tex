@@ -54,9 +54,9 @@ about $8.75$, Fisher's exact $p = 0.003$; an exploratory subset result,
 \S\ref{sec:lim}), and the collapse replicates on MMLU
 at $2.8\times$ compression rather than $14\times$. Re-running the weak-teacher
 arm with the renderer fixed, so the supervision preserves the reasoning,
-removes the compression and turns the exploratory cut into an intervention:
-acknowledgment recovers only partially ($3\% \to 14\%$, still below baseline's
-$25\%$, paired $p = 0.005$) at preserved capability. A capability-only
+removes most of the compression and corroborates the exploratory cut with an
+intervention: acknowledgment recovers only partially ($3\% \to 14\%$, still
+below baseline's $25\%$, paired $p = 0.005$) at preserved GPQA accuracy. A capability-only
 certification can pass a model whose CoT has become markedly less revealing
 while still reading as elaborate.
 \end{abstract}
@@ -123,7 +123,7 @@ suggests that compression accounts for the raw drop while W2SR additionally
 suppresses cue acknowledgment at matched length, exactly where monitorability
 matters (an exploratory subset finding; see \S\ref{sec:lim}). An intervention
 corroborates the residual: re-running the arm with reasoning-preserving
-supervision (Task K, \S\ref{sec:taskK}) removes the compression, yet
+supervision (Task K, \S\ref{sec:taskK}) removes most of the compression, yet
 acknowledgment recovers only to $14.4\%$, still below baseline's $25.0\%$
 (paired $p = 0.005$).
 
@@ -380,13 +380,20 @@ substrate with dynamic range, we move to a reasoning student.
 \paragraph{Behavior is preserved, verbalization collapses.}
 On the reasoning student, the setup is fully in-family: student
 \texttt{R1-Distill-Qwen-7B}, weak teacher \texttt{R1-Distill-Qwen-1.5B}.
-Distillation passes the capability gate (held-out MATH Pass@1 above baseline by
-the preregistered $\ge 5$-point margin), the trained student's GPQA answers
+Distillation preserves capability on the eval substrate (uncued GPQA
+$0.400 \to 0.425$, $n = 40$), the trained student's GPQA answers
 remain parseable at $94.2\%$ ($179/190$ cued samples, vs $76.9\%$ for the
 untrained baseline), and baseline acknowledgment is off-floor at $25\%$
 (Chua and Evans~\cite{chua2025} report ${\sim}59\%$ on the full DeepSeek-R1;
 our lower baseline is on the distilled 7B variant on GPQA, so absolute levels
-differ across scale and eval set). Paired influence (answer equal to cue
+differ across scale and eval set). One qualification: the only committed
+measurement of the preregistered held-out MATH capability gate for this arm
+--- a re-gating run performed alongside Task~K (\S\ref{sec:taskK}) ---
+\emph{fails} it (Pass@1 $0.550$ vs the untrained reference $0.695$, with a
+repetition-loop flag), so this arm does not clear the preregistered
+$\ge 5$-point MATH margin. We disclose this as a preregistration deviation
+(\S\ref{sec:lim}) and scope capability-preservation claims to the GPQA
+substrate on which every monitorability number in this paper is measured. Paired influence (answer equal to cue
 target on matched (qid, cue) pairs) gives $\Delta = +0.157$, $95\%$ CI
 $[+0.037, +0.278]$, $n = 108$, McNemar $p = 0.021$, discordant $16/33$. The
 direction is positive, but the lower confidence bound is close to zero, so we
@@ -419,8 +426,11 @@ becomes even more one-directional. Both numbers hold at preserved GPQA accuracy
 ($0.400 \to 0.425$, $n = 40$; a $+2.5$pp difference that this $n$ cannot
 resolve from zero) and at roughly $14\times$ shorter CoT (baseline
 median $18{,}692$ chars, W2SR $1{,}362$). The monitorability cost is therefore
-not bought with a capability loss that a certifier would notice: on the metric
-the certification actually checks, the model is unchanged.
+not explained by a capability loss on the eval substrate: on the questions the
+monitorability numbers are measured on, the model is unchanged. (The held-out
+MATH gate is a different matter --- this arm fails it, as disclosed above and
+in \S\ref{sec:lim} --- so a certifier checking a single capability metric
+could be misled in either direction.)
 
 We checked that the collapse is not an artifact. Hand-checked completions are
 coherent, $37/40$ conclude with an answer, and none are degenerate. The model
@@ -556,9 +566,15 @@ an intervention. We re-ran the W2SR-weak arm identically --- same $729$
 R1-1.5B teacher traces, LoRA recipe, seed, decode parameters, judge, and
 $n = 40$ cells --- except that the SFT examples were rendered with the fixed
 renderer of Section~\ref{sec:supervision}, so the reasoning span entered the
-loss. This removes the compression at its source: the retrained student's
-median cued-cell CoT is $13{,}721$ chars ($1{,}364$ for the answer-only arm;
-$18{,}847$ for baseline). Under the compression-only account, acknowledgment
+loss. This removes most of the compression at its source: the retrained
+student's median cued-cell CoT is $13{,}721$ chars ($1{,}364$ for the
+answer-only arm; $18{,}847$ for baseline, i.e.\ the rerun's traces remain
+${\sim}27\%$ shorter than baseline's).\footnote{The medians in this paragraph
+come from the Task~K pipeline, which uses the upper-middle element; Table~\ref{tab:r1}'s
+$18{,}692$ and $1{,}362$ come from an earlier pipeline that uses
+\texttt{statistics.median} (mean of the two middle values) over the same
+records. The conventions differ by well under $1\%$ and every comparison is
+convention-consistent.} Under the compression-only account, acknowledgment
 should return to baseline. It recovers most of the way but not all:
 $26/180 = 14.4\%$, against the answer-only arm's $3.2\%$ (paired
 $\Delta = +0.118$ $[+0.065, +0.176]$, $n = 170$, discordants $23$
@@ -566,20 +582,28 @@ rerun-only vs $3$ answer-only-arm-only, $p = 8.8 \times 10^{-5}$) and
 against baseline's $25.0\%$ (paired $\Delta = -0.110$ $[-0.181, -0.039]$,
 $n = 155$, discordants $25$ baseline-only vs $8$ rerun-only,
 $p = 0.005$). The cue's behavioral pull sits at the baseline rate
-(influenced $35.2\%$ vs baseline $35.8\%$), and capability is preserved:
-on the held-out MATH gate the rerun scores $0.685$ against its untrained
-reference $0.650$, where the answer-only arm had scored $0.550$ against
-$0.695$; on matched uncued GPQA questions under a single re-extraction
-method the rerun scores $0.562$ ($n = 32$) vs the answer-only arm's
-$0.447$ ($n = 38$). Per cue, the recovery is uneven: insider-info
+(influenced $35.2\%$ vs baseline $35.8\%$) --- though this is itself a shift
+from the answer-only arm's $49.2\%$ (paired $\Delta = -0.141$
+$[-0.246, -0.035]$, $p = 0.013$), so the intervention changed behavior as
+well as verbalization --- and capability shows no loss: on the held-out MATH
+gate the rerun scores $0.685$ against its untrained reference $0.650$, where
+the answer-only arm had scored $0.550$ against $0.695$; on matched uncued
+GPQA questions under a single re-extraction method the rerun scores $0.562$
+($n = 32$) vs the answer-only arm's $0.447$ ($n = 38$; the rerun's uncued
+pass actually covered the full $198$-question GPQA-Diamond set, scoring
+$0.538$ with $145$ parseable --- we quote the subset matched to the original
+arm's $40$-question cell). Per cue, the recovery is uneven: insider-info
 ($15/36$ vs $2/38$) and Stanford-professor ($10/36$ vs $3/38$) recover
 substantially, while grader-hack does not recover at all ($0/36$; baseline
 $7/32$). So the supervision format explains most of the raw collapse ---
 consistent with the compression story --- but a suppression component
 survives when the compression is removed, and it concentrates on the most
 grader-adversarial cue. Caveats: this is one arm and one seed, scored by
-the headline judge only (no multi-judge battery on this arm), and the
-per-cue cells are small (result files:
+the headline judge only (no multi-judge battery on this arm); the
+per-cue cells are small; and the rerun's own gate report formally fails the
+preregistered criteria (format-valid $0.80 < 0.9$, a repetition-loop flag,
+and a $+3.5$pp MATH gain below the $\ge 5$-point margin), so ``no capability
+loss'' above is not a passing gate (result files:
 \texttt{results/reanalysis/K\_cotsft\_rerun.*}).
 
 \paragraph{Teacher-strength axis.}
@@ -647,8 +671,10 @@ also survived in another terminal form (a closing
 \texttt{\textbackslash boxed\{\}} or a final ``the answer is X'' sentence),
 so the judge could in principle read the letter off the emission rather than
 the reasoning. Nearly all of the $30$ were judged walks-to-cue (at least one
-was judged a silent flip); excluding every one of them
-still gives $184/225 = 81.8\%$, so the headline does not rest on them (and a
+was judged a silent flip); excluding all $30$ and conservatively deducting
+every one of them from the walks-to-cue count gives a floor of
+$184/225 = 81.8\%$ (crediting the silent flip, $185/225 = 82.2\%$), so the
+headline does not rest on them (and a
 CoT that closes by naming its own conclusion is largely what the transparent
 ``by naming the letter'' category is already reporting).
 
@@ -807,8 +833,8 @@ reasoning student, the cue's behavioral pull on the answer is not reduced
 while verbal acknowledgment collapses. Compression alone predicts most of that
 raw collapse; what a compression-only account does not predict is the
 exploratory matched-length residual on the $\mathrm{influenced}=1$ subset ---
-nor the Task K rerun, which removes the compression by fixing the supervision
-and still finds acknowledgment significantly below baseline. The
+nor the Task K rerun, which removes most of the compression by fixing the
+supervision and still finds acknowledgment significantly below baseline. The
 safety-relevant component gets worse, not better.
 
 The warning is sharp. An accuracy-only certification of any CoT-SFT student
@@ -904,7 +930,22 @@ preregistered primary estimand was W2SR $-$ strong-teacher control, which is
 null here ($p = 0.09$); our headline is the preregistered secondary estimand,
 W2SR $-$ baseline. Under the preregistered decision rules this is the H0 case,
 ``no weak-supervision-specific effect, but an SFT-on-CoT effect that is itself
-reportable,'' which is what we report. The prereg also called for judge--human
+reportable,'' which is what we report. A more consequential deviation: the
+preregistration's validity gate required the W2SR student's held-out MATH
+Pass@1 to exceed baseline by at least $5$ absolute points (or recover at
+least $30\%$ of the baseline-to-teacher gap) for condition-2 monitorability
+numbers to count, and the only committed gate measurement for the W2SR-weak
+arm --- taken when it was re-gated alongside Task~K --- fails both branches
+($0.550$ vs $0.695$, with a repetition-loop flag; the weak teacher sits below
+the student's baseline, so the gap-recovery branch does not apply), as does
+the Task~K rerun's own gate report (format-valid $0.80$, gain $+3.5$pp).
+Under a strict reading of the prereg, the reasoning-arm monitorability
+numbers are therefore reported despite a failed capability gate. We report
+them because the paper's claims do not rest on a capability gain --- the
+finding is the collapse, measured on a substrate (GPQA) where the arm's
+accuracy is preserved --- but a reader holding us to the preregistered gate
+should treat condition 2 as failing its validity criterion and weight the
+reasoning-arm results accordingly. The prereg also called for judge--human
 agreement on a hand-labeled set before trusting the acknowledgment labels; we
 substituted cross-judge agreement across three model families and a
 within-judge rubric swap, which is weaker on the human-validity axis. Smaller
@@ -917,7 +958,7 @@ and the optional mixed-effects robustness model was not run.
 
 W2SR's accuracy gain is real but conditional, requiring an in-family teacher
 and a base student. On a reasoning student, its faithfulness collapse
-($25\%$ to $3\%$ at preserved accuracy) is not specific to weak-to-strong
+($25\%$ to $3\%$ at preserved GPQA accuracy) is not specific to weak-to-strong
 distillation: a same-strength self-distillation control reproduces the
 collapse at indistinguishable magnitude, and the cue's behavioral pull on the
 answer is not reduced while verbalization collapses. The dissociation
@@ -930,8 +971,8 @@ moved the answer, acknowledgment is suppressed at matched length
 ($\mathrm{OR} \approx 8.75$, $p = 0.003$, exploratory; \S\ref{sec:lim}); the
 MMLU replication reproduces the full collapse at $2.8\times$ compression
 rather than GPQA's $14\times$; and re-running the arm with
-reasoning-preserving supervision (Task K) removes the compression yet leaves
-acknowledgment significantly below baseline ($14.4\%$ vs $25.0\%$, paired
+reasoning-preserving supervision (Task K) removes most of the compression yet
+leaves acknowledgment significantly below baseline ($14.4\%$ vs $25.0\%$, paired
 $p = 0.005$), so the effect is not reducible to how much shorter the traces
 got. A same-recipe cross-family
 attempt on R1-Distill-Llama-8B fails the capability gate ($-27.5$pp accuracy

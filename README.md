@@ -38,10 +38,11 @@ legible.
 > collapse, or the matched-length residual. `src/train_student.py` now renders
 > the assistant turn without the template and hard-fails if the reasoning span
 > is missing from a rendered example. **Task K re-runs the W2SR-weak arm with
-> the fixed renderer**: compression disappears (median CoT 13,721 chars) and
-> acknowledgment recovers only partially (3.2% → 14.4%, still below baseline's
-> 25.0%, paired p = 0.005) at preserved capability — so the format explains
-> most, but not all, of the collapse (`results/reanalysis/K_cotsft_rerun.*`).
+> the fixed renderer**: compression mostly disappears (median CoT 13,721 chars,
+> still ~27% below baseline's 18,847) and acknowledgment recovers only partially
+> (3.2% → 14.4%, still below baseline's 25.0%, paired p = 0.005) at preserved
+> GPQA accuracy — so the format explains most, but not all, of the collapse
+> (`results/reanalysis/K_cotsft_rerun.*`).
 
 ## Headline numbers (all reproduce exactly from disk)
 
@@ -76,7 +77,7 @@ exits non-zero if any drift.
 ## Layout
 
 ```
-writeup_workshop.tex          — the paper (12 pages, NeurIPS 2025 preprint style)
+writeup_workshop.tex          — the paper (13 pages, NeurIPS 2025 preprint style)
 writeup_workshop.pdf          — compiled paper
 arxiv_submission.zip          — arXiv-ready bundle (tex + sty + fig)
 neurips_2025.sty              — NeurIPS style file
@@ -199,4 +200,11 @@ judge-dependent; (f) inference-time mitigation (Task J) recovers only
 on nameable authority cues, not on subtler framings; (g) training-side
 mitigation not attempted; (h) the preregistered primary estimand
 (W2SR − strong-teacher control) is null (p = 0.09) — the headline is the
-preregistered secondary estimand, which is the prereg's H0 case.
+preregistered secondary estimand, which is the prereg's H0 case; (i) the only
+committed measurement of the preregistered held-out MATH capability gate for
+the R1 W2SR-weak arm (re-gated alongside Task K,
+`results/reanalysis/K_orig_w2sr_gate_report.json`) **fails** it (Pass@1 0.550
+vs 0.695, repetition-loop flag), as does the Task K rerun's own gate report
+(format-valid 0.80, gain +3.5pp) — capability-preservation claims are scoped
+to the GPQA eval substrate (0.400 → 0.425), and this is disclosed as a
+preregistration deviation in the paper.
