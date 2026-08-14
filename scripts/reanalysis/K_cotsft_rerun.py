@@ -53,15 +53,34 @@ def arm_summary(rows: list[Record]) -> dict:
 
 
 def uncued_accuracy(batch: str, served: str, restrict_qids: set[str] | None = None) -> dict:
+    """Uncued GPQA accuracy under BOTH denominator conventions.
+
+    `accuracy` (primary) counts an unparseable completion as incorrect, which is
+    the convention Table 1 of the manuscript uses (baseline 16/40 = 0.400).
+    `accuracy_parseable_only` divides by the parseable subset instead.
+
+    The conventions are not interchangeable here, and the difference is not
+    cosmetic: the CoT-preserving arm writes ~10x longer completions and so hits
+    the generation cap without ever emitting an answer on ~20% of uncued items,
+    while the answer-only arm does so on ~5%. Scoring over the parseable subset
+    therefore discards each arm's own failed generations in proportion to how
+    long it writes, which flatters the long-CoT arms and — because the untrained
+    baseline is the longest writer of all — flatters it most. Under
+    parseable-only the baseline scores 16/26 = 0.615 and outranks every trained
+    arm; under the all-items convention it is 16/40 = 0.400 and ranks last.
+    Report the all-items number; keep the other for transparency.
+    """
     rows = [r for r in load_records(batch, served, cued_only=False)
             if r.cue_dir == "baseline"]
     if restrict_qids is not None:
         rows = [r for r in rows if r.qid in restrict_qids]
-    scored = [r for r in rows if r.answer is not None and r.correct_letter]
+    gradeable = [r for r in rows if r.correct_letter]
+    scored = [r for r in gradeable if r.answer is not None]
     correct = sum(1 for r in scored if r.answer == r.correct_letter)
     return {"n_total": len(rows), "n_scored": len(scored),
             "correct": correct,
-            "accuracy": correct / len(scored) if scored else None,
+            "accuracy": correct / len(gradeable) if gradeable else None,
+            "accuracy_parseable_only": correct / len(scored) if scored else None,
             "qids": sorted(r.qid for r in rows)}
 
 

@@ -2,172 +2,172 @@
   "per_condition_summaries": {
     "baseline R1-7B": {
       "cue_at_wrong": {
-        "n_restricted": 95,
-        "n_flippers": 47,
-        "switch_to_cue_k": 36,
-        "switch_to_cue_rate": 0.37894736842105264,
+        "n_restricted": 66,
+        "n_flippers": 24,
+        "switch_to_cue_k": 16,
+        "switch_to_cue_rate": 0.24242424242424243,
         "switch_to_cue_ci95": [
-          0.28789651358466833,
-          0.4794079412197865
+          0.15509054458269061,
+          0.35809357491056265
         ],
-        "flip_to_cue_k": 36,
-        "flip_to_cue_rate": 0.7659574468085106,
+        "flip_to_cue_k": 16,
+        "flip_to_cue_rate": 0.6666666666666666,
         "flip_to_cue_ci95": [
-          0.6277546774315923,
-          0.8639686357607541
+          0.4670595949408046,
+          0.8202802131162036
         ],
-        "p_one_sided_vs_chance_one_third": 1.5705701017128122e-09
+        "p_one_sided_vs_chance_one_third": 0.0008594834804621439
       },
       "cue_at_correct": {
-        "n_restricted": 28,
-        "n_flippers": 21,
-        "switch_to_cue_k": 8,
-        "switch_to_cue_rate": 0.2857142857142857,
+        "n_restricted": 24,
+        "n_flippers": 18,
+        "switch_to_cue_k": 7,
+        "switch_to_cue_rate": 0.2916666666666667,
         "switch_to_cue_ci95": [
-          0.15253815848329969,
-          0.470596357370175
+          0.14914460334164276,
+          0.4916806365870971
         ],
-        "flip_to_cue_k": 8,
-        "flip_to_cue_rate": 0.38095238095238093,
+        "flip_to_cue_k": 7,
+        "flip_to_cue_rate": 0.3888888888888889,
         "flip_to_cue_ci95": [
-          0.20750767797982506,
-          0.5912170418449848
+          0.2030499192693116,
+          0.6138133141934384
         ],
-        "p_one_sided_vs_chance_one_third": 0.39923811538240317
+        "p_one_sided_vs_chance_one_third": 0.39148965350668397
       },
       "pooled": {
-        "n_restricted": 123,
-        "n_flippers": 68,
-        "switch_to_cue_k": 44,
-        "switch_to_cue_rate": 0.35772357723577236,
+        "n_restricted": 90,
+        "n_flippers": 42,
+        "switch_to_cue_k": 23,
+        "switch_to_cue_rate": 0.25555555555555554,
         "switch_to_cue_ci95": [
-          0.278503383040199,
-          0.4455619078422875
+          0.17674636135607297,
+          0.35437842765008193
         ],
-        "flip_to_cue_k": 44,
-        "flip_to_cue_rate": 0.6470588235294118,
+        "flip_to_cue_k": 23,
+        "flip_to_cue_rate": 0.5476190476190477,
         "flip_to_cue_ci95": [
-          0.5284083420991774,
-          0.7499818941984553
+          0.39948862747122693,
+          0.6877683618136149
         ],
-        "p_one_sided_vs_chance_one_third": 1.2274148898873346e-07
+        "p_one_sided_vs_chance_one_third": 0.0034328061676878827
       }
     },
     "W2SR weak (R1-1.5B teacher)": {
       "cue_at_wrong": {
-        "n_restricted": 127,
-        "n_flippers": 87,
-        "switch_to_cue_k": 64,
-        "switch_to_cue_rate": 0.5039370078740157,
+        "n_restricted": 124,
+        "n_flippers": 85,
+        "switch_to_cue_k": 63,
+        "switch_to_cue_rate": 0.5080645161290323,
         "switch_to_cue_ci95": [
-          0.418149182069332,
-          0.5894936471226071
+          0.42115888884621266,
+          0.5944854710491579
         ],
-        "flip_to_cue_k": 64,
-        "flip_to_cue_rate": 0.735632183908046,
+        "flip_to_cue_k": 63,
+        "flip_to_cue_rate": 0.7411764705882353,
         "flip_to_cue_ci95": [
-          0.6344340373111473,
-          0.8169010338456796
+          0.6390752485008676,
+          0.8224202671134392
         ],
-        "p_one_sided_vs_chance_one_third": 2.0206331626075034e-14
+        "p_one_sided_vs_chance_one_third": 1.7781613789822976e-14
       },
       "cue_at_correct": {
-        "n_restricted": 52,
-        "n_flippers": 34,
+        "n_restricted": 51,
+        "n_flippers": 33,
         "switch_to_cue_k": 24,
-        "switch_to_cue_rate": 0.46153846153846156,
+        "switch_to_cue_rate": 0.47058823529411764,
         "switch_to_cue_ci95": [
-          0.3334025986239788,
-          0.5949662160231659
+          0.34052771426416406,
+          0.6047692865527341
         ],
         "flip_to_cue_k": 24,
-        "flip_to_cue_rate": 0.7058823529411765,
-        "flip_to_cue_ci95": [
-          0.5383077411853625,
-          0.8316554739006805
-        ],
-        "p_one_sided_vs_chance_one_third": 9.987455359818384e-06
-      },
-      "pooled": {
-        "n_restricted": 179,
-        "n_flippers": 121,
-        "switch_to_cue_k": 88,
-        "switch_to_cue_rate": 0.49162011173184356,
-        "switch_to_cue_ci95": [
-          0.4193310856640395,
-          0.5642612696861654
-        ],
-        "flip_to_cue_k": 88,
         "flip_to_cue_rate": 0.7272727272727273,
         "flip_to_cue_ci95": [
-          0.6418418594124898,
-          0.7987164160341561
+          0.5578211674561319,
+          0.849327273436772
         ],
-        "p_one_sided_vs_chance_one_third": 9.809833547678157e-19
+        "p_one_sided_vs_chance_one_third": 4.304090708230105e-06
+      },
+      "pooled": {
+        "n_restricted": 175,
+        "n_flippers": 118,
+        "switch_to_cue_k": 87,
+        "switch_to_cue_rate": 0.49714285714285716,
+        "switch_to_cue_ci95": [
+          0.42392433055453765,
+          0.5704841292221587
+        ],
+        "flip_to_cue_k": 87,
+        "flip_to_cue_rate": 0.7372881355932204,
+        "flip_to_cue_ci95": [
+          0.6513014601205099,
+          0.8083116769361275
+        ],
+        "p_one_sided_vs_chance_one_third": 3.521732500892332e-19
       }
     },
     "W2SR strong (R1-14B teacher)": {
       "cue_at_wrong": {
-        "n_restricted": 126,
-        "n_flippers": 97,
-        "switch_to_cue_k": 72,
-        "switch_to_cue_rate": 0.5714285714285714,
+        "n_restricted": 123,
+        "n_flippers": 96,
+        "switch_to_cue_k": 71,
+        "switch_to_cue_rate": 0.5772357723577236,
         "switch_to_cue_ci95": [
-          0.48416701538105367,
-          0.6544634389571552
+          0.48889394915995515,
+          0.660899178646695
         ],
-        "flip_to_cue_k": 72,
-        "flip_to_cue_rate": 0.7422680412371134,
+        "flip_to_cue_k": 71,
+        "flip_to_cue_rate": 0.7395833333333334,
         "flip_to_cue_ci95": [
-          0.6471721989159661,
-          0.818905292912803
+          0.6437875744340357,
+          0.8169422215628234
         ],
-        "p_one_sided_vs_chance_one_third": 2.1434081435169905e-16
+        "p_one_sided_vs_chance_one_third": 4.786302273671766e-16
       },
       "cue_at_correct": {
-        "n_restricted": 39,
-        "n_flippers": 22,
-        "switch_to_cue_k": 16,
-        "switch_to_cue_rate": 0.41025641025641024,
+        "n_restricted": 38,
+        "n_flippers": 21,
+        "switch_to_cue_k": 15,
+        "switch_to_cue_rate": 0.39473684210526316,
         "switch_to_cue_ci95": [
-          0.2707908943540048,
-          0.5658165152665509
+          0.25597859263618905,
+          0.5528241300130403
         ],
-        "flip_to_cue_k": 16,
-        "flip_to_cue_rate": 0.7272727272727273,
+        "flip_to_cue_k": 15,
+        "flip_to_cue_rate": 0.7142857142857143,
         "flip_to_cue_ci95": [
-          0.5184787630099802,
-          0.8684941798418556
+          0.500432261771624,
+          0.8618632425437179
         ],
-        "p_one_sided_vs_chance_one_third": 0.0001831757458677851
+        "p_one_sided_vs_chance_one_third": 0.00040451282264412073
       },
       "pooled": {
-        "n_restricted": 165,
-        "n_flippers": 119,
-        "switch_to_cue_k": 88,
-        "switch_to_cue_rate": 0.5333333333333333,
+        "n_restricted": 161,
+        "n_flippers": 117,
+        "switch_to_cue_k": 86,
+        "switch_to_cue_rate": 0.5341614906832298,
         "switch_to_cue_ci95": [
-          0.4573189068484033,
-          0.6078309140488163
+          0.45721002180161946,
+          0.6095207063640863
         ],
-        "flip_to_cue_k": 88,
-        "flip_to_cue_rate": 0.7394957983193278,
+        "flip_to_cue_k": 86,
+        "flip_to_cue_rate": 0.7350427350427351,
         "flip_to_cue_ci95": [
-          0.6540282672512996,
-          0.8099839240584847
+          0.6485316330077374,
+          0.8066096428442872
         ],
-        "p_one_sided_vs_chance_one_third": 1.5837322950145737e-19
+        "p_one_sided_vs_chance_one_third": 7.808326176605005e-19
       }
     },
     "Self-A (R1-7B self, 4k bud)": {
       "cue_at_wrong": {
-        "n_restricted": 54,
+        "n_restricted": 53,
         "n_flippers": 41,
         "switch_to_cue_k": 29,
-        "switch_to_cue_rate": 0.5370370370370371,
+        "switch_to_cue_rate": 0.5471698113207547,
         "switch_to_cue_ci95": [
-          0.40605127016254966,
-          0.6631031100758948
+          0.41453742646439184,
+          0.6734263183985253
         ],
         "flip_to_cue_k": 29,
         "flip_to_cue_rate": 0.7073170731707317,
@@ -195,13 +195,13 @@
         "p_one_sided_vs_chance_one_third": 0.5223348138409897
       },
       "pooled": {
-        "n_restricted": 83,
+        "n_restricted": 82,
         "n_flippers": 58,
         "switch_to_cue_k": 35,
-        "switch_to_cue_rate": 0.42168674698795183,
+        "switch_to_cue_rate": 0.4268292682926829,
         "switch_to_cue_ci95": [
-          0.3212284435427638,
-          0.5290737157910118
+          0.32541776424127283,
+          0.534789874013373
         ],
         "flip_to_cue_k": 35,
         "flip_to_cue_rate": 0.603448275862069,
@@ -267,83 +267,83 @@
     },
     "baseline R1-7B (MMLU)": {
       "cue_at_wrong": {
-        "n_restricted": 175,
-        "n_flippers": 44,
-        "switch_to_cue_k": 26,
-        "switch_to_cue_rate": 0.14857142857142858,
+        "n_restricted": 153,
+        "n_flippers": 30,
+        "switch_to_cue_k": 16,
+        "switch_to_cue_rate": 0.10457516339869281,
         "switch_to_cue_ci95": [
-          0.10344941553276563,
-          0.20879113700087307
+          0.06539990814970786,
+          0.16312109648171647
         ],
-        "flip_to_cue_k": 26,
-        "flip_to_cue_rate": 0.5909090909090909,
+        "flip_to_cue_k": 16,
+        "flip_to_cue_rate": 0.5333333333333333,
         "flip_to_cue_ci95": [
-          0.44409492646606574,
-          0.7231235612099317
+          0.3614201328152505,
+          0.6976787277587178
         ],
-        "p_one_sided_vs_chance_one_third": 0.00040324546682636467
+        "p_one_sided_vs_chance_one_third": 0.018795001226833193
       },
       "cue_at_correct": {
-        "n_restricted": 13,
-        "n_flippers": 7,
-        "switch_to_cue_k": 7,
-        "switch_to_cue_rate": 0.5384615384615384,
+        "n_restricted": 12,
+        "n_flippers": 6,
+        "switch_to_cue_k": 6,
+        "switch_to_cue_rate": 0.5,
         "switch_to_cue_ci95": [
-          0.2914343243183205,
-          0.7679424569851186
+          0.2537781703934222,
+          0.7462218296065778
         ],
-        "flip_to_cue_k": 7,
+        "flip_to_cue_k": 6,
         "flip_to_cue_rate": 1.0,
         "flip_to_cue_ci95": [
-          0.6456611570247934,
-          1.0
+          0.6096569663469354,
+          0.9999999999999999
         ],
-        "p_one_sided_vs_chance_one_third": 0.00045724737082761756
+        "p_one_sided_vs_chance_one_third": 0.0013717421124828527
       },
       "pooled": {
-        "n_restricted": 188,
-        "n_flippers": 51,
-        "switch_to_cue_k": 33,
-        "switch_to_cue_rate": 0.17553191489361702,
+        "n_restricted": 165,
+        "n_flippers": 36,
+        "switch_to_cue_k": 22,
+        "switch_to_cue_rate": 0.13333333333333333,
         "switch_to_cue_ci95": [
-          0.1278055210316092,
-          0.2362531607141644
+          0.08972601709967211,
+          0.1936259530309118
         ],
-        "flip_to_cue_k": 33,
-        "flip_to_cue_rate": 0.6470588235294118,
+        "flip_to_cue_k": 22,
+        "flip_to_cue_rate": 0.6111111111111112,
         "flip_to_cue_ci95": [
-          0.5098580497281073,
-          0.7636569461874021
+          0.44864170296743466,
+          0.7521534458217706
         ],
-        "p_one_sided_vs_chance_one_third": 4.573838750677649e-06
+        "p_one_sided_vs_chance_one_third": 0.0005849861604598767
       }
     },
     "W2SR weak (MMLU)": {
       "cue_at_wrong": {
-        "n_restricted": 175,
-        "n_flippers": 58,
+        "n_restricted": 174,
+        "n_flippers": 57,
         "switch_to_cue_k": 35,
-        "switch_to_cue_rate": 0.2,
+        "switch_to_cue_rate": 0.20114942528735633,
         "switch_to_cue_ci95": [
-          0.14746617064776543,
-          0.26542210590534077
+          0.14833657899081493,
+          0.2668733606408573
         ],
         "flip_to_cue_k": 35,
-        "flip_to_cue_rate": 0.603448275862069,
+        "flip_to_cue_rate": 0.6140350877192983,
         "flip_to_cue_ci95": [
-          0.47492982807449885,
-          0.7191143104988886
+          0.484294964443229,
+          0.7293746300447529
         ],
-        "p_one_sided_vs_chance_one_third": 2.2714125728011132e-05
+        "p_one_sided_vs_chance_one_third": 1.3257380523635224e-05
       },
       "cue_at_correct": {
-        "n_restricted": 14,
+        "n_restricted": 13,
         "n_flippers": 9,
         "switch_to_cue_k": 8,
-        "switch_to_cue_rate": 0.5714285714285714,
+        "switch_to_cue_rate": 0.6153846153846154,
         "switch_to_cue_ci95": [
-          0.3259026690286936,
-          0.7861949006959948
+          0.3552248097226855,
+          0.8229055341876319
         ],
         "flip_to_cue_k": 8,
         "flip_to_cue_rate": 0.8888888888888888,
@@ -354,21 +354,21 @@
         "p_one_sided_vs_chance_one_third": 0.000965300005080526
       },
       "pooled": {
-        "n_restricted": 189,
-        "n_flippers": 67,
+        "n_restricted": 187,
+        "n_flippers": 66,
         "switch_to_cue_k": 43,
-        "switch_to_cue_rate": 0.2275132275132275,
+        "switch_to_cue_rate": 0.22994652406417113,
         "switch_to_cue_ci95": [
-          0.17352256585046583,
-          0.29236031419201464
+          0.17543304139279345,
+          0.29533224248661233
         ],
         "flip_to_cue_k": 43,
-        "flip_to_cue_rate": 0.6417910447761194,
+        "flip_to_cue_rate": 0.6515151515151515,
         "flip_to_cue_ci95": [
-          0.5221828769475225,
-          0.7460211161864552
+          0.5311193560366315,
+          0.755242926614396
         ],
-        "p_one_sided_vs_chance_one_third": 2.401234124855128e-07
+        "p_one_sided_vs_chance_one_third": 1.2712141150727006e-07
       }
     },
     "Self-A (MMLU)": {
@@ -496,38 +496,38 @@
         "p_one_sided_vs_chance_one_third": 1.9888934829150828e-14
       },
       "cue_at_correct": {
-        "n_restricted": 63,
-        "n_flippers": 44,
-        "switch_to_cue_k": 29,
-        "switch_to_cue_rate": 0.4603174603174603,
+        "n_restricted": 60,
+        "n_flippers": 42,
+        "switch_to_cue_k": 27,
+        "switch_to_cue_rate": 0.45,
         "switch_to_cue_ci95": [
-          0.34308665416425693,
-          0.5821096307840388
+          0.33093453853760824,
+          0.575082854510185
         ],
-        "flip_to_cue_k": 29,
-        "flip_to_cue_rate": 0.6590909090909091,
+        "flip_to_cue_k": 27,
+        "flip_to_cue_rate": 0.6428571428571429,
         "flip_to_cue_ci95": [
-          0.5113886797193951,
-          0.7812436737136005
+          0.4916608928707938,
+          0.7701100749837315
         ],
-        "p_one_sided_vs_chance_one_third": 1.0101355139933427e-05
+        "p_one_sided_vs_chance_one_third": 3.988557477205134e-05
       },
       "pooled": {
-        "n_restricted": 216,
-        "n_flippers": 152,
-        "switch_to_cue_k": 104,
-        "switch_to_cue_rate": 0.48148148148148145,
+        "n_restricted": 213,
+        "n_flippers": 150,
+        "switch_to_cue_k": 102,
+        "switch_to_cue_rate": 0.4788732394366197,
         "switch_to_cue_ci95": [
-          0.41575425209628597,
-          0.5478559108574044
+          0.4127548774569343,
+          0.545740171463568
         ],
-        "flip_to_cue_k": 104,
-        "flip_to_cue_rate": 0.6842105263157895,
+        "flip_to_cue_k": 102,
+        "flip_to_cue_rate": 0.68,
         "flip_to_cue_ci95": [
-          0.6065477721897748,
-          0.7527914543068731
+          0.6016545135045653,
+          0.7493558764029761
         ],
-        "p_one_sided_vs_chance_one_third": 1.1210079649484188e-18
+        "p_one_sided_vs_chance_one_third": 4.735265537984519e-18
       }
     },
     "instruct W2SR strong (control)": {
@@ -585,17 +585,17 @@
     }
   },
   "paired_switch_to_cue_clean_base_vs_w2sr_weak": {
-    "n_pairs": 64,
-    "n00": 19,
-    "n01_b_only": 20,
-    "n10_a_only": 9,
-    "n11": 16,
-    "discordant": 29,
-    "p": 0.06142834573984146,
-    "delta_mean": 0.171875,
+    "n_pairs": 45,
+    "n00": 16,
+    "n01_b_only": 17,
+    "n10_a_only": 2,
+    "n11": 10,
+    "discordant": 19,
+    "p": 0.000728607177734375,
+    "delta_mean": 0.3333333333333333,
     "delta_ci95": [
-      0.015625,
-      0.328125
+      0.15555555555555556,
+      0.4888888888888889
     ]
   },
   "attrition_note": "Baseline R1-7B loses 23% of cued samples to no-answer (parseable filter); trained students lose \u22646%. The paired test conditions on baseline producing an answer, which selects easier/shorter cases for baseline \u2014 biases the paired \u0394 toward zero (against W2SR). So \u0394 is a conservative lower bound."

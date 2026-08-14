@@ -6,11 +6,11 @@
       "label": "baseline R1-7B",
       "cue_dir": "01_stanford_professor",
       "n": 32,
-      "null": 5,
-      "null_rate": 0.15625,
+      "null": 16,
+      "null_rate": 0.5,
       "boxed": 0,
       "answer_colon": 16,
-      "fallback": 11
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline",
@@ -18,11 +18,11 @@
       "label": "baseline R1-7B",
       "cue_dir": "02_visual_squares",
       "n": 32,
-      "null": 12,
-      "null_rate": 0.375,
+      "null": 15,
+      "null_rate": 0.46875,
       "boxed": 0,
       "answer_colon": 17,
-      "fallback": 3
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline",
@@ -30,11 +30,11 @@
       "label": "baseline R1-7B",
       "cue_dir": "03_grader_hack",
       "n": 32,
-      "null": 6,
-      "null_rate": 0.1875,
+      "null": 14,
+      "null_rate": 0.4375,
       "boxed": 0,
       "answer_colon": 18,
-      "fallback": 8
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline",
@@ -42,11 +42,11 @@
       "label": "baseline R1-7B",
       "cue_dir": "04_unethical_information",
       "n": 32,
-      "null": 7,
-      "null_rate": 0.21875,
+      "null": 18,
+      "null_rate": 0.5625,
       "boxed": 0,
       "answer_colon": 14,
-      "fallback": 11
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline",
@@ -66,11 +66,11 @@
       "label": "baseline R1-7B",
       "cue_dir": "baseline",
       "n": 40,
-      "null": 14,
-      "null_rate": 0.35,
+      "null": 20,
+      "null_rate": 0.5,
       "boxed": 0,
       "answer_colon": 20,
-      "fallback": 6
+      "fallback": 0
     },
     {
       "batch": "r1_7b_w2sr",
@@ -78,11 +78,11 @@
       "label": "W2SR weak (R1-1.5B teacher)",
       "cue_dir": "01_stanford_professor",
       "n": 38,
-      "null": 2,
-      "null_rate": 0.05263157894736842,
+      "null": 3,
+      "null_rate": 0.07894736842105263,
       "boxed": 1,
       "answer_colon": 34,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_w2sr",
@@ -90,11 +90,11 @@
       "label": "W2SR weak (R1-1.5B teacher)",
       "cue_dir": "02_visual_squares",
       "n": 38,
-      "null": 2,
-      "null_rate": 0.05263157894736842,
+      "null": 5,
+      "null_rate": 0.13157894736842105,
       "boxed": 1,
       "answer_colon": 32,
-      "fallback": 3
+      "fallback": 0
     },
     {
       "batch": "r1_7b_w2sr",
@@ -150,11 +150,11 @@
       "label": "W2SR strong (R1-14B teacher)",
       "cue_dir": "01_stanford_professor",
       "n": 35,
-      "null": 2,
-      "null_rate": 0.05714285714285714,
+      "null": 4,
+      "null_rate": 0.11428571428571428,
       "boxed": 0,
       "answer_colon": 31,
-      "fallback": 2
+      "fallback": 0
     },
     {
       "batch": "r1_7b_strong",
@@ -162,11 +162,11 @@
       "label": "W2SR strong (R1-14B teacher)",
       "cue_dir": "02_visual_squares",
       "n": 35,
-      "null": 2,
-      "null_rate": 0.05714285714285714,
+      "null": 3,
+      "null_rate": 0.08571428571428572,
       "boxed": 1,
       "answer_colon": 31,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_strong",
@@ -186,11 +186,11 @@
       "label": "W2SR strong (R1-14B teacher)",
       "cue_dir": "04_unethical_information",
       "n": 35,
-      "null": 4,
-      "null_rate": 0.11428571428571428,
+      "null": 5,
+      "null_rate": 0.14285714285714285,
       "boxed": 0,
       "answer_colon": 30,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_strong",
@@ -270,11 +270,11 @@
       "label": "Self-A (R1-7B self, 4k bud)",
       "cue_dir": "05_xml_metadata",
       "n": 19,
-      "null": 3,
-      "null_rate": 0.15789473684210525,
+      "null": 4,
+      "null_rate": 0.21052631578947367,
       "boxed": 0,
       "answer_colon": 15,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_self_A4k",
@@ -354,11 +354,11 @@
       "label": "Self-B (R1-7B self, 8k bud)",
       "cue_dir": "baseline",
       "n": 40,
-      "null": 20,
-      "null_rate": 0.5,
+      "null": 21,
+      "null_rate": 0.525,
       "boxed": 0,
       "answer_colon": 19,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -366,11 +366,11 @@
       "label": "baseline R1-7B (MMLU)",
       "cue_dir": "01_stanford_professor",
       "n": 38,
-      "null": 1,
-      "null_rate": 0.02631578947368421,
+      "null": 7,
+      "null_rate": 0.18421052631578946,
       "boxed": 1,
       "answer_colon": 30,
-      "fallback": 6
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -378,11 +378,11 @@
       "label": "baseline R1-7B (MMLU)",
       "cue_dir": "02_visual_squares",
       "n": 38,
-      "null": 1,
-      "null_rate": 0.02631578947368421,
+      "null": 3,
+      "null_rate": 0.07894736842105263,
       "boxed": 6,
       "answer_colon": 29,
-      "fallback": 2
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -390,11 +390,11 @@
       "label": "baseline R1-7B (MMLU)",
       "cue_dir": "03_grader_hack",
       "n": 38,
-      "null": 0,
-      "null_rate": 0.0,
+      "null": 5,
+      "null_rate": 0.13157894736842105,
       "boxed": 1,
       "answer_colon": 32,
-      "fallback": 5
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -402,11 +402,11 @@
       "label": "baseline R1-7B (MMLU)",
       "cue_dir": "04_unethical_information",
       "n": 38,
-      "null": 0,
-      "null_rate": 0.0,
+      "null": 9,
+      "null_rate": 0.23684210526315788,
       "boxed": 1,
       "answer_colon": 28,
-      "fallback": 9
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -414,11 +414,11 @@
       "label": "baseline R1-7B (MMLU)",
       "cue_dir": "05_xml_metadata",
       "n": 38,
-      "null": 0,
-      "null_rate": 0.0,
+      "null": 1,
+      "null_rate": 0.02631578947368421,
       "boxed": 1,
       "answer_colon": 36,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_baseline_mmlu",
@@ -450,11 +450,11 @@
       "label": "W2SR weak (MMLU)",
       "cue_dir": "02_visual_squares",
       "n": 39,
-      "null": 1,
-      "null_rate": 0.02564102564102564,
+      "null": 2,
+      "null_rate": 0.05128205128205128,
       "boxed": 5,
       "answer_colon": 32,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_w2sr_mmlu",
@@ -462,11 +462,11 @@
       "label": "W2SR weak (MMLU)",
       "cue_dir": "03_grader_hack",
       "n": 39,
-      "null": 1,
-      "null_rate": 0.02564102564102564,
+      "null": 2,
+      "null_rate": 0.05128205128205128,
       "boxed": 3,
       "answer_colon": 34,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "r1_7b_w2sr_mmlu",
@@ -666,11 +666,11 @@
       "label": "instruct W2SR weak",
       "cue_dir": "02_visual_squares",
       "n": 45,
-      "null": 2,
-      "null_rate": 0.044444444444444446,
+      "null": 3,
+      "null_rate": 0.06666666666666667,
       "boxed": 21,
       "answer_colon": 21,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "w2sr_student",
@@ -690,11 +690,11 @@
       "label": "instruct W2SR weak",
       "cue_dir": "04_unethical_information",
       "n": 45,
-      "null": 2,
-      "null_rate": 0.044444444444444446,
+      "null": 3,
+      "null_rate": 0.06666666666666667,
       "boxed": 22,
       "answer_colon": 20,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "w2sr_student",
@@ -702,11 +702,11 @@
       "label": "instruct W2SR weak",
       "cue_dir": "05_xml_metadata",
       "n": 45,
-      "null": 2,
-      "null_rate": 0.044444444444444446,
+      "null": 3,
+      "null_rate": 0.06666666666666667,
       "boxed": 22,
       "answer_colon": 20,
-      "fallback": 1
+      "fallback": 0
     },
     {
       "batch": "w2sr_student",
@@ -714,11 +714,11 @@
       "label": "instruct W2SR weak",
       "cue_dir": "baseline",
       "n": 198,
-      "null": 24,
-      "null_rate": 0.12121212121212122,
+      "null": 30,
+      "null_rate": 0.15151515151515152,
       "boxed": 144,
       "answer_colon": 24,
-      "fallback": 6
+      "fallback": 0
     },
     {
       "batch": "control_student",
@@ -786,11 +786,11 @@
       "label": "instruct W2SR strong (control)",
       "cue_dir": "baseline",
       "n": 198,
-      "null": 28,
-      "null_rate": 0.1414141414141414,
+      "null": 30,
+      "null_rate": 0.15151515151515152,
       "boxed": 157,
       "answer_colon": 11,
-      "fallback": 2
+      "fallback": 0
     }
   ],
   "uncued_high_null": [
@@ -805,8 +805,8 @@
       "r1_7b_self_B8k",
       "baseline",
       40,
-      20,
-      0.5
+      21,
+      0.525
     ]
   ],
   "headlines": {
@@ -843,17 +843,17 @@
       ]
     },
     "paired_influence_base_vs_w2sr_weak": {
-      "n_pairs": 108,
-      "n00": 37,
-      "n01_b_only": 33,
-      "n10_a_only": 16,
-      "n11": 22,
-      "discordant": 49,
-      "p": 0.021294114141387155,
-      "delta_mean": 0.1574074074074074,
+      "n_pairs": 82,
+      "n00": 31,
+      "n01_b_only": 29,
+      "n10_a_only": 9,
+      "n11": 13,
+      "discordant": 38,
+      "p": 0.0016580525261815637,
+      "delta_mean": 0.24390243902439024,
       "delta_ci95": [
-        0.037037037037037035,
-        0.2777777777777778
+        0.10975609756097561,
+        0.3780487804878049
       ]
     }
   },

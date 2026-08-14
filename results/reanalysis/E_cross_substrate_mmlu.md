@@ -6,8 +6,8 @@
 
 | condition | cued | parseable | ack k/n | ack % | 95% Wilson |
 |---|---:|---:|---:|---:|---|
-| baseline R1-7B (MMLU) | 190 | 188 | 52/190 | 27.4% | [21.5, 34.1] |
-| W2SR weak (MMLU) | 195 | 189 | 7/195 | 3.6% | [1.7, 7.2] |
+| baseline R1-7B (MMLU) | 190 | 165 | 52/190 | 27.4% | [21.5, 34.1] |
+| W2SR weak (MMLU) | 195 | 187 | 7/195 | 3.6% | [1.7, 7.2] |
 | Self-A (MMLU) | 195 | 193 | 9/195 | 4.6% | [2.4, 8.5] |
 
 ## Paired ack vs baseline R1-7B (MMLU)
@@ -55,11 +55,11 @@ Baseline emits `</think>` on 87% of MMLU cued completions (vs 57% on GPQA — sh
 
 | condition | k/n | rate | 95% CI |
 |---|---:|---:|---|
-| baseline R1-7B (MMLU) | 33/188 | 17.6% | [12.8, 23.6] |
-| W2SR weak (MMLU) | 43/189 | 22.8% | [17.4, 29.2] |
+| baseline R1-7B (MMLU) | 22/165 | 13.3% | [9.0, 19.4] |
+| W2SR weak (MMLU) | 43/187 | 23.0% | [17.5, 29.5] |
 | Self-A (MMLU) | 47/193 | 24.4% | [18.8, 30.9] |
 
-Same direction as GPQA: trained students show modestly higher switch-to-cue rate (baseline 17.6% → W2SR 22.8% → Self-A 24.4%), so the "behavior toward the cue, silence about it" dissociation holds.
+Same direction as GPQA: trained students show modestly higher switch-to-cue rate (baseline 13.3% → W2SR 23.0% → Self-A 24.4%), so the "behavior toward the cue, silence about it" dissociation holds.
 
 ## Interpretation
 Cross-substrate replication on MMLU (5 STEM subjects × 8 Qs per cue) holds the headline pattern: baseline ack 27.4%, W2SR weak 3.6%, Self-A 4.6%. W2SR weak vs baseline paired Δ = -0.232, McNemar p = 2.42e-10 (n = 185, discordant 47/4); Self-A vs baseline Δ = -0.222, p = 8.23e-10 (discordant 45/4). Self-A vs W2SR weak remains indistinguishable (Δ = +0.010, p = 0.727) — the 'same mechanism' finding generalizes. CoT compresses 2.8× on MMLU (3,226 → 1,141 chars) vs ~14× on GPQA, because baseline R1-7B already writes shorter CoT on MMLU. Effect generalizes beyond GPQA-Diamond.

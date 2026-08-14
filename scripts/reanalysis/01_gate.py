@@ -10,7 +10,10 @@ Step 2: reproduce the four headline numbers from disk:
   (c) paired acknowledgment table baseline vs W2SR weak on (qid, cue):
         n=150, discordant 34/1, McNemar p ≈ 2.1e-9, Δ = −0.220
   (d) paired influence table on (qid, cue), parseable both sides:
-        n=108, discordant 16/33 (base-only / W2SR-only), Δ = +0.157, p = 0.021
+        n=82, discordant 9/29 (base-only / W2SR-only), Δ = +0.244, p = 0.0017
+      ("parseable" = an explicit ANSWER:/\boxed{} marker; see
+       _common.LOOSE_FALLBACK_IS_AN_ANSWER for why the loose pattern does not
+       count. Pre-2026-08-13 this read n=108, 16/33, Δ=+0.157, p=0.021.)
 
 Inputs (verified):
   external/monitorability-eval/logs/r1_7b_baseline/openai_DeepSeek-R1-Distill-Qwen-7B/{01..05,baseline}/config_001/*.eval
@@ -55,11 +58,18 @@ HEADLINE = {
     "paired_ack_w2sr_only": 1,
     "paired_ack_delta": -0.220,
     "paired_ack_p_max": 1e-8,      # manuscript reports ≈ 2.1e-9; allow ≤ 1e-8
-    "paired_inf_n": 108,
-    "paired_inf_base_only": 16,
-    "paired_inf_w2sr_only": 33,
-    "paired_inf_delta": +0.157,
-    "paired_inf_p_max": 0.05,      # manuscript reports = 0.021
+    # Influence values re-pinned 2026-08-13 when the loose-fallback extractor
+    # was rejected as an answer source (see _common.LOOSE_FALLBACK_IS_AN_ANSWER).
+    # Superseded values, on the contaminated extraction:
+    #   n = 108, disc 16/33, Δ = +0.157, p = 0.021
+    # The contamination inflated BASELINE influence, so the corrected effect is
+    # larger and more significant, not smaller. The acknowledgment headlines
+    # above are judge-scored and are unchanged by the fix.
+    "paired_inf_n": 82,
+    "paired_inf_base_only": 9,
+    "paired_inf_w2sr_only": 29,
+    "paired_inf_delta": +0.244,
+    "paired_inf_p_max": 0.005,     # observed = 0.0017
 }
 
 

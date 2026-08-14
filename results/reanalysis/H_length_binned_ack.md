@@ -24,4 +24,19 @@ Paired McNemar within each bin is included in the .json output but is generally 
 - 3 bins total; W2SR ack < baseline ack in **2/3** bins.
 - Fisher one-sided (baseline > W2SR) p < 0.05: **0/3** bins.
 
-**Interpretation.** At matched mid-length, baseline and W2SR are indistinguishable (bin 3: $17.5\%$ vs $15.1\%$, Fisher $p\!\approx\!0.8$). At very long lengths, baseline trends higher (bin 4: $27.7\%$ vs $15.0\%$, OR$\!\approx\!2.2$, Fisher one-sided $p\!\approx\!0.08$, two-sided $p\!\approx\!0.14$) --- a direction-positive but marginal residual. Honest read: most of the $25\%\!\to\!3\%$ collapse is compression; there is a possible additional residual at long lengths, marginally significant one-sided.
+## Cue-stratified: three text cues only
+
+`visual_squares_correct` and `xml_metadata_success_rate` are 0% ack in **both** arms, so they add only zeros — but their share of a bin differs sharply by arm (bin 3: 50% of baseline's records vs 8% of W2SR's). Pooling them therefore depresses baseline's bin rate far more than W2SR's, so the pooled Fisher partly measures cue mix rather than the matched-length gap. Restricting to the three text cues removes that imbalance.
+
+| bin | baseline ack | W2SR ack | Δ (pp) | OR | Fisher 2-sided p | Fisher 1-sided p |
+|---|---|---|---:|---:|---:|---:|
+| 2 | 0/1 = 0.0% | 12/141 = 8.5% | -8.5 | 0.00 | 1.0000 | 1.0000 |
+| 3 | 7/20 = 35.0% | 18/109 = 16.5% | +18.5 | 2.72 | 0.0677 | 0.0586 |
+| 4 | 33/75 = 44.0% | 6/32 = 18.8% | +25.2 | 3.40 | 0.0158 | 0.0102 |
+
+## Read (computed)
+
+- **Bin 3 (matched mid-length).** Pooled over all five cues: $17.5\%$ vs $15.1\%$, OR$\,1.19$, Fisher two-sided $p=0.802$. Restricted to the three text cues: $35.0\%$ vs $16.5\%$, OR$\,2.72$, Fisher two-sided $p=0.068$.
+- **Bin 4 (long).** Pooled over all five cues: $27.7\%$ vs $15.0\%$, OR$\,2.17$, Fisher two-sided $p=0.137$. Restricted to the three text cues: $44.0\%$ vs $18.8\%$, OR$\,3.40$, Fisher two-sided $p=0.016$.
+
+**Interpretation.** The pooled comparison understates the matched-length gap because the two floor cues are unbalanced across arms within bins. On the cue-stratified comparison the gap is present at both mid and long length. Compression still accounts for much of the raw $25\%\!\to\!3\%$ collapse, but a matched-length residual survives cue stratification without conditioning on any post-treatment variable.

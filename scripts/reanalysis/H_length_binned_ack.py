@@ -92,43 +92,59 @@ def main():
 
     from scipy.stats import fisher_exact
 
-    rows = []
-    for i in range(len(edges) - 1):
-        lo, hi = int(edges[i] + (1 if i == 0 else 0)), int(edges[i+1])
-        b_in = [r for r in b if bin_idx(r.cot_chars) == i]
-        w_in = [r for r in w if bin_idx(r.cot_chars) == i]
-        if not b_in or not w_in:
-            continue
-        kb = sum(r.ack for r in b_in); nb = len(b_in)
-        kw = sum(r.ack for r in w_in); nw = len(w_in)
-        pb, pb_lo, pb_hi = wilson(kb, nb)
-        pw, pw_lo, pw_hi = wilson(kw, nw)
+    def compute_rows(b_list, w_list):
+        """Per-bin unpaired Fisher + paired McNemar for one pair of arms."""
+        rows = []
+        for i in range(len(edges) - 1):
+            lo, hi = int(edges[i] + (1 if i == 0 else 0)), int(edges[i+1])
+            b_in = [r for r in b_list if bin_idx(r.cot_chars) == i]
+            w_in = [r for r in w_list if bin_idx(r.cot_chars) == i]
+            if not b_in or not w_in:
+                continue
+            kb = sum(r.ack for r in b_in); nb = len(b_in)
+            kw = sum(r.ack for r in w_in); nw = len(w_in)
+            pb, pb_lo, pb_hi = wilson(kb, nb)
+            pw, pw_lo, pw_hi = wilson(kw, nw)
 
-        # paired McNemar on (qid, cue) within this bin (often underpowered;
-        # baseline's long traces and W2SR's long traces don't share many qids)
-        keys, a_vals, c_vals = paired_align(b_in, w_in, "ack")
-        mc = mcnemar_exact(a_vals, c_vals) if keys else None
+            # paired McNemar on (qid, cue) within this bin (often underpowered;
+            # baseline's long traces and W2SR's long traces don't share many qids)
+            keys, a_vals, c_vals = paired_align(b_in, w_in, "ack")
+            mc = mcnemar_exact(a_vals, c_vals) if keys else None
 
-        # UNPAIRED Fisher's exact — the proper test when paired overlap is small.
-        # CI-overlap on Wilson intervals is a known-conservative heuristic; Fisher
-        # uses the full n on each side and is the right test for "does baseline
-        # have higher ack than W2SR within this length bin?"
-        table = [[kb, nb - kb], [kw, nw - kw]]
-        odds_ratio, fp_two = fisher_exact(table, alternative="two-sided")
-        _, fp_one_b_gt_w = fisher_exact(table, alternative="greater")
+            # UNPAIRED Fisher's exact — the proper test when paired overlap is
+            # small. CI-overlap on Wilson intervals is a known-conservative
+            # heuristic; Fisher uses the full n on each side and is the right
+            # test for "does baseline have higher ack than W2SR in this bin?"
+            table = [[kb, nb - kb], [kw, nw - kw]]
+            odds_ratio, fp_two = fisher_exact(table, alternative="two-sided")
+            _, fp_one_b_gt_w = fisher_exact(table, alternative="greater")
 
-        rows.append({
-            "bin": i,
-            "range_chars": [lo, hi],
-            "median_chars_in_bin": int(np.median([r.cot_chars for r in (b_in + w_in)])),
-            "baseline": {"k": kb, "n": nb, "rate": pb, "ci95": [pb_lo, pb_hi]},
-            "w2sr":     {"k": kw, "n": nw, "rate": pw, "ci95": [pw_lo, pw_hi]},
-            "delta_pp": 100 * (pb - pw),
-            "odds_ratio": odds_ratio,
-            "fisher_two_sided_p": fp_two,
-            "fisher_one_sided_p_baseline_gt_w2sr": fp_one_b_gt_w,
-            "paired":   mc,
-        })
+            rows.append({
+                "bin": i,
+                "range_chars": [lo, hi],
+                "median_chars_in_bin": int(np.median([r.cot_chars for r in (b_in + w_in)])),
+                "baseline": {"k": kb, "n": nb, "rate": pb, "ci95": [pb_lo, pb_hi]},
+                "w2sr":     {"k": kw, "n": nw, "rate": pw, "ci95": [pw_lo, pw_hi]},
+                "delta_pp": 100 * (pb - pw),
+                "odds_ratio": odds_ratio,
+                "fisher_two_sided_p": fp_two,
+                "fisher_one_sided_p_baseline_gt_w2sr": fp_one_b_gt_w,
+                "paired":   mc,
+            })
+        return rows
+
+    rows = compute_rows(b, w)
+
+    # Cue-stratified replication. `visual_squares_correct` and
+    # `xml_metadata_success_rate` sit at 0% acknowledgment in BOTH arms, so they
+    # contribute only zeros — but they are not balanced across arms within a
+    # bin: in bin 3 they are 20/40 (50%) of baseline's records and 10/119 (8%)
+    # of W2SR's. Pooling them therefore drags baseline's bin rate down far more
+    # than W2SR's, and the pooled Fisher measures cue mix as much as it measures
+    # the matched-length gap. Restricting to the three text cues removes the
+    # imbalance; report both.
+    rows_text = compute_rows([r for r in b if r.cue in THICK_CUES],
+                             [r for r in w if r.cue in THICK_CUES])
 
     # ---- print summary table ----
     print(f"\n{'bin':>3s} {'range (chars)':>22s} {'n_b':>4s} {'n_w':>4s} "
@@ -169,7 +185,18 @@ def main():
             print(f"  McNemar p:    {mc['p']:.3g}  (n_pairs={mc['n_pairs']}, "
                   f"disc base-only/W2SR-only = {mc['n10_a_only']}/{mc['n01_b_only']})")
 
+    print("\nCue-stratified (three text cues only — the two non-text cues are "
+          "0% ack in both arms and unbalanced across arms within bins):")
+    for r in rows_text:
+        print(f"  bin {r['bin']} [{r['range_chars'][0]:,}, {r['range_chars'][1]:,}): "
+              f"baseline {r['baseline']['k']}/{r['baseline']['n']}="
+              f"{100*r['baseline']['rate']:.1f}%  "
+              f"W2SR {r['w2sr']['k']}/{r['w2sr']['n']}={100*r['w2sr']['rate']:.1f}%  "
+              f"OR={r['odds_ratio']:.2f}  p2={r['fisher_two_sided_p']:.4f}  "
+              f"p1={r['fisher_one_sided_p_baseline_gt_w2sr']:.4f}")
+
     out = {"edges": [int(x) for x in edges], "rows": rows,
+           "rows_text_cues_only": rows_text,
            "summary": {
                "n_bins": n_bins,
                "bins_with_w2sr_lower": positive_delta_bins,
@@ -218,15 +245,51 @@ def main():
            f"**{positive_delta_bins}/{n_bins}** bins.",
            f"- Fisher one-sided (baseline > W2SR) p < 0.05: "
            f"**{sig_bins_one}/{n_bins}** bins.",
-           "",
-           "**Interpretation.** At matched mid-length, baseline and W2SR are "
-           "indistinguishable (bin 3: $17.5\\%$ vs $15.1\\%$, Fisher $p\\!\\approx\\!0.8$). "
-           "At very long lengths, baseline trends higher (bin 4: $27.7\\%$ vs $15.0\\%$, "
-           "OR$\\!\\approx\\!2.2$, Fisher one-sided $p\\!\\approx\\!0.08$, two-sided "
-           "$p\\!\\approx\\!0.14$) --- a direction-positive but marginal residual. "
-           "Honest read: most of the $25\\%\\!\\to\\!3\\%$ collapse is compression; "
-           "there is a possible additional residual at long lengths, "
-           "marginally significant one-sided.",
+           ""]
+
+    # Cue-stratified table. Values below are COMPUTED, never hardcoded — an
+    # earlier version of this file pinned the interpretation prose as literals,
+    # which silently went stale (see E_cross_substrate_mmlu.py for the same
+    # failure mode having already occurred once).
+    md += ["## Cue-stratified: three text cues only\n",
+           "`visual_squares_correct` and `xml_metadata_success_rate` are 0% ack "
+           "in **both** arms, so they add only zeros — but their share of a bin "
+           "differs sharply by arm (bin 3: 50% of baseline's records vs 8% of "
+           "W2SR's). Pooling them therefore depresses baseline's bin rate far "
+           "more than W2SR's, so the pooled Fisher partly measures cue mix "
+           "rather than the matched-length gap. Restricting to the three text "
+           "cues removes that imbalance.\n",
+           "| bin | baseline ack | W2SR ack | Δ (pp) | OR | Fisher 2-sided p | Fisher 1-sided p |",
+           "|---|---|---|---:|---:|---:|---:|"]
+    for r in rows_text:
+        b_str = f"{r['baseline']['k']}/{r['baseline']['n']} = {100*r['baseline']['rate']:.1f}%"
+        w_str = f"{r['w2sr']['k']}/{r['w2sr']['n']} = {100*r['w2sr']['rate']:.1f}%"
+        md.append(f"| {r['bin']} | {b_str} | {w_str} | {r['delta_pp']:+.1f} | "
+                  f"{r['odds_ratio']:.2f} | {r['fisher_two_sided_p']:.4f} | "
+                  f"{r['fisher_one_sided_p_baseline_gt_w2sr']:.4f} |")
+
+    def _fmt(rr):
+        return (f"${100*rr['baseline']['rate']:.1f}\\%$ vs "
+                f"${100*rr['w2sr']['rate']:.1f}\\%$, "
+                f"OR$\\,{rr['odds_ratio']:.2f}$, "
+                f"Fisher two-sided $p={rr['fisher_two_sided_p']:.3f}$")
+
+    pooled_by_bin = {r["bin"]: r for r in rows}
+    text_by_bin   = {r["bin"]: r for r in rows_text}
+    md += ["", "## Read (computed)", ""]
+    for bno, name in [(3, "matched mid-length"), (4, "long")]:
+        if bno in pooled_by_bin and bno in text_by_bin:
+            md.append(f"- **Bin {bno} ({name}).** Pooled over all five cues: "
+                      f"{_fmt(pooled_by_bin[bno])}. Restricted to the three text "
+                      f"cues: {_fmt(text_by_bin[bno])}.")
+    md += ["",
+           "**Interpretation.** The pooled comparison understates the "
+           "matched-length gap because the two floor cues are unbalanced across "
+           "arms within bins. On the cue-stratified comparison the gap is "
+           "present at both mid and long length. Compression still accounts for "
+           "much of the raw $25\\%\\!\\to\\!3\\%$ collapse, but a matched-length "
+           "residual survives cue stratification without conditioning on any "
+           "post-treatment variable.",
            ""]
     OUT_MD.write_text("\n".join(md))
     print(f"\nWrote {OUT_MD.relative_to(REPO)} and {OUT_JSON.relative_to(REPO)}")
