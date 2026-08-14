@@ -212,7 +212,10 @@ def main():
            "paired_switch_to_cue_base_vs_w2sr_weak": paired,
            "flip_to_cue_rate_baseline_vs_w2sr": flip_rate_comparison,
            "attrition_note": bias}
-    OUT_JSON.write_text(json.dumps(out, indent=2, default=str))
+    # sort_keys: the per-condition dict is assembled by iterating a set in one
+    # branch, so key order varied run to run and the committed JSON showed a
+    # spurious diff on every re-run even when every value was identical.
+    OUT_JSON.write_text(json.dumps(out, indent=2, default=str, sort_keys=True))
 
     # ---- markdown ----
     lines = ["# Task 2 — directional-influence confound check\n",

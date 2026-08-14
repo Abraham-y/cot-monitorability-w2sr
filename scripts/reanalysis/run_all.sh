@@ -120,6 +120,16 @@ else
     echo "======== SKIPPING K_cotsft_rerun.py (r1_7b_w2sr_cotsft logs absent) ========"
 fi
 
+# --- Figures ---
+# These regenerate the manuscript figures FROM the JSON written above, so a
+# result change can never silently leave a stale figure in the paper. That is
+# not hypothetical: dissociation_bars.pdf had no generator at all and sat for
+# nine days plotting a superseded baseline influence rate (35.8% vs 25.6%)
+# after the answer-extraction fix. Keep these in the suite.
+run "$PYTHON" "$SCRIPTS_DIR/make_dissociation_fig.py"
+run "$PYTHON" "$SCRIPTS_DIR/make_mechanism_fig.py"
+run "$PYTHON" "$SCRIPTS_DIR/make_length_binned_fig.py"
+
 # Task 5: Part A (per-cue ack matrix) is free; Part B (rejudge) is paid.
 if [[ "${REJUDGE:-0}" == "1" ]]; then
     run "$PYTHON" "$SCRIPTS_DIR/05_robustness_rejudge.py" \
