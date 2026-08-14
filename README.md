@@ -1,11 +1,14 @@
-# Math Distillation Decouples Chain-of-Thought from Behavior on a Reasoning Model
+# Math-CoT Distillation Suppresses Cue Acknowledgment Beyond What Compression Explains
 
 > Empirical study of CoT monitorability under math-CoT SFT on
-> DeepSeek-R1-Distill students. Documents a **behavior–verbalization
-> dissociation**: behavior preserved while CoT acknowledgment of cues
-> collapses ($25\% \to 3\%$, paired McNemar $p \approx 2 \times 10^{-9}$).
-> Effect is teacher-strength-invariant, survives three judges from three
-> model families, replicates on math and non-math domains.
+> DeepSeek-R1-Distill students. Headline is an **intervention**: with the
+> reasoning span genuinely in the SFT loss, cue acknowledgment falls
+> $25.0\% \to 14.4\%$ (paired McNemar $p = 0.005$) while the cue's behavioral
+> pull is unchanged ($\Delta = +0.048$, $p = 0.52$) and held-out MATH accuracy
+> rises ($0.650 \to 0.685$) — at traces only ~27% shorter than baseline, so
+> compression cannot account for the gap. A second arm, supervised on
+> answer segments only, compresses CoT 14× and drives acknowledgment to
+> $3.2\%$, bounding how much of the effect trace length alone produces.
 
 **Paper:** [writeup_workshop.pdf](writeup_workshop.pdf)  ·  **arXiv package:** [arxiv_submission.zip](arxiv_submission.zip)
 
@@ -46,10 +49,15 @@ legible.
 
 ## Headline numbers (all reproduce exactly from disk)
 
-- Baseline R1-7B acknowledgment: **40/160 = 25.0%**
-- W2SR acknowledgment: **6/190 = 3.2%**
-- Paired McNemar ack drop: **Δ = −0.220, 34/1 discordant, $p \approx 2\times 10^{-9}$**
-- Paired influence (behavior): **Δ = +0.157, $n = 108$, $p = 0.021$**
+- **Headline (Task K, reasoning-preserving SFT):** ack **26/180 = 14.4%** vs
+  baseline **40/160 = 25.0%**; paired **Δ = −0.110, $n = 155$, disc. 25/8,
+  $p = 0.005$**; paired influence null (**Δ = +0.048, $n = 83$, $p = 0.52$**);
+  median CoT 13,721 vs baseline 18,847 chars; held-out MATH 0.650 → 0.685
+- Answer-only arm acknowledgment: **6/190 = 3.2%**
+- Paired McNemar ack drop (answer-only): **Δ = −0.220, 34/1 discordant, $p \approx 2\times 10^{-9}$**
+- Paired influence (answer-only): **Δ = +0.244, $n = 82$, $p = 0.0017$**
+- Matched-length, cue-stratified (text cues only): long bin **44.0% vs 18.8%,
+  OR ≈ 3.40, Fisher $p = 0.016$**
 - Three-judge robustness (κ vs Sonnet):
   - Gemini 2.5 Pro: **overall κ = 0.68**, Δ = −0.153, $p = 2.4 \times 10^{-7}$
   - Kimi K2: **overall κ = 0.556** (stricter), Δ = −0.114, $p = 1.4 \times 10^{-4}$
