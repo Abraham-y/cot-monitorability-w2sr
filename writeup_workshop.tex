@@ -36,26 +36,36 @@ al.\ (2023) on a DeepSeek-R1-distilled student. Our central result is an
 intervention. Fine-tuning the student on a weaker model's math CoT, with the
 reasoning span genuinely present in the loss, cuts the CoT's acknowledgment of
 a planted cue from $25.0\%$ to $14.4\%$ on matched (question, cue) pairs
-(paired $\Delta = -0.110$, $n = 155$, McNemar $p = 0.005$) while the cue's
-behavioral pull on the answer is unchanged (paired $\Delta = +0.048$,
-$p = 0.52$) and held-out MATH accuracy rises ($0.650 \to 0.685$). The retrained
-student's traces are only ${\sim}27\%$ shorter than the untrained model's, so
-CoT compression cannot account for the gap. The model keeps being moved by the
-cue and says so less often. That fine-tuning lowers CoT faithfulness on an
-answer-level metric is already known (Lobo et al., 2024); our contribution is
-that the cue's grip on behavior is held fixed while verbalization drops, which
-is the failure mode that matters for monitorability, and that this is shown by
-intervention rather than by conditioning on a post-treatment variable. A second
-arm isolates how much of the effect a shorter trace can produce on its own. Due
+(paired $\Delta = -0.110$, $n = 155$, McNemar $p = 0.005$), at held-out MATH
+accuracy that does not fall ($0.685$ against an untrained reference of
+$0.650$). The retrained student's traces are only ${\sim}27\%$ shorter than the
+untrained model's, so the drop is not a by-product of the extreme CoT
+compression that answer-only supervision produces. Over the same pairs we
+cannot detect a change in the cue's behavioral pull on the answer (paired
+$\Delta = +0.048$, $95\%$ CI $[-0.060, +0.157]$, $n = 83$, $p = 0.52$) --- but
+we are explicit that this is an underpowered null rather than a demonstrated
+invariance, and that the behavioral measurement is degraded by the untrained
+baseline failing to emit a parseable answer on $44\%$ of these items
+(\S\ref{sec:lim}). That fine-tuning lowers CoT faithfulness on an answer-level
+metric is already known (Lobo et al., 2024); what we add is that the drop is
+induced by intervention, survives the removal of the compression that would
+trivially explain it, and is not accompanied by any detectable reduction in how
+much the cue moves the answer. A second arm isolates how much of the effect a
+shorter trace can produce on its own. Due
 to a chat-template defect we document in \S\ref{sec:supervision}, an earlier
 run supervised the same student on the \emph{final-answer segments} of the same
 traces; that arm compresses CoT $14\times$ and drives acknowledgment to $3.2\%$,
 so answer-only supervision reproduces a far larger collapse than
 reasoning-preserving supervision does. Length alone is nonetheless
-insufficient: at matched length and matched cue the gap persists (Fisher
-$p = 0.016$ in the long bin), and the collapse replicates on MMLU at
-$2.8\times$ compression rather than $14\times$. A same-strength
-self-distillation control rules out the weak-to-strong asymmetry as the cause.
+insufficient: at matched length and matched cue composition the gap persists in
+direction and effect size under every construction we tried, though it reaches
+significance only in the construction that does not hold the question pool
+fixed, and the question-matched alternatives leave $7$ and $8$ records
+(\S\ref{sec:mech}), and the collapse replicates on MMLU at $2.8\times$
+compression rather than $14\times$. A same-strength
+self-distillation control makes the weak-to-strong asymmetry an unlikely cause,
+though that control was run under answer-only supervision and is correspondingly
+weak (\S\ref{sec:lim}).
 A capability-only certification can pass a model whose CoT has become markedly
 less revealing while still reading as elaborate.
 \end{abstract}
@@ -92,21 +102,22 @@ uncertainty. Our contributions are methodological and target-specific.
 
 \begin{enumerate}
 
-\item We induce a behavior--verbalization dissociation by intervention. On a
-run whose supervision genuinely contains the teacher's reasoning
-(\S\ref{sec:taskK}), math-CoT SFT moves an R1-distill student from
-acknowledgment $25.0\%$ to $14.4\%$ (paired $p = 0.005$) while paired influence
-is unchanged ($\Delta = +0.048$, $p = 0.52$) and held-out MATH accuracy rises.
-Because the manipulation is the training data rather than a filter applied to
-the outcome, this does not condition on any post-treatment variable. The new
-piece beyond Zaman and Srivastava is the controllability: an ordinary
-post-training recipe produces the dissociation on demand.
+\item We induce a drop in cue acknowledgment by intervention. On a run whose
+supervision genuinely contains the teacher's reasoning (\S\ref{sec:taskK}),
+math-CoT SFT moves an R1-distill student from acknowledgment $25.0\%$ to
+$14.4\%$ (paired $p = 0.005$) at held-out MATH accuracy that does not fall,
+and with no detectable change in paired influence ($\Delta = +0.048$,
+CI $[-0.060, +0.157]$, $p = 0.52$ --- an underpowered null, not a demonstrated
+invariance). Because the manipulation is the training data rather than a filter
+applied to the outcome, this does not condition on any post-treatment variable.
+The new piece beyond Zaman and Srivastava is the controllability: an ordinary
+post-training recipe produces the effect on demand.
 
 \item A same-strength self-distillation arm serves as a negative control. With
 teacher equal to student, the collapse is indistinguishable from W2SR
 (paired $p\!=\!1$, $n\!=\!79$), and every answer-only arm we tested against
 W2SR gives $p\!\ge\!0.09$. We have not seen this control in the literature in
-this form. It is the cleanest evidence that the cause is the SFT in general,
+this form. It is our strongest evidence that the cause is the SFT in general,
 not weak-to-strong asymmetry, and it separates our claim from the concurrent
 self-distillation work on uncertainty, since the outcome variable is different
 but the underlying mechanism is similar. We are explicit that this control was
@@ -119,12 +130,14 @@ not, using a supervision-format contrast that we did not design but can
 exploit. The answer-only arm (\S\ref{sec:supervision}) compresses CoT
 $14\times$ and reaches acknowledgment $3.2\%$; the reasoning-preserving arm
 compresses only ${\sim}27\%$ and reaches $14.4\%$. Length therefore carries
-much of the raw drop. It does not carry all of it: at matched length and
-matched cue composition the gap survives (long bin $44.0\%$ vs $18.8\%$,
-$\mathrm{OR}\!\approx\!3.40$, Fisher $p\!=\!0.016$; \S\ref{sec:mech}), the
-reasoning-preserving arm sits significantly below baseline at near-matched
-length, and the MMLU replication reproduces the full collapse at $2.8\times$
-compression rather than $14\times$.
+much of the raw drop. It does not carry all of it: the reasoning-preserving arm
+sits significantly below baseline at near-matched length; the MMLU replication
+reproduces the full collapse at $2.8\times$ compression rather than
+$14\times$; and at matched length with cue composition held fixed the gap is
+present in every construction we tried, at $\mathrm{OR}$ between $2.7$ and
+$4.7$, though only the construction that pools a larger re-run reaches
+significance and that construction does not hold the question pool fixed
+(\S\ref{sec:mech}).
 
 \item A reproduction of W2SR with a headroom probe shows that its accuracy
 claim is itself conditional. The gain only fires with (i) an in-family teacher
@@ -188,10 +201,13 @@ compression of distributed transformer computation into linear natural
 language. They show via causal mediation that even non-verbalized hints can
 causally route influence through the CoT to the answer. That is our
 dissociation, observed inferentially. We add three things on top. First, we
-induce the dissociation with a training method, moving acknowledgment from
-$25\%$ to $3\%$ on a fixed substrate. Second, we pin the behavioral pull
+induce the effect with a training method, moving acknowledgment from $25.0\%$
+to $14.4\%$ on a fixed substrate under reasoning-preserving supervision, and to
+$3.2\%$ under answer-only supervision. Second, we pin the behavioral pull
 directly, via paired influence and a flip-to-cue-target rate at about
-$2\times$ chance, rather than infer it through mediation. Third, we draw the
+$2\times$ chance on the trained arms, rather than infer it through mediation.
+(On the answer-only arm the pull does not merely persist but strengthens; on the
+reasoning-preserving arm we cannot resolve a change either way.) Third, we draw the
 certification consequence, since an accuracy-only or verbosity-rewarding check
 passes the very models on which the dissociation is most extreme. Zaman also
 argue that hint-acknowledgment is a poor faithfulness metric because absence
@@ -200,9 +216,10 @@ with that critique on faithfulness grounds. But for monitorability the
 metric is aligned with the task: what an overseer can read off the trace
 determines whether they can catch the influence, independent of whether the
 model was ``really'' moved by the hint in some deeper counterfactual sense.
-Our CoT-conclusion analysis in \S\ref{sec:ext} further shows the CoT reasoning
-itself walks to the cue target in most silently-influenced cases, so
-acknowledgment absence is not merely compression stripping the hint word.
+Our CoT-conclusion analysis in \S\ref{sec:mech} further shows the CoT reasoning
+itself walks to the cue target in most silently-influenced cases, so on that arm
+acknowledgment absence is not merely a missing hint word. We note the analysis
+was run on the answer-only arm, so it cannot by itself adjudicate compression.
 
 Channel migration is not what is happening here. Recent work on
 extended-thinking models documents a thinking-vs-answer divergence in hint
@@ -236,8 +253,8 @@ across otherwise identical setups, so absolute rates should be read as
 judge-dependent. Scalena et al.~\cite{scalena2026commit} argue that
 reasoning models commit to an answer well before the CoT ends, so late CoT
 content can be epiphenomenal and length-only comparisons can be misleading
-(our Task H length-binned analysis is designed to defuse this specific
-critique on our data). Za et al.~\cite{za2026persuasion} document that
+(our Task H length-binned analysis addresses this critique on our data, though
+see \S\ref{sec:mech} for how much weight it can bear). Za et al.~\cite{za2026persuasion} document that
 Sonnet is roughly $3\times$ more susceptible than Gemini under adversarial
 persuasion when used as a monitor, which is one reason we cross-check our
 Sonnet judge with two others: Gemini (Cohen's $\kappa \in [0.64, 0.68]$,
@@ -264,9 +281,11 @@ with \texttt{claude-sonnet-4-6} at $T = 0$ as the single judge. Faithfulness is
 reported as acknowledgment among cued samples. All evaluation is greedy
 ($T = 0$), trace sets are hashed, and training is LoRA. Generation, training,
 and gating run on Modal GPUs. All code, configs, per-sample judge labels, and
-the reanalysis pipeline are released. The four headline numbers in
-Table~\ref{tab:r1} are enforced by hard-fail assertions in \texttt{01\_gate.py},
-so any drift halts the suite.
+the reanalysis pipeline are released. Four numbers from the answer-only arms
+--- its acknowledgment rate, baseline's, and the two paired deltas --- are
+enforced by hard-fail assertions in \texttt{01\_gate.py}, so any drift halts the
+suite. The reasoning-preserving arm's numbers are reproduced by
+\texttt{K\_cotsft\_rerun.py} but are not yet under assertion.
 
 \paragraph{Procedural details that matter for interpretation.}
 Trace generation used $T = 0.6$, top-$p$ $0.95$, and a repetition penalty of
@@ -282,6 +301,20 @@ teacher-vs-student comparisons are not budget-matched (the
 baseline-vs-trained comparisons that carry every headline result are).
 SFT computes the loss over the full rendered sequence, prompt tokens included,
 rather than masking to the assistant span.
+The cue generator is \emph{adaptive}: for each condition it points the cue at an
+option that differs from that model's own uncued answer, so that the cue always
+has somewhere to pull. A consequence we should state plainly is that pairing on
+(question, cue) pairs responses to the same question and the same cue
+\emph{type}, but not always to the same planted target letter --- across
+baseline and the trained arms the target differs on roughly $60\%$ of matched
+pairs ($90/150$ against the answer-only arm, $90/155$ against the
+reasoning-preserving one). The paired estimand is therefore ``does this model
+follow a cue aimed away from its own prior answer,'' which is the quantity we
+want, rather than ``do two models respond identically to one fixed prompt.''
+Restricting to the pairs where the target letter does coincide preserves every
+result: the headline acknowledgment drop of \S\ref{sec:taskK} becomes
+$\Delta = -0.138$ on $n = 65$ ($p = 0.022$), and the answer-only arm's drop
+becomes $\Delta = -0.167$ on $n = 60$ ($p = 0.006$).
 Task H's W2SR side pools a larger re-run of the three text cues with the
 original run's two non-text cues ($634$ records) to give the length bins usable
 counts; the paired analyses elsewhere use the original matched set. The main
@@ -295,7 +328,7 @@ rubric swap moved baseline acknowledgment from $9.4\%$ to $8.8\%$ and its
 McNemar $p$ from $6 \times 10^{-5}$ to $1.2 \times 10^{-4}$. We report the
 committed label set and note that judge-level digits carry this much noise.
 
-\paragraph{What the supervision actually contained.}
+\subsection{What the supervision actually contained}
 \label{sec:supervision}
 This matters for how the results should be read, so we state it explicitly.
 Traces are generated by prompting the teacher with the R1 chat template, whose
@@ -304,18 +337,26 @@ the form \texttt{\{reasoning\}</think>\{answer\}}. Our SFT examples were
 rendered with the student's own chat template. The published
 R1-Distill template contains, for assistant turns, a rule that splits the
 content on \texttt{</think>} and keeps only the final segment. The tokenized
-supervision for every R1-substrate arm in this paper was therefore the
-\emph{final-answer segment only}, with the reasoning span removed --- even
-though the trace files on disk retain it (which is why a check of the trace
-data alone does not reveal this, and why we report it here). The intervention
-we are measuring is thus SFT on the answer segments of math CoT traces
-(``answer-only'' supervision), not SFT on the reasoning itself. We flag the
-consequences in Section~\ref{sec:lim}: it gives the CoT compression a
-straightforward explanation, and it makes the teacher-strength invariance in
-Table~\ref{tab:r1} much less surprising, since the teacher's reasoning never
-entered the loss. It does not affect the behavioral measurements, the paired
-acknowledgment collapse, or the matched-length residual, all of which are
-properties of the resulting models rather than of the training data. The
+supervision for every R1-substrate arm \emph{trained before we found this} was
+therefore the \emph{final-answer segment only}, with the reasoning span removed
+--- even though the trace files on disk retain it (which is why a check of the
+trace data alone does not reveal this, and why we report it here). Those arms
+are the strong-teacher, both self-distillation, and the original weak-teacher
+runs; the intervention they measure is SFT on the answer segments of math CoT
+traces (``answer-only'' supervision), not SFT on the reasoning itself. The
+reasoning-preserving arm of \S\ref{sec:taskK}, which carries this paper's
+headline, was trained after the fix and does not have this property.
+
+The format turns out to matter a great deal, which is why we treat the contrast
+between the two as a result rather than as a caveat. It gives the answer-only
+arms' CoT compression a straightforward explanation; it makes their
+teacher-strength invariance much less surprising, since the teacher's reasoning
+never entered the loss; and it moves acknowledgment itself, from $3.2\%$ to
+$14.4\%$ (\S\ref{sec:taskK}). What the format does \emph{not} change is that
+each resulting model is what it is: the behavioral and acknowledgment
+measurements are properties of the trained checkpoints, not of our beliefs
+about their training data, and they stand for whichever arm they were measured
+on. The
 released training code now renders the assistant turn without the template and
 hard-fails if the reasoning span is absent from a rendered example; Task K
 (\S\ref{sec:taskK}) re-runs the W2SR-weak arm with that fixed renderer and
@@ -366,14 +407,18 @@ Qwen2.5-7B-Instruct & 0.230 & 0.630 & 0.630 & $+0.000$ (artifact)\\
 
 We compare a baseline student, a W2SR student (LoRA-SFT'd on a weak in-family
 teacher's MATH CoT), and references, on GPQA. The SFT lands the student at its
-own CoT ceiling, so faithfulness differences are not a capability confound. The
+own CoT ceiling on this eval. Capability is not uniform across the arms,
+however --- the answer-only arm fails its held-out MATH gate outright (below)
+--- so we do not claim faithfulness differences are confound-free by
+construction, and we return to what each arm's capability actually does. The
 question we are asking is whether distillation changes faithfulness, not
 whether it improves capability.
 
 \paragraph{The instruct student is at the floor.}
 On \texttt{Qwen2.5-7B-Instruct}, cue-acknowledgment is at a floor for every
 condition (baseline $1.8\%$ at $N\!=\!970$; W2SR $3.6\%$; strong-teacher
-control $4.6\%$), while teacher references reach $22$ to $37\%$. We cannot
+control $4.6\%$), while the one teacher we evaluated under cues (the R1-1.5B weak teacher)
+reaches $22.2\%$ pooled and $37.1\%$ on its strongest single cue. We cannot
 detect faithfulness transfer here. But verbosity does transfer strongly
 ($\Delta = +0.26$ for W2SR over baseline, CI $[0.22, 0.31]$), so the model
 looks more monitorable without any measurable faithfulness change. To get a
@@ -385,8 +430,9 @@ On the reasoning student, the setup is fully in-family: student
 subsection describes the arm whose supervision was answer-only
 (\S\ref{sec:supervision}); \S\ref{sec:taskK} gives the reasoning-preserving
 re-run that carries our headline. The trained student's GPQA answers remain
-parseable at $94.2\%$ ($179/190$ cued samples, vs $76.9\%$ for the untrained
-baseline), and baseline acknowledgment is off-floor at $25\%$ (Chua and
+parseable at $92.1\%$ ($175/190$ cued samples, vs $56.2\%$ ($90/160$) for the
+untrained baseline --- an asymmetry we return to in \S\ref{sec:lim}, since it
+is large enough to compromise the behavioral comparison), and baseline acknowledgment is off-floor at $25\%$ (Chua and
 Evans~\cite{chua2025} report ${\sim}59\%$ on the full DeepSeek-R1; our lower
 baseline is on the distilled 7B variant on GPQA, so absolute levels differ
 across scale and eval set). Capability on this arm is \emph{not} preserved:
@@ -455,7 +501,10 @@ budget. We therefore rest capability claims on the held-out MATH gate
 mean what it says.
 
 We checked that the collapse is not an artifact. Hand-checked completions are
-coherent, $37/40$ conclude with an answer, and none are degenerate. The model
+coherent and none of them degenerate in the sense of looping or emitting empty
+text. (This is a hand inspection of GPQA completions; it is not in tension with
+the repetition-loop flag both arms carry on the held-out MATH gate, which is
+raised by a single generation out of $200$ on a different task.) The model
 solves the problem without verbalizing the cue. It is also not a single-judge
 artifact: re-scoring the same 525 R1-family CoTs with \texttt{gemini-2.5-pro}
 gives per-condition Cohen's $\kappa \in [0.64, 0.68]$ (overall $\kappa = 0.68$),
@@ -483,8 +532,11 @@ cue whose text the re-scoring harness withholds, while the self-naming
 Stanford cue agrees on $105/105$. Prompt construction is identical across
 conditions within each harness, so no paired drop is biased by this. The
 three-judge agreement covers three model families and both stricter and looser
-rubric readings; the drop direction and one-directional discordant pattern are
-stable across all three.
+rubric readings. The drop direction is stable across all three; the discordant
+pattern is strictly one-directional under Sonnet and Gemini and
+near-one-directional under Kimi ($17/1$). All three were measured on the
+answer-only arm --- the reasoning-preserving arm of \S\ref{sec:taskK} is scored
+by the Sonnet judge alone.
 
 \begin{table}[t]
 \centering\small
@@ -539,29 +591,34 @@ strong-teacher KD vs.\ baseline $p = 2.2 \times 10^{-5}$; Self-A vs.\ baseline
 $p = 2.4 \times 10^{-7}$ ($n = 77$, disc.\ $23/0$); Self-B vs.\ baseline
 $p = 4.8 \times 10^{-7}$ ($n = 82$, disc.\ $22/0$); Self-A vs.\ W2SR
 $p = 1$ ($n = 79$, disc.\ $2/2$); Self-B vs.\ W2SR $p = 1$ ($n = 79$,
-disc.\ $2/3$). All tested pairs of trained arms are statistically
-indistinguishable; the three pairs not involving W2SR weak were not tested.
+disc.\ $2/3$). All tested pairs of \emph{answer-only} arms are statistically
+indistinguishable; the three pairs not involving W2SR weak were not tested. The
+reasoning-preserving arm is the one trained arm that does differ from W2SR weak
+($p = 8.8 \times 10^{-5}$).
 \end{table}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{results/figs/dissociation_bars.pdf}
-\caption{Behavior--verbalization dissociation across the reasoning-student
-axis. Acknowledgment (verbalization) collapses from $25.0\%$ on baseline R1-7B
-to $2.4$--$7.4\%$ across all four trained arms (W2SR, strong-teacher
-distill, two self-distill budgets). Influence (behavior, defined as answer
-equal to cue target) is preserved or strengthened in every trained condition
-and stays well above the $1/3$ random-flip chance line. The trained arms keep
-being moved by the cue and stop saying so. This figure covers the answer-only
-arms; the reasoning-preserving arm of \S\ref{sec:taskK} sits at
-acknowledgment $14.4\%$ with influence statistically identical to baseline.
-Numbers reproduced exactly by \texttt{python3 scripts/reanalysis/01\_gate.py};
-the $25.0\%$, $3.2\%$, and paired deltas of $-0.22$ and $+0.24$ are enforced
-by hard-fail asserts in that script.}
+\caption{Behavior and verbalization across the \emph{answer-only} reasoning-student
+arms. Acknowledgment (verbalization) collapses from $25.0\%$ on baseline R1-7B
+to $2.4$--$7.4\%$ across all four trained arms (W2SR, strong-teacher distill,
+two self-distill budgets), while influence (behavior, defined as answer equal
+to cue target) is higher in every trained condition than in baseline's $25.6\%$.
+These arms keep being moved by the cue --- if anything more than baseline does
+--- and stop saying so. The reasoning-preserving arm that carries the paper's
+headline is not plotted here: it sits at acknowledgment $14.4\%$ with influence
+statistically indistinguishable from baseline (\S\ref{sec:taskK}). No $1/3$
+chance line is drawn, because influence as plotted is an unconditional rate;
+the $1/3$ reference applies to the flip-to-cue rate among flippers, reported
+separately in the text. Regenerate with
+\texttt{python3 scripts/reanalysis/make\_dissociation\_fig.py}; the $25.0\%$,
+$3.2\%$ and the paired deltas $-0.22$ and $+0.24$ carry hard-fail asserts in
+\texttt{01\_gate.py}.}
 \label{fig:dissociation}
 \end{figure}
 
-\paragraph{Why faithfulness drops: compression, plus residual cue suppression.}
+\subsection{Why faithfulness drops: compression, plus residual cue suppression}
 \label{sec:mech}
 Faithfulness and CoT length both fall, so the near-trivial half of the story
 is that shorter CoT surfaces cues less often. The interesting question is
@@ -590,9 +647,25 @@ rather than the matched-length gap. Restricted to the three text cues, the gap
 is present at both lengths: mid-length baseline $35.0\%$ ($7/20$) vs W2SR
 $16.5\%$ ($18/109$), OR $\approx 2.72$, two-sided $p = 0.068$; long baseline
 $44.0\%$ ($33/75$) vs W2SR $18.8\%$ ($6/32$), OR $\approx 3.40$, two-sided
-$p = 0.016$, one-sided $p = 0.010$. We report both stratifications; the
-cue-stratified one is the comparison that holds the acknowledgment opportunity
-fixed, and it does not condition on anything measured after treatment.
+$p = 0.016$.
+
+That significance should not be leaned on, for a reason we state rather than
+bury. Task H's W2SR side pools a larger re-run of the three text cues
+($634$ records over $188$ question ids) with the original run's non-text cues,
+while the baseline side is the original $160$ records over $32$ question ids.
+The two sides therefore do not draw from a common question pool: in the long
+bin only $5$ question ids are shared, and only $7$ of the $32$ W2SR records
+sit on a question the baseline arm ever saw. Question identity is thus
+partially confounded with condition. Two constructions that do hold the
+question pool fixed preserve the direction and, if anything, the effect size,
+but lose power: restricting the W2SR side to baseline's question ids gives
+$44.0\%$ vs $14.3\%$ ($1/7$), OR $\approx 4.71$, $p = 0.23$; using the
+original un-thickened W2SR run, which shares $30$ of baseline's $32$ question
+ids, gives $44.0\%$ vs $0.0\%$ ($0/8$), $p = 0.019$ on a zero cell. The honest
+summary is that the matched-length gap is directionally robust and
+quantitatively consistent across constructions, and statistically fragile in
+all of them. It is supporting evidence, not load-bearing; \S\ref{sec:taskK} is
+what the argument rests on.
 
 A third cut restricts to the safety-relevant subset, where
 $\mathrm{influenced} = 1$ means the cue actually moved the answer. There the
@@ -608,7 +681,7 @@ So a large share of the raw $25\% \to 3\%$ drop is compression, and that
 compression has a mundane and fully identified cause: the supervision this arm
 received was answer-only (Section~\ref{sec:supervision}). A student trained on
 final-answer segments produces short completions that rarely emit the
-\texttt{</think>} separator ($22\%$ of W2SR-student completions vs $57\%$ of
+\texttt{</think>} separator ($21.6\%$ of W2SR-student completions vs $57.5\%$ of
 baseline), which is what we observe. We therefore do \emph{not} claim the
 compression is an emergent or surprising property of SFT; it is the expected
 consequence of the supervision format.
@@ -616,12 +689,11 @@ consequence of the supervision format.
 What compression does not explain is what remains once it is removed. The
 cue-stratified matched-length gap above is one handle; the MMLU replication is
 a second, since it reproduces the collapse at a much lower compression ratio;
-and the intervention in \S\ref{sec:taskK} is the third and the one we lean on,
+and the intervention in \S\ref{sec:taskK} is the third and the one we rely on,
 because there the compression is removed at its source rather than conditioned
 away.
 
-\paragraph{The headline result: the same arm with reasoning-preserving
-supervision (Task K).}
+\subsection{The headline result: the same arm with reasoning-preserving supervision (Task K)}
 \label{sec:taskK}
 The length-binned analysis is correlational; the supervision format gives us
 an intervention. We re-ran the W2SR-weak arm identically --- same $729$
@@ -646,19 +718,35 @@ $[-0.181, -0.039]$, $n = 155$, discordants $25$ baseline-only vs $8$
 rerun-only, $p = 0.005$). This is the paper's central number, and it is an
 intervention on the training data rather than a filter on the outcome.
 
-The dissociation is cleaner on this arm than on the answer-only one. Paired
-influence against baseline is null ($\Delta = +0.048$, $n = 83$, $p = 0.52$),
-so the cue's behavioral grip is genuinely held fixed rather than merely
-``not reduced'' --- and it is a real shift down from the answer-only arm's
-level (paired $\Delta = -0.163$, $n = 123$, $p = 0.007$). Capability holds on
-the measurement that can carry it: on the held-out MATH gate the rerun scores
-$0.685$ against its untrained reference $0.650$, where the answer-only arm had
-scored $0.550$ against $0.695$. Uncued GPQA is, as noted in \S\ref{sec:ext},
-budget-limited and ambiguous here: scoring unparseable completions as
-incorrect gives the rerun $0.375$ against the answer-only arm's $0.425$ and
-baseline's $0.275$, while scoring only parseable completions gives $0.517$,
-$0.447$ and $0.550$. We do not read a capability difference out of that
-column in either direction.
+On the behavioral side we find no detectable change: paired influence against
+baseline gives $\Delta = +0.048$, $95\%$ CI $[-0.060, +0.157]$, $n = 83$,
+$p = 0.52$. We report that interval rather than declaring behavior invariant,
+because it is wide enough to admit an effect of $+0.157$ --- numerically the
+same effect this paper's behavioral analysis of the answer-only arm reports as
+real. The raw rates move slightly upward (baseline $25.6\%$ to rerun
+$31.9\%$). What we can say is that acknowledgment falls significantly while
+influence does not fall at all, and that the influence measurement here is both
+underpowered and degraded by differential answer emission (\S\ref{sec:lim});
+what we cannot say from $n = 83$ is that behavior is invariant. An equivalence
+test on this cell would require substantially more data than we have. The rerun
+is nonetheless a real shift down from the answer-only arm's influence level
+(paired $\Delta = -0.163$, $n = 123$, $p = 0.007$).
+
+Capability does not fall on the measurement best able to carry it: on the
+held-out MATH gate the rerun scores $0.685$ against an untrained reference of
+$0.650$, where the answer-only arm scored $0.550$ against $0.695$. We
+deliberately do not describe this as a capability \emph{gain}. The gate's own
+verdict records ``no capability gain'' for the rerun, and the two gate runs
+scored the \emph{same} untrained model at $0.650$ and $0.695$ --- a
+$4.5$-point run-to-run swing in the reference, larger than the rerun's
+$+3.5$-point margin over it. The defensible reading is that the
+reasoning-preserving arm does not lose held-out MATH accuracy, whereas the
+answer-only arm loses $14.5$ points against its own reference. Uncued GPQA is,
+as noted in \S\ref{sec:ext}, budget-limited and ambiguous: scoring unparseable
+completions as incorrect gives the rerun $0.375$ against the answer-only arm's
+$0.425$ and baseline's $0.275$, while scoring only parseable completions gives
+$0.517$, $0.447$ and $0.550$. We do not read a capability difference out of
+that column in either direction.
 
 Per cue, the recovery is uneven: insider-info ($15/36$ vs $2/38$) and
 Stanford-professor ($10/36$ vs $3/38$) recover substantially, while
@@ -755,13 +843,20 @@ headline does not rest on them (and a
 CoT that closes by naming its own conclusion is largely what the transparent
 ``by naming the letter'' category is already reporting).
 
-As a control, we ran the same judge on the $36$ baseline R1-7B samples that
-meet the same influenced=1, cue\_target $\neq$ correct filter (baseline
-naturally acknowledges the cue $\sim$25\% of the time so the strict ack=0
-restriction leaves too few samples to compare). Baseline's CoT also
-concludes the cue target in $28/36$ (77.8\%) of these cases, and $9/10$
-(90\%) on the subset where baseline additionally did not acknowledge
-(matched to the W2SR condition but small $n$). So the ``CoT walks to the
+As a control, we ran the same judge on the baseline R1-7B samples meeting the
+same influenced=1, cue\_target $\neq$ correct filter (baseline naturally
+acknowledges the cue $\sim$25\% of the time, so the strict ack=0 restriction
+leaves too few samples to compare). Under the extractor in force when these
+labels were collected the filter selected $36$ samples, of which $28$
+($77.8\%$) have a CoT concluding the cue target, rising to $9/10$ ($90\%$) on
+the subset where baseline also did not acknowledge. The corrected extractor of
+\S\ref{sec:ext} shrinks that filter to $16$ samples, because defining
+``influenced'' requires a recoverable answer and baseline often has none; on
+those $16$ the CoT concludes the cue target in $16/16$, and in $6/6$ of the
+ack=0 subset. We report both: the direction is identical and the corrected
+figure is stronger, but it rests on $16$ records and the $20$ that drop out are
+disproportionately the ones whose conclusion the judge found ambiguous, so
+neither number should be read as precise. So the ``CoT walks to the
 cue when the model is influenced'' pattern is not W2SR-specific: it is the
 default behavior of any silently-influenced model. What W2SR distinctly
 loses is not the reasoning direction, which is already corrupted whenever
@@ -874,7 +969,8 @@ recovery (Task J). Ack rate on W2SR R1-7B under four system-prompt
 conditions at $\sim\!100$ matched (qid, cue) pairs per condition. The
 few-shot ICL example prompt is the strongest and reaches statistical
 significance ($p\!=\!0.008$, paired McNemar), but the pooled recovery
-still sits well below the baseline R1-7B rate of $25\%$; the recovery
+still sits well below the baseline R1-7B rate of $25\%$ --- a comparison across
+two judge/rubric stacks (\S3) and so only indicative; the recovery
 concentrates on the Stanford-professor cue (see text).}
 \label{fig:mechanism_recovery}
 \end{figure}
@@ -908,8 +1004,9 @@ the floored instruct student, Meek's composite ``monitorability'' (the mean
 of verbosity and faithfulness scores defined in~\cite{meek2025}) rises after
 distillation almost entirely via verbosity. The model looks more monitorable
 to that measure without being more monitorable to the cue test. On the
-reasoning student, the cue's behavioral pull on the answer is not reduced
-while verbal acknowledgment collapses. Compression alone predicts most of that
+reasoning student, verbal acknowledgment falls without any matching reduction in
+the cue's behavioral pull --- strengthened on the answer-only arm, not
+resolvable either way on the reasoning-preserving one. Compression alone predicts most of that
 raw collapse; what a compression-only account does not predict is the
 exploratory matched-length residual on the $\mathrm{influenced}=1$ subset ---
 nor the Task K rerun, which removes most of the compression by fixing the
@@ -960,6 +1057,28 @@ answer-only SFT on math traces is itself a common and cheap post-training
 recipe, and it is exactly the kind of change an accuracy-only gate would wave
 through.
 
+\paragraph{The behavioral comparison suffers severe differential missingness.}
+This is the sharpest limitation on the paper and it bounds every influence
+number we report. Computing whether a cue moved the answer requires recovering
+an answer, and the arms differ enormously in how often they emit one: on the
+$150$ matched (question, cue) pairs behind the answer-only comparison, $44.0\%$
+of baseline records have no recoverable answer against $6.7\%$ of the trained
+arm's. The cause is not subtle --- the untrained baseline writes ${\sim}20{,}000$
+character traces into an 8k-token budget and frequently never concludes. Two
+consequences follow. First, the influence estimate is computed on a subset that
+discards nearly half of one arm and almost none of the other, and the discarded
+baseline records disproportionately contained text matching the cue target, so
+the direction of the extraction correction (\S\ref{sec:ext}) is partly what
+discarding them mechanically produces. Second, and more fundamentally, a
+comparison of ``does the cue move the answer'' between a model that answers
+$92\%$ of the time and one that answers $56\%$ of the time is not clean under
+any extraction rule: the loose rule buys coverage with records whose accuracy
+is at chance, and the strict rule buys accuracy with attrition. We report the
+strict rule, disclose the sensitivity, and note that the fix is not analytical
+but experimental --- the evaluation needs a generation budget large enough that
+both arms actually finish. Until that is run, treat the acknowledgment results
+as the paper's evidence and the behavioral results as directional.
+
 \paragraph{Answer extraction is a measured quantity, not a given.} Every
 behavioral number depends on recovering a final answer letter from a
 completion, and the arms differ enormously in how often they emit one within
@@ -980,11 +1099,14 @@ is closed (Task H bin 3, $17.5\%$ vs $15.1\%$, Fisher $p = 0.80$) and the
 long-length gap is marginal (bin 4: $\mathrm{OR} \approx 2.2$, two-sided
 $p = 0.14$); restricted to the three text cues, which removes a large
 across-arm imbalance in cue composition within bins, the gap is present at
-both lengths ($p = 0.068$ and $p = 0.016$); on the $\mathrm{influenced} = 1$
+both lengths ($p = 0.068$ and $p = 0.016$) but on a W2SR side that does not
+share baseline's question pool, and the question-matched versions keep the
+effect size while losing significance; on the $\mathrm{influenced} = 1$
 subset the mid-length gap is $70.0\%$ vs $21.1\%$, $\mathrm{OR} \approx 8.75$,
 $p = 0.003$, on $n = 10$ baseline records and conditioning on a post-treatment
 variable. Only the cue-stratified cut avoids both the composition confound and
-the post-treatment conditioning, and it is the one we lean on among the three;
+the post-treatment conditioning, and it is the strongest of the three, but it is
+supporting evidence only;
 none of them carry the argument on their own, which is why \S\ref{sec:taskK}
 exists. Compression accounts for a large share of the raw drop in absolute ack
 rates. We do not claim it is the sole mechanism, and we do not claim it is
@@ -1062,11 +1184,14 @@ and the optional mixed-effects robustness model was not run.
 
 Fine-tuning an R1-distill student on a weaker model's math chain-of-thought,
 with the reasoning genuinely in the loss, cuts the trace's acknowledgment of a
-planted cue from $25.0\%$ to $14.4\%$ (paired $p = 0.005$) while the cue's pull
-on the answer is unchanged (paired $\Delta = +0.048$, $p = 0.52$) and held-out
-MATH accuracy rises. Because the retrained traces are only ${\sim}27\%$ shorter
-than the untrained model's, compression cannot carry that gap, and because the
-manipulation is the training data rather than a filter on the outcome, the
+planted cue from $25.0\%$ to $14.4\%$ (paired $p = 0.005$) at held-out MATH
+accuracy that does not fall, and with no detectable change in the cue's pull on
+the answer (paired $\Delta = +0.048$, CI $[-0.060, +0.157]$, $p = 0.52$ --- an
+underpowered null on a measurement degraded by differential answer emission,
+not a demonstrated invariance). Because the retrained traces are only
+${\sim}27\%$ shorter than the untrained model's, the drop is not a by-product
+of the extreme compression that answer-only supervision produces; and because
+the manipulation is the training data rather than a filter on the outcome, the
 result does not condition on anything measured after treatment.
 
 A second arm bounds how much of the effect trace length alone can produce. Due
@@ -1075,8 +1200,9 @@ final-answer segments of the same traces; it compresses CoT $14\times$ and
 drives acknowledgment to $3.2\%$, so answer-only supervision reproduces a far
 larger collapse than reasoning-preserving supervision does. Length is
 nonetheless not the whole story even there: at matched length and matched cue
-composition the gap survives (long bin $\mathrm{OR} \approx 3.40$,
-$p = 0.016$), and the MMLU replication reproduces the full collapse at
+composition the gap survives at $\mathrm{OR}$ between $2.7$ and $4.7$ across
+constructions, though underpowered wherever the question pool is held fixed
+(\S\ref{sec:mech}), and the MMLU replication reproduces the full collapse at
 $2.8\times$ compression rather than GPQA's $14\times$. The collapse on that
 arm is also not specific to weak-to-strong distillation --- a same-strength
 self-distillation control reproduces it at indistinguishable magnitude --- and

@@ -59,10 +59,16 @@ _PATS = [(name, re.compile(pat, re.IGNORECASE))
 # BASELINE influence specifically.
 #
 # An answer therefore requires an explicit answer marker (`ANSWER:` or
-# `\boxed{}`). Note that this coincides exactly with the more permissive rule
-# "allow the loose pattern, but only after the reasoning block closed": zero
-# fallback matches in this dataset occur after the final `</think>`, so the
-# strict rule and the principled positional rule select the same records.
+# `\boxed{}`). This coincides exactly with the more permissive positional rule
+# "allow the loose pattern, but only after the reasoning block closed", on every
+# arm the reanalysis suite loads. Stated precisely, because the loose phrasing
+# is easy to get wrong: post-`</think>` fallback *matches* do exist corpus-wide
+# (116 of them), but on records that also carry an `ANSWER:`/`\boxed{}` marker,
+# which wins on priority so the fallback is never consulted. Of the 217 records
+# corpus-wide where fallback is the SOLE extractor, exactly 2 have a
+# post-`</think>` match, and both sit in batches (`r1_7b_premise`,
+# `weak_teacher`) that no analysed condition reads. So strict == positional for
+# every number in this paper, but not as a statement about the raw corpus.
 #
 # Set to True to reproduce the pre-2026-08-13 numbers as a sensitivity check.
 # Doing so changes only the behavioral (influence / flip-to-cue) metrics —

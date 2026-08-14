@@ -9,7 +9,7 @@
 Paired ack, cotsft − baseline: Δ = -0.110 [-0.181, -0.039], n = 155, disc 25/8 (baseline-only/cotsft-only), p = 4.55e-03
 Paired ack, cotsft − original W2SR: Δ = +0.118 [+0.065, +0.176], n = 170, disc 3/23 (orig-only/cotsft-only), p = 8.80e-05
 
-Uncued GPQA accuracy: cotsft 0.375 (matched n=29), full-diamond 0.354 (n=130); original W2SR 0.425 (n=38).
+Uncued GPQA accuracy (all-items convention: unparseable counts as incorrect; parseable-only shown in parentheses). cotsft 0.375 over n=40 (0.517 over 29 parseable); full-diamond 0.354 over n=198; original W2SR 0.425 (n=38).
 
 Per-cue ack (cotsft vs baseline vs original):
 

@@ -56,18 +56,22 @@ def uncued_accuracy(batch: str, served: str, restrict_qids: set[str] | None = No
     """Uncued GPQA accuracy under BOTH denominator conventions.
 
     `accuracy` (primary) counts an unparseable completion as incorrect, which is
-    the convention Table 1 of the manuscript uses (baseline 16/40 = 0.400).
+    the convention Table 1 of the manuscript uses.
     `accuracy_parseable_only` divides by the parseable subset instead.
 
     The conventions are not interchangeable here, and the difference is not
     cosmetic: the CoT-preserving arm writes ~10x longer completions and so hits
-    the generation cap without ever emitting an answer on ~20% of uncued items,
-    while the answer-only arm does so on ~5%. Scoring over the parseable subset
+    the generation cap without ever emitting an answer on 27.5% of its matched-40
+    uncued items (34.3% over the full 198),
+    while the answer-only arm does so on 5.0% and the untrained baseline --- the
+    longest writer of all --- on 50.0%. Scoring over the parseable subset
     therefore discards each arm's own failed generations in proportion to how
     long it writes, which flatters the long-CoT arms and — because the untrained
     baseline is the longest writer of all — flatters it most. Under
-    parseable-only the baseline scores 16/26 = 0.615 and outranks every trained
-    arm; under the all-items convention it is 16/40 = 0.400 and ranks last.
+    parseable-only the baseline scores 11/20 = 0.550 and outranks every trained
+    arm; under the all-items convention it is 11/40 = 0.275 and ranks last.
+    (Values under the shipped extractor; with LOOSE_FALLBACK_IS_AN_ANSWER=True
+    they read 0.615 and 0.400.)
     Report the all-items number; keep the other for transparency.
     """
     rows = [r for r in load_records(batch, served, cued_only=False)
@@ -154,11 +158,14 @@ def main() -> None:
         f"n = {vo['n_pairs']}, disc {vo['n10_a_only']}/{vo['n01_b_only']} "
         f"(orig-only/cotsft-only), p = {vo['p']:.2e}",
         "",
-        "Uncued GPQA accuracy: "
+        "Uncued GPQA accuracy (all-items convention: unparseable counts as "
+        "incorrect; parseable-only shown in parentheses). "
         f"cotsft {out['uncued_accuracy']['cotsft_matched_to_paper_n40']['accuracy']:.3f} "
-        f"(matched n={out['uncued_accuracy']['cotsft_matched_to_paper_n40']['n_scored']}), "
+        f"over n={out['uncued_accuracy']['cotsft_matched_to_paper_n40']['n_total']} "
+        f"({out['uncued_accuracy']['cotsft_matched_to_paper_n40']['accuracy_parseable_only']:.3f} "
+        f"over {out['uncued_accuracy']['cotsft_matched_to_paper_n40']['n_scored']} parseable); "
         f"full-diamond {out['uncued_accuracy']['cotsft_full_diamond']['accuracy']:.3f} "
-        f"(n={out['uncued_accuracy']['cotsft_full_diamond']['n_scored']}); "
+        f"over n={out['uncued_accuracy']['cotsft_full_diamond']['n_total']}; "
         f"original W2SR {out['uncued_accuracy']['orig_w2sr_n40']['accuracy']:.3f} "
         f"(n={out['uncued_accuracy']['orig_w2sr_n40']['n_scored']}).",
         "",
