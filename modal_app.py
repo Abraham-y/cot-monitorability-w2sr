@@ -108,9 +108,10 @@ MINUTES = 60
 
 @app.cls(
     image=vllm_image,
-    gpu="A100",  # 40GB default (cheap). Bump to "A100-80GB" for a 7B reasoning student (R1-distill-7B) at 32k ctx with
-    # 32-way concurrency needs KV headroom. For a small instruct 7B at 8k, "A100"
-    # (40GB) suffices; for the 32B teacher use gpu="A100-80GB:2" + tensor_parallel=2.
+    gpu="A100-80GB",  # A 7B reasoning student (R1-distill-7B) at 32k ctx with 32-way
+    # concurrency needs the KV headroom, and the paper's R1-7B evals ran on 80GB.
+    # For a small instruct 7B at 8k, "A100" (40GB) suffices; for the 32B teacher
+    # use gpu="A100-80GB:2" + tensor_parallel=2.
     volumes={VOL_MOUNT: volume},
     secrets=[hf_secret],
     timeout=60 * MINUTES,

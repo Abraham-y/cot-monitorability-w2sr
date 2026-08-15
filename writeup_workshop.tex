@@ -35,10 +35,14 @@ property, using the cue-based paradigm of Meek et al.\ (2025) and Turpin et
 al.\ (2023) on a DeepSeek-R1-distilled student. Our central result is an
 intervention. Fine-tuning the student on a weaker model's math CoT, with the
 reasoning span genuinely present in the loss, cuts the CoT's acknowledgment of
-a planted cue from $25.0\%$ to $14.4\%$ on matched (question, cue) pairs
-(paired $\Delta = -0.110$, $n = 155$, McNemar $p = 0.005$), at held-out MATH
+a planted cue from $23.6\%$ to $16.6\%$ on matched (question, cue) pairs
+(paired $\Delta = -0.080$, $n = 150$, McNemar $p = 0.043$), at held-out MATH
 accuracy that does not fall ($0.685$ against an untrained reference of
-$0.650$). The retrained student's traces are only ${\sim}27\%$ shorter than the
+$0.650$). Those figures come from a budget-matched re-run of both arms
+(\S\ref{sec:budget}); the same comparison at the 8k generation budget the rest
+of this paper uses reads $25.0\%$ to $14.4\%$, $p = 0.005$, and we treat the
+weaker budget-matched number as the honest one, because at 8k only the
+untrained baseline was routinely truncated before it could answer. The retrained student's traces are only ${\sim}27\%$ shorter than the
 untrained model's, so the drop is not a by-product of the extreme CoT
 compression that answer-only supervision produces. Over the same pairs we
 cannot detect a change in the cue's behavioral pull on the answer (paired
@@ -104,8 +108,11 @@ uncertainty. Our contributions are methodological and target-specific.
 
 \item We induce a drop in cue acknowledgment by intervention. On a run whose
 supervision genuinely contains the teacher's reasoning (\S\ref{sec:taskK}),
-math-CoT SFT moves an R1-distill student from acknowledgment $25.0\%$ to
-$14.4\%$ (paired $p = 0.005$) at held-out MATH accuracy that does not fall,
+math-CoT SFT moves an R1-distill student from acknowledgment $23.6\%$ to
+$16.6\%$ at a budget matched across arms (paired $p = 0.043$;
+$25.0\%\!\to\!14.4\%$, $p = 0.005$, at the 8k budget that truncates the
+baseline far more than the trained arm --- \S\ref{sec:budget}), at held-out
+MATH accuracy that does not fall,
 and with no detectable change in paired influence ($\Delta = +0.048$,
 CI $[-0.060, +0.157]$, $p = 0.52$ --- an underpowered null, not a demonstrated
 invariance). Because the manipulation is the training data rather than a filter
@@ -771,6 +778,45 @@ they can emit a boxed answer, where the answer-only arm at $1{,}364$
 characters scored $0.99$ on the identical check (result files:
 \texttt{results/reanalysis/K\_cotsft\_rerun.*}).
 
+\subsection{The generation budget was not neutral between the arms}
+\label{sec:budget}
+Every number above is generated at an 8k token budget, and that budget is not
+neutral. The untrained baseline writes ${\sim}20{,}000$-character traces and
+hit the ceiling on $43.8\%$ of its cued samples, against $21.7\%$ for the
+reasoning-preserving arm; a truncated trace cannot emit a parseable answer, so
+the behavioural metrics were computed on a subset that discarded nearly half of
+one arm and a fifth of the other. We therefore re-ran both arms at $32$k,
+identical in every other respect (Task L,
+\texttt{results/reanalysis/L\_budget\_matched\_32k.*}).
+
+The missingness does close: baseline parseability rises $56.2\% \to 73.3\%$ and
+its truncation rate falls $43.8\% \to 24.8\%$, narrowing the across-arm
+parseability gap from $22.1$ to $9.5$ points. Two things follow, and neither
+favours us.
+
+First, the behavioural null is not a truncation artifact. The paired influence
+interval is essentially unchanged in width ($0.217 \to 0.221$) even though $n$
+rises from $83$ to $95$: $\Delta = +0.032$, $95\%$ CI $[-0.074, +0.147]$,
+$p = 0.71$. Budget was the wrong lever; only more questions would resolve it.
+
+Second, the acknowledgment effect \emph{weakens} at the fairer budget. Baseline
+acknowledgment moves $25.0\% \to 23.6\%$ while the trained arm moves
+$14.4\% \to 16.6\%$, so the paired drop falls from $\Delta = -0.110$
+($p = 0.005$) to $\Delta = -0.080$ $[-0.153, -0.013]$, $n = 150$,
+$p = 0.043$. The gap narrows from $10.6$ to $7.0$ points. We report the
+budget-matched figure as the headline because it is the specification in which
+neither arm is advantaged, and we note plainly that it is significant only
+marginally.
+
+The same re-run also corrects a capability number. Baseline's uncued GPQA
+accuracy was substantially a budget artifact: $0.275$ at 8k against $0.425$ at
+32k on the all-items convention, which places the untrained model at the
+answer-only arm's level rather than below it. Any reading in which distillation
+\emph{improves} accuracy on this substrate does not survive a matched budget.
+Truncation is not eliminated even at 32k --- $24.8\%$ of baseline's cued
+samples still exhaust it --- so we do not claim this comparison is fully
+budget-saturated, only that it is fairer than the 8k one.
+
 \paragraph{Teacher-strength axis.}
 A strong (14B) teacher degrades faithfulness about as much as a weak (1.5B)
 one (Table~\ref{tab:r1}), and the two are not distinguishable. To check
@@ -1025,6 +1071,16 @@ guarantee is narrow on both axes.
 \section{Limitations}
 \label{sec:lim}
 
+\paragraph{The headline is marginal at a matched budget.} At the 8k budget used
+throughout most of this paper the acknowledgment drop is comfortable
+($p = 0.005$); at the 32k budget that stops advantaging the trained arm it is
+$p = 0.043$ (\S\ref{sec:budget}). We report the latter. A reader should treat
+the effect as directionally consistent across both specifications and
+statistically marginal in the fairer one, and should not read the 8k figure as
+the estimate. The behavioural half is a wide null under both budgets, and the
+budget re-run establishes that widening the generation cap does not narrow it
+--- the binding constraint is the number of questions, not the trace length.
+
 \paragraph{The headline rests on a single arm and a single seed.} The
 reasoning-preserving result (\S\ref{sec:taskK}) is one training run of one
 teacher--student pair, scored by the headline judge alone, with no multi-judge
@@ -1184,8 +1240,10 @@ and the optional mixed-effects robustness model was not run.
 
 Fine-tuning an R1-distill student on a weaker model's math chain-of-thought,
 with the reasoning genuinely in the loss, cuts the trace's acknowledgment of a
-planted cue from $25.0\%$ to $14.4\%$ (paired $p = 0.005$) at held-out MATH
-accuracy that does not fall, and with no detectable change in the cue's pull on
+planted cue from $23.6\%$ to $16.6\%$ at a matched $32$k generation budget
+(paired $\Delta = -0.080$, $n = 150$, $p = 0.043$; the same comparison at 8k,
+where only the baseline is routinely truncated, reads $25.0\%$ to $14.4\%$ at
+$p = 0.005$) and at held-out MATH accuracy that does not fall, and with no detectable change in the cue's pull on
 the answer (paired $\Delta = +0.048$, CI $[-0.060, +0.157]$, $p = 0.52$ --- an
 underpowered null on a measurement degraded by differential answer emission,
 not a demonstrated invariance). Because the retrained traces are only

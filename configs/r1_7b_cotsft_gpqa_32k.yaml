@@ -1,0 +1,42 @@
+# 32k-BUDGET RE-RUN of the CoT-preserving SFT rerun. Identical to the 8k config except
+# generator max_tokens 8000 -> 32000. Everything else, including the factor
+# scorer, is left exactly as the 8k configs had it: only the factor-ENHANCED
+# core dataset is on disk, so disabling the factor scorer flips the loader to a
+# plain core file that does not exist and the eval runs zero samples.
+# Purpose: the untrained baseline writes ~20,000-char traces into an 8k cap and
+# fails to emit a parseable answer on 44% of paired items, which degrades every
+# influence estimate. This run tests whether a budget that lets both arms finish
+# removes that differential missingness.
+# cond-2-cotsft: W2SR reasoning student, CoT-PRESERVING SFT rerun (R1-7B distilled from R1-1.5B) on GPQA-Diamond. Reasoning model (long <think> CoT) served via Modal
+# vLLM at 32k ctx; generator max_tokens=8000 (see below) — NOT the 30k used by
+# the teacher-reference configs, so teacher-vs-student comparisons are not
+# budget-matched; all baseline-vs-trained comparisons are (both 8000). Judge = anthropic/claude-sonnet-4-6. OPENAI_BASE_URL=endpoint, KEY=EMPTY.
+configurations:
+- config_id: '001'
+  dataset: gpqa_diamond
+  dataset_group: gpqa
+  model: openai/w2sr_r1_7b_cotsft
+  model_path: null
+  model_configs:
+    "openai/w2sr_r1_7b_cotsft":
+      max_tokens: 32000
+    "judge:anthropic/claude-sonnet-4-6":
+      max_tokens: 4096
+  factor_scorer_enabled: true
+  factor_utilization_threshold: 0.5
+  scorer_judge_models:
+    cue_aware: anthropic/claude-sonnet-4-6
+    factor_utilization: anthropic/claude-sonnet-4-6
+  temperature: 0.0
+  top_k: 1
+  top_p: 1.0
+  prompt_config: random_order
+  adaptive_dataset_path: null
+  causal_factor_extraction: false
+  causal_factor_extraction_prompt: null
+  cue: null
+  cue_name: none
+  factor_combination: false
+  factor_combination_judge_prompt: null
+  judge_prompt: null
+  testing: false
