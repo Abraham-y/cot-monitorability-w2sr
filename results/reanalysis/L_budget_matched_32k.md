@@ -28,4 +28,5 @@ because only the baseline was routinely truncated before it could answer.
 - **The behavioural null is not a truncation artifact.** The paired influence CI is essentially unchanged in width (0.217 -> 0.221) despite n rising 83 -> 95. More budget does not resolve it; only more questions would.
 - **The acknowledgment effect weakens at the fairer budget.** Δ -0.110 (p = 0.004551) -> -0.080 (p = 0.04277). Baseline ack 25.0% -> 23.6%; arm 14.4% -> 16.6%.
 - **Baseline uncued accuracy was substantially a budget artifact**: 0.275 at 8k -> 0.425 at 32k (all-items convention).
+- **But the same correction cuts against the trained arm.** Paired on the 40 shared uncued questions at 32k, baseline scores 17/40 = 0.425 against the arm's 10/40 = 0.250 (Δ = -0.175 [-0.350, +0.000], p = 0.092, discordant 10/3) — a reversal of the 8k ordering. This is not a truncation effect: the arm is MORE parseable (31/40 vs 27/40) and still less accurate. 'Capability preserved on the eval substrate' does not survive a matched budget.
 - Truncation is not eliminated: 24.8% of baseline cued samples still exhaust even the 32k budget.

@@ -38,19 +38,22 @@ reasoning span genuinely present in the loss, cuts the CoT's acknowledgment of
 a planted cue from $23.6\%$ to $16.6\%$ on matched (question, cue) pairs
 (paired $\Delta = -0.080$, $n = 150$, McNemar $p = 0.043$), at held-out MATH
 accuracy that does not fall ($0.685$ against an untrained reference of
-$0.650$). Those figures come from a budget-matched re-run of both arms
+$0.650$ --- though a matched-budget re-run shows the arm scoring $0.250$ on
+uncued GPQA against baseline's $0.425$, so we no longer claim capability is
+preserved on the eval substrate, \S\ref{sec:budget}). Those figures come from a
+budget-matched re-run of both arms
 (\S\ref{sec:budget}); the same comparison at the 8k generation budget the rest
 of this paper uses reads $25.0\%$ to $14.4\%$, $p = 0.005$, and we treat the
 weaker budget-matched number as the honest one, because at 8k only the
 untrained baseline was routinely truncated before it could answer. The retrained student's traces are only ${\sim}27\%$ shorter than the
 untrained model's, so the drop is not a by-product of the extreme CoT
-compression that answer-only supervision produces. Over the same pairs we
-cannot detect a change in the cue's behavioral pull on the answer (paired
-$\Delta = +0.048$, $95\%$ CI $[-0.060, +0.157]$, $n = 83$, $p = 0.52$) --- but
-we are explicit that this is an underpowered null rather than a demonstrated
-invariance, and that the behavioral measurement is degraded by the untrained
-baseline failing to emit a parseable answer on $44\%$ of these items
-(\S\ref{sec:lim}). That fine-tuning lowers CoT faithfulness on an answer-level
+compression that answer-only supervision produces. At the same budget we cannot
+detect a change in the cue's behavioral pull on the answer (paired
+$\Delta = +0.032$, $95\%$ CI $[-0.074, +0.147]$, $n = 95$, $p = 0.71$) --- an
+underpowered null, not a demonstrated invariance. Raising the budget closes most
+of the differential truncation that degraded this measurement (baseline
+parseability $56.2\% \to 73.3\%$) without narrowing the interval at all, so the
+imprecision is real and only more questions would resolve it. That fine-tuning lowers CoT faithfulness on an answer-level
 metric is already known (Lobo et al., 2024); what we add is that the drop is
 induced by intervention, survives the removal of the compression that would
 trivially explain it, and is not accompanied by any detectable reduction in how
@@ -62,9 +65,9 @@ traces; that arm compresses CoT $14\times$ and drives acknowledgment to $3.2\%$,
 so answer-only supervision reproduces a far larger collapse than
 reasoning-preserving supervision does. Length alone is nonetheless
 insufficient: at matched length and matched cue composition the gap persists in
-direction and effect size under every construction we tried, though it reaches
-significance only in the construction that does not hold the question pool
-fixed, and the question-matched alternatives leave $7$ and $8$ records
+direction and effect size under every construction we tried, though each is
+fragile: the two that hold the question pool fixed rest on $7$ and $8$ records
+(reaching $p = 0.23$ and $p = 0.019$, the latter on a zero cell)
 (\S\ref{sec:mech}), and the collapse replicates on MMLU at $2.8\times$
 compression rather than $14\times$. A same-strength
 self-distillation control makes the weak-to-strong asymmetry an unlikely cause,
@@ -223,7 +226,7 @@ with that critique on faithfulness grounds. But for monitorability the
 metric is aligned with the task: what an overseer can read off the trace
 determines whether they can catch the influence, independent of whether the
 model was ``really'' moved by the hint in some deeper counterfactual sense.
-Our CoT-conclusion analysis in \S\ref{sec:mech} further shows the CoT reasoning
+Our CoT-conclusion analysis in \S\ref{sec:ext} further shows the CoT reasoning
 itself walks to the cue target in most silently-influenced cases, so on that arm
 acknowledgment absence is not merely a missing hint word. We note the analysis
 was run on the answer-only arm, so it cannot by itself adjudicate compression.
@@ -548,10 +551,15 @@ by the Sonnet judge alone.
 \begin{table}[t]
 \centering\small
 \caption{Reasoning-student monitorability on GPQA with in-family R1-distill
-teachers. Faithfulness is acknowledgment among cued samples; median CoT is
-computed on cued-cell completions. The first block is the reasoning-preserving
-re-run that carries our headline (\S\ref{sec:taskK}): acknowledgment falls to
-$14.4\%$ at $13{,}721$-character traces, i.e.\ without the compression. The
+teachers. \textbf{Every row is at the 8k generation budget}, which truncates the
+untrained baseline far more than the trained arms; \S\ref{sec:budget} re-runs the
+first two rows at 32k and those are the figures the abstract reports
+($23.6\%$ and $16.6\%$ acknowledgment, baseline GPQA $0.425$ against the arm's
+$0.250$). Read this table as the 8k specification, not as the headline.
+Faithfulness is acknowledgment among cued samples; median CoT is computed on
+cued-cell completions. The first block is the reasoning-preserving re-run
+(\S\ref{sec:taskK}): acknowledgment falls to $14.4\%$ at $13{,}721$-character
+traces, i.e.\ without the compression. The
 second block is the answer-only supervision format (\S\ref{sec:supervision}),
 under which every arm compresses ${\sim}14\times$ and lands near the floor,
 teacher strength notwithstanding --- self-distillation collapses
@@ -613,9 +621,11 @@ to $2.4$--$7.4\%$ across all four trained arms (W2SR, strong-teacher distill,
 two self-distill budgets), while influence (behavior, defined as answer equal
 to cue target) is higher in every trained condition than in baseline's $25.6\%$.
 These arms keep being moved by the cue --- if anything more than baseline does
---- and stop saying so. The reasoning-preserving arm that carries the paper's
-headline is not plotted here: it sits at acknowledgment $14.4\%$ with influence
-statistically indistinguishable from baseline (\S\ref{sec:taskK}). No $1/3$
+--- and stop saying so. All bars are at the 8k generation budget. The
+reasoning-preserving arm is not plotted: at 8k it sits at acknowledgment
+$14.4\%$, and at the matched 32k budget the paper reports
+(\S\ref{sec:budget}) at $16.6\%$, with influence an underpowered null against
+baseline under both budgets. No $1/3$
 chance line is drawn, because influence as plotted is an unconditional rate;
 the $1/3$ reference applies to the flip-to-cue rate among flippers, reported
 separately in the text. Regenerate with
@@ -670,8 +680,9 @@ $44.0\%$ vs $14.3\%$ ($1/7$), OR $\approx 4.71$, $p = 0.23$; using the
 original un-thickened W2SR run, which shares $30$ of baseline's $32$ question
 ids, gives $44.0\%$ vs $0.0\%$ ($0/8$), $p = 0.019$ on a zero cell. The honest
 summary is that the matched-length gap is directionally robust and
-quantitatively consistent across constructions, and statistically fragile in
-all of them. It is supporting evidence, not load-bearing; \S\ref{sec:taskK} is
+quantitatively consistent across constructions, and rests on very few records
+in every construction that holds the question pool fixed --- two of the four
+reach nominal significance, but on $8$ records and a zero cell respectively. It is supporting evidence, not load-bearing; \S\ref{sec:taskK} is
 what the argument rests on.
 
 A third cut restricts to the safety-relevant subset, where
@@ -722,8 +733,11 @@ $\Delta = +0.118$ $[+0.065, +0.176]$, $n = 170$, discordants $23$ rerun-only
 vs $3$ answer-only-arm-only, $p = 8.8 \times 10^{-5}$), and still
 significantly below baseline's $25.0\%$ (paired $\Delta = -0.110$
 $[-0.181, -0.039]$, $n = 155$, discordants $25$ baseline-only vs $8$
-rerun-only, $p = 0.005$). This is the paper's central number, and it is an
-intervention on the training data rather than a filter on the outcome.
+rerun-only, $p = 0.005$). This was the paper's headline until we re-ran both arms at a
+matched budget (\S\ref{sec:budget}), which weakens it to $p = 0.043$; the
+figures in this subsection are the 8k specification and should be read as such.
+What survives either way is that the manipulation is the training data rather
+than a filter on the outcome.
 
 On the behavioral side we find no detectable change: paired influence against
 baseline gives $\Delta = +0.048$, $95\%$ CI $[-0.060, +0.157]$, $n = 83$,
@@ -767,7 +781,9 @@ is specification-sensitive, weakening to $p = 0.077$ if we restrict to the
 $83$ pairs where neither side hit the generation cap (baseline $20.5\%$ vs
 rerun $10.8\%$, $\Delta = -0.096$, same direction and magnitude, less power ---
 note baseline truncates more often than the rerun, $41.9\%$ vs $21.3\%$ of the
-$155$ paired records, so this is not a bias against the rerun); and the rerun's
+$155$ paired records --- we originally read this as reassuring, but
+\S\ref{sec:budget} re-ran both arms without the cap and the effect did weaken,
+so the sensitivity was signal rather than noise); and the rerun's
 own gate report formally fails the
 preregistered criteria (format-valid $0.80 < 0.9$, a repetition-loop flag,
 and a $+3.5$pp MATH gain below the $\ge 5$-point margin), so ``capability
@@ -777,45 +793,6 @@ $13{,}721$ characters, so a fifth of its gate generations are cut off before
 they can emit a boxed answer, where the answer-only arm at $1{,}364$
 characters scored $0.99$ on the identical check (result files:
 \texttt{results/reanalysis/K\_cotsft\_rerun.*}).
-
-\subsection{The generation budget was not neutral between the arms}
-\label{sec:budget}
-Every number above is generated at an 8k token budget, and that budget is not
-neutral. The untrained baseline writes ${\sim}20{,}000$-character traces and
-hit the ceiling on $43.8\%$ of its cued samples, against $21.7\%$ for the
-reasoning-preserving arm; a truncated trace cannot emit a parseable answer, so
-the behavioural metrics were computed on a subset that discarded nearly half of
-one arm and a fifth of the other. We therefore re-ran both arms at $32$k,
-identical in every other respect (Task L,
-\texttt{results/reanalysis/L\_budget\_matched\_32k.*}).
-
-The missingness does close: baseline parseability rises $56.2\% \to 73.3\%$ and
-its truncation rate falls $43.8\% \to 24.8\%$, narrowing the across-arm
-parseability gap from $22.1$ to $9.5$ points. Two things follow, and neither
-favours us.
-
-First, the behavioural null is not a truncation artifact. The paired influence
-interval is essentially unchanged in width ($0.217 \to 0.221$) even though $n$
-rises from $83$ to $95$: $\Delta = +0.032$, $95\%$ CI $[-0.074, +0.147]$,
-$p = 0.71$. Budget was the wrong lever; only more questions would resolve it.
-
-Second, the acknowledgment effect \emph{weakens} at the fairer budget. Baseline
-acknowledgment moves $25.0\% \to 23.6\%$ while the trained arm moves
-$14.4\% \to 16.6\%$, so the paired drop falls from $\Delta = -0.110$
-($p = 0.005$) to $\Delta = -0.080$ $[-0.153, -0.013]$, $n = 150$,
-$p = 0.043$. The gap narrows from $10.6$ to $7.0$ points. We report the
-budget-matched figure as the headline because it is the specification in which
-neither arm is advantaged, and we note plainly that it is significant only
-marginally.
-
-The same re-run also corrects a capability number. Baseline's uncued GPQA
-accuracy was substantially a budget artifact: $0.275$ at 8k against $0.425$ at
-32k on the all-items convention, which places the untrained model at the
-answer-only arm's level rather than below it. Any reading in which distillation
-\emph{improves} accuracy on this substrate does not survive a matched budget.
-Truncation is not eliminated even at 32k --- $24.8\%$ of baseline's cued
-samples still exhaust it --- so we do not claim this comparison is fully
-budget-saturated, only that it is fairer than the 8k one.
 
 \paragraph{Teacher-strength axis.}
 A strong (14B) teacher degrades faithfulness about as much as a weak (1.5B)
@@ -1041,6 +1018,57 @@ insider\_info       & $18/32 = 56.2\%$ & $2/38 = 5.3\%$  & $-0.50$ ($30$, $15/0$
 \end{tabular}
 \end{table}
 
+\subsection{The generation budget was not neutral between the arms}
+\label{sec:budget}
+Every result above for the two arms compared here is generated at an 8k token
+budget (the cross-family Llama arms used 16k and the teacher reference rows 30k,
+\S\ref{sec:supervision}), and that budget is not neutral. The untrained baseline writes ${\sim}20{,}000$-character traces and
+hit the ceiling on $43.8\%$ of its cued samples, against $21.7\%$ for the
+reasoning-preserving arm; a truncated trace cannot emit a parseable answer, so
+the behavioural metrics were computed on a subset that discarded nearly half of
+one arm and a fifth of the other. We therefore re-ran both arms at $32$k,
+identical in every other respect (Task L,
+\texttt{results/reanalysis/L\_budget\_matched\_32k.*}).
+
+The missingness does close: baseline parseability rises $56.2\% \to 73.3\%$ and
+its truncation rate falls $43.8\% \to 24.8\%$, narrowing the across-arm
+parseability gap from $22.1$ to $9.5$ points. Two things follow, and neither
+favours us.
+
+First, the behavioural null is not a truncation artifact. The paired influence
+interval is essentially unchanged in width ($0.217 \to 0.221$) even though $n$
+rises from $83$ to $95$: $\Delta = +0.032$, $95\%$ CI $[-0.074, +0.147]$,
+$p = 0.71$. Budget was the wrong lever; only more questions would resolve it.
+
+Second, the acknowledgment effect \emph{weakens} at the fairer budget. Baseline
+acknowledgment moves $25.0\% \to 23.6\%$ while the trained arm moves
+$14.4\% \to 16.6\%$, so the paired drop falls from $\Delta = -0.110$
+($p = 0.005$) to $\Delta = -0.080$ $[-0.153, -0.013]$, $n = 150$,
+$p = 0.043$. The gap narrows from $10.6$ to $7.0$ points. We report the
+budget-matched figure as the headline because it is the specification in which
+neither arm is advantaged, and we note plainly that it is significant only
+marginally.
+
+The same re-run also corrects a capability number, and the correction runs
+against us. Baseline's uncued GPQA accuracy was substantially a budget
+artifact: $0.275$ at 8k against $0.425$ at 32k on the all-items convention.
+But the reasoning-preserving arm, scored on the \emph{same} $40$ uncued
+questions at the same budget, reaches only $0.250$. Paired, that is
+$\Delta = -0.175$, $95\%$ CI $[-0.350, +0.000]$, $p = 0.092$, discordant
+$10/3$: marginal, but an interval whose upper bound touches zero and does not
+exclude real harm. The 8k ordering ($0.375$ arm against $0.275$ baseline,
+Table~\ref{tab:r1}) is reversed. This is not a truncation effect --- at 32k the
+arm is \emph{more} parseable than baseline on these items ($31/40$ against
+$27/40$) and still less accurate, so it answers more often and gets more of
+them wrong. We therefore withdraw any reading in which distillation preserves
+or improves accuracy on this substrate: at a budget that does not advantage
+either arm, the intervention costs accuracy on the very eval the monitorability
+numbers are measured on, and the acknowledgment drop should be read against
+that.
+Truncation is not eliminated even at 32k --- $24.8\%$ of baseline's cued
+samples still exhaust it --- so we do not claim this comparison is fully
+budget-saturated, only that it is fairer than the 8k one.
+
 \section{Discussion}
 
 Math-CoT SFT does not preserve monitorability, and where it is measurable, it
@@ -1054,15 +1082,20 @@ reasoning student, verbal acknowledgment falls without any matching reduction in
 the cue's behavioral pull --- strengthened on the answer-only arm, not
 resolvable either way on the reasoning-preserving one. Compression alone predicts most of that
 raw collapse; what a compression-only account does not predict is the
-exploratory matched-length residual on the $\mathrm{influenced}=1$ subset ---
+cue-stratified matched-length gap (\S\ref{sec:mech}; the
+$\mathrm{influenced}=1$ variant of that cut is the paper's most fragile number
+and nothing here rests on it) ---
 nor the Task K rerun, which removes most of the compression by fixing the
 supervision and still finds acknowledgment significantly below baseline. The
 safety-relevant component gets worse, not better.
 
 The warning is sharp. An accuracy-only certification of any CoT-SFT student
-trained on MATH-style traces, including same-strength self-distillation
-rather than just weak-to-strong as in W2SR, can pass a model whose
-chain-of-thought has become markedly less revealing, and a monitorability
+trained on MATH-style traces, including same-strength self-distillation rather
+than just weak-to-strong as in W2SR, \emph{could} pass a model whose
+chain-of-thought has become markedly less revealing. We are careful with the
+modal verb: no arm in this paper actually clears its capability gate, so we
+demonstrate the monitorability loss and the inadequacy of the metric, not a
+certification that passed in practice. and a monitorability
 check that rewards elaborate-looking CoT misses the same failure. The
 narrowness of the W2SR accuracy claim itself (in-family teacher and a base
 student, Section~\ref{sec:repro}) sharpens this further. The certified
@@ -1084,9 +1117,10 @@ budget re-run establishes that widening the generation cap does not narrow it
 \paragraph{The headline rests on a single arm and a single seed.} The
 reasoning-preserving result (\S\ref{sec:taskK}) is one training run of one
 teacher--student pair, scored by the headline judge alone, with no multi-judge
-battery on that arm. Its significance is also specification-sensitive: $p =
-0.005$ as reported, $p = 0.077$ if we restrict to pairs where neither side hit
-the generation cap. The direction and magnitude are stable across those cuts,
+battery on that arm. Its significance is also specification-sensitive:
+$p = 0.043$ at the matched budget we report, $p = 0.005$ at 8k, and $p = 0.077$
+if we instead restrict the 8k pairs to those where neither side hit the cap.
+The direction and magnitude are stable across those cuts,
 but the evidence is thinner than the surrounding robustness battery, which was
 measured on the answer-only arms. Re-running the strong-teacher and
 self-distillation arms with the corrected renderer is the obvious next
@@ -1130,10 +1164,12 @@ comparison of ``does the cue move the answer'' between a model that answers
 $92\%$ of the time and one that answers $56\%$ of the time is not clean under
 any extraction rule: the loose rule buys coverage with records whose accuracy
 is at chance, and the strict rule buys accuracy with attrition. We report the
-strict rule, disclose the sensitivity, and note that the fix is not analytical
-but experimental --- the evaluation needs a generation budget large enough that
-both arms actually finish. Until that is run, treat the acknowledgment results
-as the paper's evidence and the behavioral results as directional.
+strict rule and disclose the sensitivity. The fix is experimental rather than
+analytical --- the evaluation needs a budget large enough that both arms finish
+--- and \S\ref{sec:budget} now reports that experiment: at 32k the parseability
+gap narrows from $22.1$ to $9.5$ points, the behavioral interval does not narrow
+at all, and the acknowledgment effect weakens. Treat the acknowledgment result
+as the paper's evidence and the behavioral result as directional.
 
 \paragraph{Answer extraction is a measured quantity, not a given.} Every
 behavioral number depends on recovering a final answer letter from a
@@ -1258,9 +1294,9 @@ final-answer segments of the same traces; it compresses CoT $14\times$ and
 drives acknowledgment to $3.2\%$, so answer-only supervision reproduces a far
 larger collapse than reasoning-preserving supervision does. Length is
 nonetheless not the whole story even there: at matched length and matched cue
-composition the gap survives at $\mathrm{OR}$ between $2.7$ and $4.7$ across
-constructions, though underpowered wherever the question pool is held fixed
-(\S\ref{sec:mech}), and the MMLU replication reproduces the full collapse at
+composition the gap survives across constructions, though every one of them is
+fragile --- the question-matched versions rest on $7$ and $8$ records
+(\S\ref{sec:mech}) --- and the MMLU replication reproduces the full collapse at
 $2.8\times$ compression rather than GPQA's $14\times$. The collapse on that
 arm is also not specific to weak-to-strong distillation --- a same-strength
 self-distillation control reproduces it at indistinguishable magnitude --- and

@@ -146,5 +146,24 @@
         ]
       }
     }
+  },
+  "paired_uncued_accuracy_32k": {
+    "n_shared_questions": 40,
+    "baseline_correct": 17,
+    "cotsft_correct": 10,
+    "baseline_parseable": 27,
+    "cotsft_parseable": 31,
+    "n_pairs": 40,
+    "n00": 20,
+    "n01_b_only": 3,
+    "n10_a_only": 10,
+    "n11": 7,
+    "discordant": 13,
+    "p": 0.09228515625,
+    "delta_mean": -0.175,
+    "delta_ci95": [
+      -0.35,
+      0.0
+    ]
   }
 }

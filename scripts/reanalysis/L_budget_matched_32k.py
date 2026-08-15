@@ -118,6 +118,26 @@ def main() -> None:
             "influence": paired(a, b, "inf"),
         }
 
+    # Paired UNCUED accuracy at 32k, on the shared question set. This is the
+    # other half of the budget correction and it cuts against us: the same
+    # re-run that lifts baseline's accuracy also shows the headline arm scoring
+    # BELOW baseline at matched budget. Reporting only the baseline half would
+    # be selective. Unparseable counts as incorrect (Table 1's convention).
+    ub = {r.qid: r for r in load_records(*ARMS["baseline_32k"], cued_only=False)
+          if r.cue_dir == "baseline"}
+    uc = {r.qid: r for r in load_records(*ARMS["cotsft_32k"], cued_only=False)
+          if r.cue_dir == "baseline"}
+    shared = sorted(ub.keys() & uc.keys())
+    va = [int(bool(ub[q].answer) and ub[q].answer == ub[q].correct_letter) for q in shared]
+    vc = [int(bool(uc[q].answer) and uc[q].answer == uc[q].correct_letter) for q in shared]
+    out["paired_uncued_accuracy_32k"] = {
+        "n_shared_questions": len(shared),
+        "baseline_correct": sum(va), "cotsft_correct": sum(vc),
+        "baseline_parseable": sum(1 for q in shared if ub[q].answer),
+        "cotsft_parseable": sum(1 for q in shared if uc[q].answer),
+        **mcnemar_exact(va, vc),
+    }
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "L_budget_matched_32k.json").write_text(json.dumps(out, indent=2))
 
@@ -152,6 +172,7 @@ def main() -> None:
                       f"{m['p']:.4g} | {m['n10_a_only']}/{m['n01_b_only']} |")
 
     b8, b32 = A["baseline_8k"], A["baseline_32k"]
+    ua = out["paired_uncued_accuracy_32k"]
     i8 = out["paired"]["8k"]["influence"]; i32 = out["paired"]["32k"]["influence"]
     a8 = out["paired"]["8k"]["acknowledgment"]; a32 = out["paired"]["32k"]["acknowledgment"]
     w8 = i8["delta_ci95"][1] - i8["delta_ci95"][0]
@@ -175,6 +196,18 @@ def main() -> None:
         f"- **Baseline uncued accuracy was substantially a budget artifact**: "
         f"{b8['uncued_acc_all_items']:.3f} at 8k -> {b32['uncued_acc_all_items']:.3f} at 32k "
         f"(all-items convention).",
+        f"- **But the same correction cuts against the trained arm.** Paired on the "
+        f"{ua['n_shared_questions']} shared uncued questions at 32k, baseline scores "
+        f"{ua['baseline_correct']}/{ua['n_shared_questions']} = "
+        f"{ua['baseline_correct']/ua['n_shared_questions']:.3f} against the arm's "
+        f"{ua['cotsft_correct']}/{ua['n_shared_questions']} = "
+        f"{ua['cotsft_correct']/ua['n_shared_questions']:.3f} "
+        f"(Δ = {ua['delta_mean']:+.3f} [{ua['delta_ci95'][0]:+.3f}, {ua['delta_ci95'][1]:+.3f}], "
+        f"p = {ua['p']:.3f}, discordant {ua['n10_a_only']}/{ua['n01_b_only']}) — a reversal of "
+        f"the 8k ordering. This is not a truncation effect: the arm is MORE parseable "
+        f"({ua['cotsft_parseable']}/{ua['n_shared_questions']} vs "
+        f"{ua['baseline_parseable']}/{ua['n_shared_questions']}) and still less accurate. "
+        f"'Capability preserved on the eval substrate' does not survive a matched budget.",
         f"- Truncation is not eliminated: {A['baseline_32k']['capped_rate']:.1%} of baseline "
         f"cued samples still exhaust even the 32k budget.",
         "",
