@@ -35,8 +35,9 @@ property, using the cue-based paradigm of Meek et al.\ (2025) and Turpin et
 al.\ (2023) on a DeepSeek-R1-distilled student. Our central result is an
 intervention. Fine-tuning the student on a weaker model's math CoT, with the
 reasoning span genuinely present in the loss, cuts the CoT's acknowledgment of
-a planted cue from $23.6\%$ to $16.6\%$ on matched (question, cue) pairs
-(paired $\Delta = -0.080$, $n = 150$, McNemar $p = 0.043$), at held-out MATH
+a planted cue from $23.6\%$ to $16.6\%$ pooled over cued samples --- $23.3\%$ to
+$15.3\%$ on the $150$ matched (question, cue) pairs the paired test actually uses
+(paired $\Delta = -0.080$, McNemar $p = 0.043$), at held-out MATH
 accuracy that does not fall ($0.685$ against an untrained reference of
 $0.650$ --- though a matched-budget re-run shows the arm scoring $0.250$ on
 uncued GPQA against baseline's $0.425$, so we no longer claim capability is
@@ -46,7 +47,7 @@ budget-matched re-run of both arms
 of this paper uses reads $25.0\%$ to $14.4\%$, $p = 0.005$, and we treat the
 weaker budget-matched number as the honest one, because at 8k only the
 untrained baseline was routinely truncated before it could answer. The retrained student's traces are only ${\sim}27\%$ shorter than the
-untrained model's, so the drop is not a by-product of the extreme CoT
+untrained model's at 8k, and $25.5\%$ shorter at the matched 32k budget, so the drop is not a by-product of the extreme CoT
 compression that answer-only supervision produces. At the same budget we cannot
 detect a change in the cue's behavioral pull on the answer (paired
 $\Delta = +0.032$, $95\%$ CI $[-0.074, +0.147]$, $n = 95$, $p = 0.71$) --- an
@@ -267,8 +268,8 @@ content can be epiphenomenal and length-only comparisons can be misleading
 see \S\ref{sec:mech} for how much weight it can bear). Za et al.~\cite{za2026persuasion} document that
 Sonnet is roughly $3\times$ more susceptible than Gemini under adversarial
 persuasion when used as a monitor, which is one reason we cross-check our
-Sonnet judge with two others: Gemini (Cohen's $\kappa \in [0.64, 0.68]$,
-substantial) and Kimi (overall $\kappa = 0.556$, moderate; systematically
+Sonnet judge with two others: Gemini (per-condition Cohen's $\kappa$
+$0.645$--$0.684$, substantial) and Kimi (overall $\kappa = 0.556$, moderate; systematically
 stricter than Sonnet). All three judges agree on the direction of the ack
 drop and give one-directional discordant patterns. We frame our headline metric as \emph{monitorability}
 (does the trace reveal the influence to an overseer) rather than
@@ -381,7 +382,10 @@ frequent degeneration, across students, ranks, and decodings. W2SR only
 reproduces with an in-family, native-Qwen weak teacher. With
 \texttt{Qwen2.5-Math-1.5B-Instruct} (about $67\%$ on the train problems) as
 teacher and \texttt{Qwen2.5-Math-7B} as student, held-out MATH (L3 to L5)
-Pass@1 goes from $0.325$ to $0.645$, with format-valid $1.00$.
+Pass@1 goes from $0.325$ to $0.645$. (Our log records two runs of this gate,
+$0.670$ with format-valid $1.00$ and the $0.645$ headroom probe we quote here;
+the reproduction figures in this section come from that development log rather
+than from a committed gate artifact.)
 
 A $+5$ point gate-pass on an already-CoT-capable model could be re-arrangement
 rather than real elicitation. To check, we score the untrained model under a
@@ -430,7 +434,10 @@ condition (baseline $1.8\%$ at $N\!=\!970$; W2SR $3.6\%$; strong-teacher
 control $4.6\%$), while the one teacher we evaluated under cues (the R1-1.5B weak teacher)
 reaches $22.2\%$ pooled and $37.1\%$ on its strongest single cue. We cannot
 detect faithfulness transfer here. But verbosity does transfer strongly
-($\Delta = +0.26$ for W2SR over baseline, CI $[0.22, 0.31]$), so the model
+($\Delta = +0.26$, CI $[0.22, 0.31]$, as recorded in our development log;
+recomputing from the committed metric files with a cue-cell-weighted mean gives
+a smaller $+0.227$ $[0.198, 0.255]$, and we report the discrepancy rather than
+silently substituting one for the other), so the model
 looks more monitorable without any measurable faithfulness change. To get a
 substrate with dynamic range, we move to a reasoning student.
 
@@ -514,10 +521,12 @@ We checked that the collapse is not an artifact. Hand-checked completions are
 coherent and none of them degenerate in the sense of looping or emitting empty
 text. (This is a hand inspection of GPQA completions; it is not in tension with
 the repetition-loop flag both arms carry on the held-out MATH gate, which is
-raised by a single generation out of $200$ on a different task.) The model
+raised on a different task; the gate stores only a boolean and stops at the
+first hit, so we cannot report how many of its $200$ generations tripped it.) The model
 solves the problem without verbalizing the cue. It is also not a single-judge
 artifact: re-scoring the same 525 R1-family CoTs with \texttt{gemini-2.5-pro}
-gives per-condition Cohen's $\kappa \in [0.64, 0.68]$ (overall $\kappa = 0.68$),
+gives per-condition Cohen's $\kappa$ of $0.645$, $0.659$ and $0.684$
+(overall $\kappa = 0.68$),
 paired drop $\Delta = -0.153$, McNemar $p = 2.4 \times 10^{-7}$, discordant
 $23/0$. Adding a third judge (\texttt{moonshotai/kimi-k2-0905}, chosen
 because it is from a different model family than both Sonnet and Gemini)
@@ -558,7 +567,7 @@ first two rows at 32k and those are the figures the abstract reports
 $0.250$). Read this table as the 8k specification, not as the headline.
 Faithfulness is acknowledgment among cued samples; median CoT is computed on
 cued-cell completions. The first block is the reasoning-preserving re-run
-(\S\ref{sec:taskK}): acknowledgment falls to $14.4\%$ at $13{,}721$-character
+(\S\ref{sec:taskK}): acknowledgment falls to $14.4\%$ at $13{,}354$-character
 traces, i.e.\ without the compression. The
 second block is the answer-only supervision format (\S\ref{sec:supervision}),
 under which every arm compresses ${\sim}14\times$ and lands near the floor,
@@ -577,7 +586,7 @@ condition & faithfulness & GPQA acc & median CoT (chars) \\
 baseline R1-7B & $40/160 = 25.0\%$ & 0.275 & 18{,}692 \\
 \midrule
 \multicolumn{4}{l}{\emph{reasoning-preserving supervision}}\\
-W2SR (1.5B $\to$ 7B), Task K & $26/180 = 14.4\%$ & 0.375 & 13{,}721 \\
+W2SR (1.5B $\to$ 7B), Task K & $26/180 = 14.4\%$ & 0.375 & 13{,}354 \\
 \midrule
 \multicolumn{4}{l}{\emph{answer-only supervision (\S\ref{sec:supervision})}}\\
 W2SR (1.5B $\to$ 7B) & $6/190 = 3.2\%$ & 0.425 & 1{,}362 \\
@@ -680,9 +689,12 @@ $44.0\%$ vs $14.3\%$ ($1/7$), OR $\approx 4.71$, $p = 0.23$; using the
 original un-thickened W2SR run, which shares $30$ of baseline's $32$ question
 ids, gives $44.0\%$ vs $0.0\%$ ($0/8$), $p = 0.019$ on a zero cell. The honest
 summary is that the matched-length gap is directionally robust and
-quantitatively consistent across constructions, and rests on very few records
-in every construction that holds the question pool fixed --- two of the four
-reach nominal significance, but on $8$ records and a zero cell respectively. It is supporting evidence, not load-bearing; \S\ref{sec:taskK} is
+quantitatively consistent across constructions, and thin in all of them. Two
+reach nominal significance: the long-bin text-cue comparison ($p = 0.016$), on
+$32$ W2SR records but \emph{without} holding the question pool fixed; and the
+un-thickened question-matched run ($p = 0.019$), on $8$ records with a zero
+cell. The remaining question-matched construction has $7$ records and does not
+reach significance. It is supporting evidence, not load-bearing; \S\ref{sec:taskK} is
 what the argument rests on.
 
 A third cut restricts to the safety-relevant subset, where
@@ -725,8 +737,11 @@ ${\sim}27\%$ shorter than baseline's).\footnote{The medians in this paragraph
 come from the Task~K pipeline, which uses the upper-middle element; Table~\ref{tab:r1}'s
 $18{,}692$ and $1{,}362$ come from an earlier pipeline that uses
 \texttt{statistics.median} (mean of the two middle values) over the same
-records. The conventions differ by well under $1\%$ and every comparison is
-convention-consistent.} Under the compression-only account, acknowledgment
+records. For baseline and the answer-only arm the conventions differ by $0.83\%$
+and $0.15\%$; for the reasoning-preserving arm they differ by $2.75\%$
+($13{,}354$ under \texttt{statistics.median}). Every comparison within a
+paragraph is convention-consistent, but Table~\ref{tab:r1} mixes them across
+rows and the $13{,}721$ there should be read as the upper-middle value.} Under the compression-only account, acknowledgment
 should return to baseline. It does not. Acknowledgment lands at
 $26/180 = 14.4\%$: well above the answer-only arm's $3.2\%$ (paired
 $\Delta = +0.118$ $[+0.065, +0.176]$, $n = 170$, discordants $23$ rerun-only
@@ -858,11 +873,14 @@ noisy). One mechanical caveat: the stripper removed only a trailing
 also survived in another terminal form (a closing
 \texttt{\textbackslash boxed\{\}} or a final ``the answer is X'' sentence),
 so the judge could in principle read the letter off the emission rather than
-the reasoning. Nearly all of the $30$ were judged walks-to-cue (at least one
-was judged a silent flip); excluding all $30$ and conservatively deducting
-every one of them from the walks-to-cue count gives a floor of
-$184/225 = 81.8\%$ (crediting the silent flip, $185/225 = 82.2\%$), so the
-headline does not rest on them (and a
+the reasoning. We flag a reproducibility problem with this count: the labels
+were collected under an earlier stripper, and re-deriving the number from the
+committed regexes gives between $15$ and $33$ records depending on how
+``terminal emission'' is operationalised, so the $30$ should not be treated as
+exact. The conclusion is insensitive to the choice. Under every reconstruction
+we tried, excluding the affected records and conservatively deducting all of
+them from the walks-to-cue count leaves a floor between $81.6\%$ and $82.6\%$,
+so the headline does not rest on them (and a
 CoT that closes by naming its own conclusion is largely what the transparent
 ``by naming the letter'' category is already reporting).
 
@@ -1044,7 +1062,7 @@ Second, the acknowledgment effect \emph{weakens} at the fairer budget. Baseline
 acknowledgment moves $25.0\% \to 23.6\%$ while the trained arm moves
 $14.4\% \to 16.6\%$, so the paired drop falls from $\Delta = -0.110$
 ($p = 0.005$) to $\Delta = -0.080$ $[-0.153, -0.013]$, $n = 150$,
-$p = 0.043$. The gap narrows from $10.6$ to $7.0$ points. We report the
+$p = 0.043$. The gap narrows from $10.6$ to $7.1$ points. We report the
 budget-matched figure as the headline because it is the specification in which
 neither arm is advantaged, and we note plainly that it is significant only
 marginally.
@@ -1093,9 +1111,11 @@ The warning is sharp. An accuracy-only certification of any CoT-SFT student
 trained on MATH-style traces, including same-strength self-distillation rather
 than just weak-to-strong as in W2SR, \emph{could} pass a model whose
 chain-of-thought has become markedly less revealing. We are careful with the
-modal verb: no arm in this paper actually clears its capability gate, so we
+modal verb: the only gate that passes in this paper is the reproduction arm of
+\S\ref{sec:repro} (a different student, on which no monitorability was
+measured), while every arm we do measure monitorability on fails its gate. So we
 demonstrate the monitorability loss and the inadequacy of the metric, not a
-certification that passed in practice. and a monitorability
+certification that passed in practice on the same model. and a monitorability
 check that rewards elaborate-looking CoT misses the same failure. The
 narrowness of the W2SR accuracy claim itself (in-family teacher and a base
 student, Section~\ref{sec:repro}) sharpens this further. The certified
